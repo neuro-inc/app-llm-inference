@@ -1,0 +1,68 @@
+nameOverride: ""
+fullnameOverride: ""
+
+# Deployment
+llm:
+  modelHFName: mistralai/Mistral-7B-v0.1
+  tokenizerHFName: mistralai/Mistral-7B-v0.1
+
+replicaCount: 1
+
+image:
+  repository: vllm/vllm-openai
+  pullPolicy: IfNotPresent
+  tag: v0.3.3
+  imagePullSecrets: []
+
+resources:
+  {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+volumes:
+  - pvcName: hf-cache
+    managed: true
+    accessMode: ReadWriteOnce
+    storageClassName: ""
+    storage: 300Gi
+volumeMounts:
+  - name: hf-cache
+    mountPath: /root/.cache/huggingface
+    readOnly: false
+
+env:
+  HUGGING_FACE_HUB_TOKEN: ""
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+priorityClassName: ""
+
+# Service
+service:
+  port: 8000
+
+# Ingress
+ingress:
+  enabled: false
+  className: traefik
+  annotations:
+    kubernetes.io/ingress.class: traefik
+  hosts:
+    - host: llm-inference-app.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: llm-inference-app-tls
+  #    hosts:
+  #      - llm-inference-app.local

@@ -1,0 +1,17 @@
+{{- range .Values.volumes }}
+{{- if .managed }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .pvcName }}
+  labels:
+    {{- include "llm-inference-app.labels" $ | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .accessMode }}
+  storageClassName: {{ .storageClassName }}
+  resources:
+    requests:
+      storage: {{ .storage }}
+{{- end }}
+{{- end }}
