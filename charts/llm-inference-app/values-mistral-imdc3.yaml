@@ -19,7 +19,7 @@ ingress:
   enabled: true
   className: traefik
   hosts:
-    - host: mistral.apps.imdc3.org.neu.ro
+    - host: mistral.apps.imdc3.org.neu.ro # we already added wildcard DNS record for *.apps.imdc3.org.neu.ro for IMDC3
       paths:
         - path: /
           pathType: Prefix
