@@ -1,7 +1,5 @@
 {{- if .Values.ingress.enabled -}}
-{{- $svcPort := .Values.service.port -}}
-{{- $ingressApiIsStable := eq (include "k8s.ingress.isStable" .) "true" -}}
-apiVersion: {{ include "k8s.ingress.apiVersion" . }}
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "llm-inference-app.fullname" . }}
@@ -12,9 +10,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if $ingressApiIsStable }}
   ingressClassName: {{ .Values.ingress.className }}
-  {{- end }}
   {{- if .Values.ingress.tls }}
   tls:
     {{- range .Values.ingress.tls }}
@@ -32,19 +28,14 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
-            {{- if and .pathType $ingressApiIsStable }}
+            {{- if .pathType }}
             pathType: {{ .pathType }}
             {{- end }}
             backend:
-              {{- if $ingressApiIsStable }}
               service:
                 name: {{ include "llm-inference-app.fullname" $ }}
                 port:
                   name: http
-              {{- else }}
-              serviceName: {{ include "llm-inference-app.fullname" $ }}
-              servicePort: http
-              {{- end }}
           {{- end }}
     {{- end }}
 {{- end }}

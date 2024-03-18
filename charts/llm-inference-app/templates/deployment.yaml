@@ -38,10 +38,12 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
+            initialDelaySeconds: {{ .Values.healthChecksDelay }}
             httpGet:
               path: /health
               port: http
           readinessProbe:
+            initialDelaySeconds: {{ .Values.healthChecksDelay }}
             httpGet:
               path: /health
               port: http
@@ -51,9 +53,10 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.env }}
           env:
-            {{- toYaml . | nindent 12 }}
+          {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
           {{- end }}
           args:
             - --host=0.0.0.0

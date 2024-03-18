@@ -3,8 +3,8 @@ fullnameOverride: ""
 
 # Deployment
 llm:
-  modelHFName: mistralai/Mistral-7B-v0.1
-  tokenizerHFName: mistralai/Mistral-7B-v0.1
+  modelHFName: ""
+  tokenizerHFName: ""
 
 replicaCount: 1
 
@@ -14,14 +14,9 @@ image:
   tag: v0.3.3
   imagePullSecrets: []
 
-resources:
-  {}
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+resources: {}
+
+healthChecksDelay: 5000
 
 volumes:
   - pvcName: hf-cache
@@ -41,7 +36,13 @@ podAnnotations: {}
 
 nodeSelector: {}
 
-tolerations: []
+tolerations:
+  - key: platform.neuromation.io/job
+    operator: Exists
+    effect: NoSchedule
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
 
 affinity: {}
 
@@ -55,14 +56,9 @@ service:
 ingress:
   enabled: false
   className: traefik
-  annotations:
-    kubernetes.io/ingress.class: traefik
   hosts:
-    - host: llm-inference-app.local
+    - host: ""
       paths:
         - path: /
-          pathType: ImplementationSpecific
+          pathType: Prefix
   tls: []
-  #  - secretName: llm-inference-app-tls
-  #    hosts:
-  #      - llm-inference-app.local

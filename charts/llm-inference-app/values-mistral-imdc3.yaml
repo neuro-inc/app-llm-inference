@@ -1,0 +1,25 @@
+# This is mostly show-off example of config adjustments
+
+llm:
+  modelHFName: mistralai/Mistral-7B-v0.1
+  tokenizerHFName: mistralai/Mistral-7B-v0.1
+
+image:
+  tag: v0.2.4 # 0.2.4 version has support for CUDA 11.8. New versions only support 12.x
+
+resources:
+  requests:
+    cpu: 1
+    memory: 4Gi
+    nvidia.com/gpu: 2
+  limits:
+    nvidia.com/gpu: 2
+
+ingress:
+  enabled: true
+  className: traefik
+  hosts:
+    - host: mistral.apps.imdc3.org.neu.ro
+      paths:
+        - path: /
+          pathType: Prefix
