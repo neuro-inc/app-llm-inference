@@ -6,6 +6,8 @@ llm:
   modelHFName: ""
   tokenizerHFName: ""
 
+serverExtraArgs: []
+
 replicaCount: 1
 
 image:
@@ -16,18 +18,22 @@ image:
 
 resources: {}
 
-healthChecksDelay: 5000
+healthChecksDelay: 300
 
-volumes:
-  - pvcName: hf-cache
-    managed: true
-    accessMode: ReadWriteOnce
-    storageClassName: ""
-    storage: 300Gi
-volumeMounts:
-  - name: hf-cache
-    mountPath: /root/.cache/huggingface
-    readOnly: false
+volumesManage: false
+PVCVolumes: []
+  # - pvcName: huggingface-cache
+  #   autocreate: false
+  #   accessMode: ReadWriteOnce
+  #   storageClassName: ""
+  #   storage: 300Gi
+  #   mountPath: /root/.cache/huggingface
+  #   mountReadOnly: false
+  #   volumeSubPath: "llm-cache"
+
+cache:
+  enabled: true
+  sizeLimit: 100Gi
 
 env:
   HUGGING_FACE_HUB_TOKEN: ""
@@ -47,6 +53,17 @@ tolerations:
 affinity: {}
 
 priorityClassName: ""
+
+# Model download hook
+modelDownload:
+  # hook is WIP, use initEnabled for now
+  hookEnabled: false
+  initEnabled: true
+  image:
+    repository: huggingface/downloader
+    tag: 0.17.3
+    pullPolicy: IfNotPresent
+  resources: {}
 
 # Service
 service:

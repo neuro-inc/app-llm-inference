@@ -1,0 +1,70 @@
+{{- if .Values.modelDownload.hookEnabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "llm-inference-app.fullname" . }}-download
+  labels:
+    {{- include "llm-inference-app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      name: {{ include "llm-inference-app.fullname" . }}-download
+      labels:
+        {{- include "llm-inference-app.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Never
+      containers:
+      - name: download
+        image: "{{ .Values.modelDownload.image.repository }}:{{ .Values.modelDownload.image.tag }}"
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        volumeMounts:
+          {{- range .Values.PVCVolumes }}
+          - name: {{ .pvcName }}
+            mountPath: {{ .mountPath }}
+            readOnly: {{ .mountReadOnly }}
+            subPath: {{ .volumeSubPath }}
+          {{- end }}
+        env:
+        {{- range $k, $v := .Values.env }}
+          - name: {{ $k }}
+            value: {{ $v | quote }}
+        {{- end }}
+        command: ["huggingface-cli"]
+        args:
+          - download
+          - --resume-download
+          - --repo-type=model
+          - "{{ .Values.llm.modelHFName }}"
+      {{- if .Values.volumes }}
+      volumes:
+      {{- range .Values.volumes }}
+        - name: {{ .pvcName }}
+          persistentVolumeClaim:
+            claimName: {{ .pvcName }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
+{{- end }}

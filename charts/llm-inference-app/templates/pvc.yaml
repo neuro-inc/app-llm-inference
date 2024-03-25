@@ -1,11 +1,13 @@
-{{- range .Values.volumes }}
-{{- if .managed }}
+{{- range .Values.PVCVolumes }}
+{{- if .autocreate }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .pvcName }}
   labels:
     {{- include "llm-inference-app.labels" $ | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   accessModes:
     - {{ .accessMode }}

@@ -34,6 +34,7 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "llm-inference-app.labels" -}}
+application: llm-inference
 helm.sh/chart: {{ include "llm-inference-app.chart" . }}
 {{ include "llm-inference-app.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
