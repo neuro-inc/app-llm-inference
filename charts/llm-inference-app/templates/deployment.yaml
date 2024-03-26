@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "llm-inference-app.fullname" . }}
+  labels:
+    {{- include "llm-inference-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "llm-inference-app.selectorLabels" . | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "llm-inference-app.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.modelDownload.initEnabled }}
+      initContainers:
+        - name: download-model
+          image: "{{ .Values.modelDownload.image.repository }}:{{ .Values.modelDownload.image.tag }}"
+          volumeMounts:
+            {{- if .Values.cache.enabled }}
+            - name: huggingface-cache
+              mountPath: /root/.cache/huggingface
+            {{- end }}
+            {{- range .Values.volumes }}
+            - name: {{ .pvcName }}
+              mountPath: {{ .mountPath }}
+              readOnly: {{ .mountReadOnly }}
+              subPath: {{ .volumeSubPath }}
+            {{- end }}
+          env:
+          {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+          {{- end }}
+          command: ["huggingface-cli"]
+          args:
+            - download
+            - --resume-download
+            - --repo-type=model
+            - "{{ .Values.llm.modelHFName }}"
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.healthChecksDelay }}
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.healthChecksDelay }}
+            httpGet:
+              path: /health
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
+            {{- if .Values.cache.enabled }}
+            - name: huggingface-cache
+              mountPath: /root/.cache/huggingface
+            {{- end }}
+            {{- range .Values.PVCVolumes }}
+            - name: {{ .pvcName }}
+              mountPath: {{ .mountPath }}
+              readOnly: {{ .mountReadOnly }}
+              subPath: {{ .volumeSubPath }}
+            {{- end }}
+          env:
+          {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+          {{- end }}
+          args:
+            - --host=0.0.0.0
+            - --port={{ .Values.service.port }}
+            - --model={{ .Values.llm.modelHFName }}
+            - --tokenizer={{ .Values.llm.tokenizerHFName }}
+          {{- with .Values.serverExtraArgs -}}
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- if or .Values.volumes .Values.cache.enabled }}
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+      {{- if .Values.cache.enabled }}
+        - name: huggingface-cache
+          emptyDir:
+            sizeLimit: {{ .Values.cache.sizeLimit }}
+      {{- end }}
+      {{- range .Values.PVCVolumes }}
+        - name: {{ .pvcName }}
+          persistentVolumeClaim:
+            claimName: {{ .pvcName }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
