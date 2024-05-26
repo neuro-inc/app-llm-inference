@@ -10,9 +10,8 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  ingressClassName: traefik
   rules:
-    - host: {{ Release.Namespace }}.apps.{{ .Values.ingress.clusterName }}.org.neu.ro
+    - host: {{ .Release.Namespace }}.apps.{{ .Values.ingress.clusterName }}.org.neu.ro
       http:
         paths:
           - path: /

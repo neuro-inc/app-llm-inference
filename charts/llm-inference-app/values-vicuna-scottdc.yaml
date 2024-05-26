@@ -6,19 +6,18 @@ llm:
 
 serverExtraArgs:
   - --dtype=half
-  - --tensor-parallel-size=2
 
 resources:
   requests:
     cpu: 1
     memory: 4Gi
-    nvidia.com/gpu: 2
+    nvidia.com/gpu: 1
   limits:
-    nvidia.com/gpu: 2
+    nvidia.com/gpu: 1
 
 nodeSelector:
-  platform.neuromation.io/nodepool: gpu-2x-2080ti-2xnvidia-geforce-rtx-2080ti
+  platform.neuromation.io/nodepool: dgx
 
 ingress:
   enabled: true
-  clusterName: onprem-poc
+  clusterName: scottdc
