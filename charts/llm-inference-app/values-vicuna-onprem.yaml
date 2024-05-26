@@ -21,9 +21,4 @@ nodeSelector:
 
 ingress:
   enabled: true
-  className: traefik
-  hosts:
-    - host: mistral.apps.onprem-poc.org.neu.ro # manually added DNS record for *.apps.onprem-poc.org.neu.ro, patched acme to gen cert, patched traefik to expose ingress
-      paths:
-        - path: /
-          pathType: Prefix
+  clusterName: onprem-poc
