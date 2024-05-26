@@ -72,10 +72,4 @@ service:
 # Ingress
 ingress:
   enabled: false
-  className: traefik
-  hosts:
-    - host: ""
-      paths:
-        - path: /
-          pathType: Prefix
-  tls: []
+  cluster_name: ""
