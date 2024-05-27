@@ -21,7 +21,8 @@ resources: {}
 healthChecksDelay: 300
 
 volumesManage: false
-PVCVolumes: []
+PVCVolumes:
+  []
   # - pvcName: huggingface-cache
   #   autocreate: false
   #   accessMode: ReadWriteOnce
@@ -72,10 +73,4 @@ service:
 # Ingress
 ingress:
   enabled: false
-  className: traefik
-  hosts:
-    - host: ""
-      paths:
-        - path: /
-          pathType: Prefix
-  tls: []
+  clusterName: ""

@@ -1,0 +1,23 @@
+# This is mostly show-off example of config adjustments
+
+llm:
+  modelHFName: lmsys/vicuna-7b-v1.3
+  tokenizerHFName: lmsys/vicuna-7b-v1.3
+
+serverExtraArgs:
+  - --dtype=half
+
+resources:
+  requests:
+    cpu: 1
+    memory: 4Gi
+    nvidia.com/gpu: 1
+  limits:
+    nvidia.com/gpu: 1
+
+nodeSelector:
+  platform.neuromation.io/nodepool: dgx
+
+ingress:
+  enabled: true
+  clusterName: scottdc
