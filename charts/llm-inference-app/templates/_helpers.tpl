@@ -50,3 +50,10 @@ Selector labels
 app.kubernetes.io/name: {{ include "llm-inference-app.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Pod-specific labels
+*/}}
+{{- define "llm-inference-app.apoloPodLabels" -}}
+platform.apolo.us/preset: {{- .Values.preset_name }}
+{{- end }}

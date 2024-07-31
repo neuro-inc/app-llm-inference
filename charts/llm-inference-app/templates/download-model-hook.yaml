@@ -15,6 +15,7 @@ spec:
       name: {{ include "llm-inference-app.fullname" . }}-download
       labels:
         {{- include "llm-inference-app.labels" . | nindent 8 }}
+        {{- include "llm-inference-app.apoloPodLabels" . | nindent 8 }}
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:
