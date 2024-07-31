@@ -56,4 +56,5 @@ Pod-specific labels
 */}}
 {{- define "llm-inference-app.apoloPodLabels" -}}
 platform.apolo.us/preset: {{- .Values.preset_name }}
+platform.apolo.us/component: app
 {{- end }}
