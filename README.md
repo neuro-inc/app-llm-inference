@@ -8,11 +8,12 @@ This example deploys `lmsys/vicuna-7b-v1.3` LLM model.
 ```yaml
 apolo run --pass-config ghcr.io/neuro-inc/app-deployment -- install https://github.com/neuro-inc/app-llm-inference \
   llm-inference vicuna7b charts/llm-inference-app \
-  --set timeout=600 \
+  --timeout=10m \
   --set "llm.modelHFName=lmsys/vicuna-7b-v1.3" \
   --set "llm.tokenizerHFName=lmsys/vicuna-7b-v1.3" \
-  --set 'serverExtraArgs[0]=--dtype=half' \
   --set "preset_name=H100x1" \  # set needed preset
+  --set 'serverExtraArgs[0]=--dtype=half' \ # optional
+  --set "env.HUGGING_FACE_HUB_TOKEN=YOUR_TOKEN" \ # optional
   --set "ingress.enabled=True" \ # optional
   --set "ingress.clusterName=scottdc" # optional
 ```
