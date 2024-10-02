@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "llm-inference-app.fullname" . }}
+  name: {{ include "app.fullname" . }}
   labels:
-    {{- include "llm-inference-app.labels" . | nindent 4 }}
+    {{- include "app.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "llm-inference-app.selectorLabels" . | nindent 6 }}
+      {{- include "app.selectorLabels" . | nindent 6 }}
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -21,8 +21,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "llm-inference-app.labels" . | nindent 8 }}
-        {{- include "llm-inference-app.apoloPodLabels" . | nindent 8 }}
+        {{- include "app.labels" . | nindent 8 }}
+        {{- include "app.apoloPodLabels" . | nindent 8 }}
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:
@@ -53,7 +53,10 @@ spec:
             - download
             - --resume-download
             - --repo-type=model
-            - "{{ .Values.llm.modelHFName }}"
+            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
+            - --revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
+            {{- end }}
+            - "{{ or .Values.llm.modelHFName .Values.model.modelHFName }}"
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -96,8 +99,14 @@ spec:
           args:
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
-            - --model={{ .Values.llm.modelHFName }}
+            - --model={{ or .Values.llm.modelHFName .Values.model.modelHFName }}
+            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
+            - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
+            {{- end }}
             - --tokenizer={{ .Values.llm.tokenizerHFName }}
+            {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            {{- end }}
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
           {{- end }}

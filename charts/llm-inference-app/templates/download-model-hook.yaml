@@ -2,9 +2,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "llm-inference-app.fullname" . }}-download
+  name: {{ include "app.fullname" . }}-download
   labels:
-    {{- include "llm-inference-app.labels" . | nindent 4 }}
+    {{- include "app.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": post-install
     "helm.sh/hook-weight": "-5"
@@ -12,10 +12,10 @@ metadata:
 spec:
   template:
     metadata:
-      name: {{ include "llm-inference-app.fullname" . }}-download
+      name: {{ include "app.fullname" . }}-download
       labels:
-        {{- include "llm-inference-app.labels" . | nindent 8 }}
-        {{- include "llm-inference-app.apoloPodLabels" . | nindent 8 }}
+        {{- include "app.labels" . | nindent 8 }}
+        {{- include "app.apoloPodLabels" . | nindent 8 }}
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:
