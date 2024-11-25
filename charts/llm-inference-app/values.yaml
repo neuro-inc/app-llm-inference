@@ -19,9 +19,9 @@ serverExtraArgs: []
 replicaCount: 1
 
 image:
-  repository: vllm/vllm-openai
+  repository: rocm/vllm-ci
   pullPolicy: IfNotPresent
-  tag: v0.5.3.post1
+  tag: a39863521595412d912f7192084357fad7a539e9
   imagePullSecrets: []
 
 resources: {}
