@@ -19,9 +19,9 @@ serverExtraArgs: []
 replicaCount: 1
 
 image:
-  repository: rocm/vllm-ci
+  repository: rocm/vllm
   pullPolicy: IfNotPresent
-  tag: a39863521595412d912f7192084357fad7a539e9
+  tag: rocm6.2_mi300_ubuntu20.04_py3.9_vllm_0.6.4
   imagePullSecrets: []
 
 resources: {}
@@ -55,7 +55,7 @@ tolerations:
   - key: platform.neuromation.io/job
     operator: Exists
     effect: NoSchedule
-  - key: nvidia.com/gpu
+  - key: amd.com/gpu
     operator: Exists
     effect: NoSchedule
 
