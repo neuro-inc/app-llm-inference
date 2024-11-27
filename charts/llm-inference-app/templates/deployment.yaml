@@ -96,6 +96,8 @@ spec:
             - name: {{ $k }}
               value: {{ $v | quote }}
           {{- end }}
+            - name: HIP_VISIBLE_DEVICES
+              value: "0"
           command:
             - python3
             - -m
@@ -141,6 +143,12 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
+        - key: "amd.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+        - key: "platform.neuromation.io/job"
+          operator: "Exists"
+          effect: "NoSchedule"
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.priorityClassName }}
