@@ -99,7 +99,7 @@ spec:
             - name: TORCH_USE_HIP_DSA
               value: "1"
             - name: AMD_SERIALIZE_KERNEL
-              value: "3"
+              value: "1"
             - name: VLLM_USE_TRITON_FLASH_ATTN
               value: "0"
             - name: ROCR_VISIBLE_DEVICES
