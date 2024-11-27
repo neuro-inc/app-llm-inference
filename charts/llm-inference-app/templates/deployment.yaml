@@ -130,7 +130,6 @@ spec:
             - --tokenizer={{ .Values.llm.tokenizerHFName }}
             {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
-            - --kv-cache-dtype=fp8
             {{- end }}
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
