@@ -161,12 +161,6 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
-        - key: "amd.com/gpu"
-          operator: "Exists"
-          effect: "NoSchedule"
-        - key: "platform.neuromation.io/job"
-          operator: "Exists"
-          effect: "NoSchedule"
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if .Values.priorityClassName }}
