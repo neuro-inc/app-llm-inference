@@ -19,9 +19,9 @@ serverExtraArgs: []
 replicaCount: 1
 
 image:
-  repository: quay.io/opendatahub/vllm
+  repository: rocm/vllm-ci
   pullPolicy: IfNotPresent
-  tag: stable-rocm-9ac4882
+  tag: 77daa0f1a9aabdd378c218e9bf17fa2112bb9344
   imagePullSecrets: []
 
 resources: {}
