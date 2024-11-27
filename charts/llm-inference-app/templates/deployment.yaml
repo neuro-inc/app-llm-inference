@@ -96,8 +96,26 @@ spec:
             - name: {{ $k }}
               value: {{ $v | quote }}
           {{- end }}
+            - name: TORCH_USE_HIP_DSA
+              value: "1"
+            - name: AMD_SERIALIZE_KERNEL
+              value: "3"
+            - name: VLLM_USE_TRITON_FLASH_ATTN
+              value: "0"
+            - name: PYTORCH_ROCM_ARCH
+              value: "gfx90a"
+            - name: HSA_OVERRIDE_GFX_VERSION
+              value: "10.3.0"
+            - name: ROCR_VISIBLE_DEVICES
+              value: "0"
             - name: HIP_VISIBLE_DEVICES
               value: "0"
+            - name: VLLM_USE_CUDA_VISIBLE_DEVICES
+              value: "1"
+            - name: VLLM_FP8_PADDING
+              value: "1"
+            - name: NCCL_MIN_NCHANNELS
+              value: "112"
           command:
             - /bin/bash
             - -c
@@ -109,15 +127,6 @@ spec:
               rocminfo && rocm-smi
               echo "Checking PyTorch version..." 
               python3 -c 'import torch; print("PyTorch version:", torch.__version__)'
-              echo "Running PyTorch GPU test..."
-              python3 -c '
-              import torch
-              print("CUDA available:", torch.cuda.is_available())
-              if torch.cuda.is_available():
-                  x = torch.tensor([1.0, 2.0, 3.0]).cuda()  
-                  y = torch.tensor([4.0, 5.0, 6.0]).cuda()
-                  print("x + y:", x + y)
-              '
               echo "Starting vLLM server..."
               python3 -m vllm.entrypoints.openai.api_server --host=0.0.0.0 --port=8000 --model=lmsys/vicuna-7b-v1.3 --tokenizer= --dtype=half
           args:
