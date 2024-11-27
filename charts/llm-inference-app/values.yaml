@@ -19,9 +19,9 @@ serverExtraArgs: []
 replicaCount: 1
 
 image:
-  repository: rocm/vllm-ci
+  repository: rocm/vllm
   pullPolicy: IfNotPresent
-  tag: 77daa0f1a9aabdd378c218e9bf17fa2112bb9344
+  tag: rocm6.2_mi300_ubuntu20.04_py3.9_vllm_0.6.4
   imagePullSecrets: []
 
 resources: {}
