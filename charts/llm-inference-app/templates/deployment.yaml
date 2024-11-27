@@ -120,7 +120,7 @@ spec:
               echo "Checking PyTorch version..." 
               python3 -c 'import torch; print("PyTorch version:", torch.__version__)'
               echo "Starting vLLM server..."
-              python3 -m vllm.entrypoints.openai.api_server --host=0.0.0.0 --port=8000 --model=lmsys/vicuna-7b-v1.3 --tokenizer= --dtype=half
+              python3 -m vllm.entrypoints.openai.api_server --host=0.0.0.0 --port=8000
           args:
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
