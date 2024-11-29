@@ -98,8 +98,6 @@ spec:
           {{- end }}
             - name: TORCH_USE_HIP_DSA
               value: "1"
-            - name: TORCH_USE_HIP_DSA
-              value: "1"
             - name: HSA_FORCE_FINE_GRAIN_PCIE
               value: "1"
             - name: HSA_ENABLE_SDMA
