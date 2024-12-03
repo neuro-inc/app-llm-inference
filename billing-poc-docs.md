@@ -17,7 +17,7 @@ Start Minikube. Nvidia GPU recommended as this example uses a CUDA optimized ima
 minikube start --driver docker --container-runtime docker --gpus all --memory 10g --cpus 6
 ```
 
-Compile a container image based on vLLM image. This is needed because their image does not come with the necessary OpenTelemetry libraries. Note that we tried to install the exact versions in [https://github.com/vllm-project/vllm/blob/main/examples/production_monitoring/Otel.md](their documentation), but those did not export traces when using OpenTelemetry FastAPI Auto Instrumentation, so we removed the version restrictions.
+Compile a container image based on vLLM image. This is needed because their image does not come with the necessary OpenTelemetry libraries. Note that we tried to install the exact versions in [their documentation](https://github.com/vllm-project/vllm/blob/main/examples/production_monitoring/Otel.md), but those did not export traces when using OpenTelemetry FastAPI Auto Instrumentation, so we removed the version restrictions.
 
 ```bash
 make build-minikube
