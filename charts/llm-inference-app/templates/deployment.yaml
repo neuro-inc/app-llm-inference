@@ -5,6 +5,7 @@ metadata:
   labels:
     {{- include "app.labels" . | nindent 4 }}
 spec:
+  revisionHistoryLimit: 0
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
@@ -109,7 +110,7 @@ spec:
             {{- end }}
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
-          {{- end }}
+              {{- end }}
       {{- if or .Values.volumes .Values.cache.enabled }}
       volumes:
         - name: dshm

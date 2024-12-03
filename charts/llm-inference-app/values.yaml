@@ -3,25 +3,32 @@ fullnameOverride: ""
 
 # Deployment
 llm:
-  modelHFName: ""
+  modelHFName: "facebook/opt-125m" # "microsoft/phi-2" # "meta-llama/Llama-3.1-8B-Instruct"
   modelRevision: ""
-  tokenizerHFName: ""
+  tokenizerHFName: "facebook/opt-125m" # "microsoft/phi-2" # "meta-llama/Llama-3.1-8B-Instruct"
   tokenizerRevision: ""
+  # fileName: "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
 
 model:
-  modelHFName: ""
+  modelHFName: "facebook/opt-125m" # "microsoft/phi-2" # "meta-llama/Llama-3.1-8B-Instruct"
   modelRevision: ""
-  tokenizerHFName: ""
+  tokenizerHFName: "facebook/opt-125m" # "microsoft/phi-2" # "meta-llama/Llama-3.1-8B-Instruct"
   tokenizerRevision: ""
 
-serverExtraArgs: []
+serverExtraArgs:
+  - --gpu-memory-utilization=0.8
+  - --enforce-eager
+  - --otlp-traces-endpoint=http://vllm-opentelemetry-collector.default.svc.cluster.local:4318/v1/traces
+  - --collect-detailed-traces=all
 
 replicaCount: 1
 
 image:
-  repository: vllm/vllm-openai
+  repository: llm-inference
+  tag: latest
+  # repository: vllm/vllm-openai 
+  # tag: v0.5.3.post1 # this version does not contain OpenTelemetry libraries
   pullPolicy: IfNotPresent
-  tag: v0.5.3.post1
   imagePullSecrets: []
 
 resources: {}
@@ -45,19 +52,31 @@ cache:
   sizeLimit: 100Gi
 
 env:
-  HUGGING_FACE_HUB_TOKEN: ""
+  # HUGGING_FACE_HUB_TOKEN: 
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://vllm-opentelemetry-collector.default.svc.cluster.local:4318"
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://vllm-opentelemetry-collector.default.svc.cluster.local:4318/v1/traces"
+  OTEL_EXPORTER_OTLP_TRACES_PROTOCOL: "http/protobuf"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  OTEL_PYTHON_DISABLED_INSTRUMENTATIONS: "aws-lambda,requests"
+  OTEL_PYTHON_FASTAPI_EXCLUDED_URLS: "health,metrics"
+  OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST: "X-Request-Id"
+  
 
-podAnnotations: {}
+
+podAnnotations:
+  prometheus.io/scrape: 'true'
+  prometheus.io/path: '/metrics'
+  prometheus.io/port: '8000'
 
 nodeSelector: {}
 
-tolerations:
-  - key: platform.neuromation.io/job
-    operator: Exists
-    effect: NoSchedule
-  - key: nvidia.com/gpu
-    operator: Exists
-    effect: NoSchedule
+tolerations: {}
+  # - key: platform.neuromation.io/job
+  #   operator: Exists
+  #   effect: NoSchedule
+  # - key: nvidia.com/gpu
+  #   operator: Exists
+  #   effect: NoSchedule
 
 affinity: {}
 
@@ -84,3 +103,94 @@ ingress:
   clusterName: ""
 
 preset_name: ""
+
+opentelemetry-collector:
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: "0.114.0"
+    # otel/opentelemetry-collector
+  mode: deployment
+  # mode: daemonset
+  # config: # this chart has an issue when installing as a subchar amd using this key. Using alternate config insted 
+  #   service:
+  #     pipelines:
+  #       traces:
+  #         receivers: [otlp]
+  #         exporters: [clickhouse, debug]
+
+  alternateConfig:
+    exporters:
+      clickhouse:
+        endpoint: "http://vllm-clickhouse.default.svc.cluster.local:8123"
+        database: "default"
+        username: "default"
+        password: "default-password"
+        ttl: 730h
+        create_schema: true
+        logs_table_name: otel_logs
+        traces_table_name: otel_traces
+        metrics_table_name: otel_metrics
+        timeout: 5s
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_interval: 30s
+          max_elapsed_time: 300s
+      debug:
+        verbosity: detailed
+    extensions:
+      # The health_check extension is mandatory for this chart.
+      # Without the health_check extension the collector will fail the readiness and liveliness probes.
+      # The health_check extension can be modified, but should never be removed.
+      health_check:
+        endpoint: ${env:MY_POD_IP}:13133
+    processors:
+      batch: {}
+      # Default memory limiter configuration for the collector based on k8s resource limits.
+      memory_limiter:
+        # check_interval is the time between measurements of memory usage.
+        check_interval: 5s
+        # By default limit_mib is set to 80% of ".Values.resources.limits.memory"
+        limit_percentage: 80
+        # By default spike_limit_mib is set to 25% of ".Values.resources.limits.memory"
+        spike_limit_percentage: 25
+    receivers:
+      otlp:
+        protocols:
+          http:
+            endpoint: ${env:MY_POD_IP}:4318
+          grpc:
+            endpoint: ${env:MY_POD_IP}:4317
+    service:
+      telemetry:
+        metrics:
+          address: ${env:MY_POD_IP}:8888
+      extensions:
+        - health_check
+      pipelines:
+        logs:
+          exporters:
+            - debug
+          processors:
+            - memory_limiter
+            - batch
+          receivers:
+            - otlp
+        traces:
+          exporters: [debug, clickhouse]
+          processors:
+            - memory_limiter
+            # - batch
+          receivers:
+            - otlp
+  
+clickhouse:
+  auth:
+    username: default
+    password: "default-password"
+  shards: 1
+  replicaCount: 1
+  resources:
+    limits:
+      memory: 2Gi
+
