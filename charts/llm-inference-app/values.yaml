@@ -84,3 +84,18 @@ ingress:
   clusterName: ""
 
 preset_name: ""
+
+autoscaling:
+  enabled: false
+  basedOn: "cpu"
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 30
+
+keda:
+  operator:
+    namespace: "{{ .Release.Namespace }}"
+  metricsServer:
+    enabled: true
+  prometheusMetrics:
+    enabled: true
