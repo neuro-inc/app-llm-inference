@@ -1,0 +1,34 @@
+{{- if .Values.autoscaling.enabled -}}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{.Values.autoscaling.basedOn}}-scaledobject
+  namespace: "{{ .Release.Namespace }}"
+spec:
+  scaleTargetRef:
+    name: stable-diffusion-5-app-stable-diffusion # Name of the deployment
+  maxReplicaCount:  {{ .Values.autoscaling.maxReplicas }}
+  minReplicaCount:  {{ .Values.autoscaling.minReplicas }}
+  triggers:
+  {{- if eq .Values.autoscaling.basedOn "cpu" }}
+  - type: cpu
+    metricType: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+    metadata:
+      value: "30"
+  {{- else if eq .Values.autoscaling.basedOn "memory" }}
+  - type: memory
+    metricType: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+    metadata:
+      value: "30"
+  {{- else if eq .Values.autoscaling.basedOn "prometheus" }}
+  - type: prometheus
+    metadata:
+      serverAddress: http://platform-prometheus-proxy:9090
+      query: sum(rate(traefik_service_requests_total{code="200",method="POST",protocol="http",service="app-apolo-default-mydifyinstance-mydifyinstance-80@kubernetes"}[2m]))
+      threshold: '100.50'
+      activationThreshold: '5.5'
+      namespace: platform
+      queryParameters: key-1=value-1,key-2=value-2
+  {{- end }}
+
+{{- end }}
