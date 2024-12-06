@@ -6,7 +6,7 @@ metadata:
   namespace: "{{ .Release.Namespace }}"
 spec:
   scaleTargetRef:
-    name: stable-diffusion-5-app-stable-diffusion # Name of the deployment
+    name: {{ include "app.fullname" . }}
   maxReplicaCount:  {{ .Values.autoscaling.maxReplicas }}
   minReplicaCount:  {{ .Values.autoscaling.minReplicas }}
   triggers:
@@ -28,7 +28,6 @@ spec:
       threshold: '100.50'
       activationThreshold: '5.5'
       namespace: platform
-      queryParameters: key-1=value-1,key-2=value-2
   {{- end }}
 
 {{- end }}
