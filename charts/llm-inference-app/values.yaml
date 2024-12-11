@@ -138,6 +138,8 @@ opentelemetry-collector:
           max_elapsed_time: 300s
       debug:
         verbosity: detailed
+      otlphttp:
+        endpoint: "http://vllm-tempo.default.svc.cluster.local:4318"
     extensions:
       # The health_check extension is mandatory for this chart.
       # Without the health_check extension the collector will fail the readiness and liveliness probes.
@@ -177,7 +179,8 @@ opentelemetry-collector:
           receivers:
             - otlp
         traces:
-          exporters: [debug, clickhouse]
+          # exporters: [debug, clickhouse]
+          exporters: [debug, otlphttp]
           processors:
             - memory_limiter
             # - batch
@@ -185,6 +188,7 @@ opentelemetry-collector:
             - otlp
   
 clickhouse:
+  enabled: false
   auth:
     username: default
     password: "default-password"
@@ -194,3 +198,11 @@ clickhouse:
     limits:
       memory: 2Gi
 
+prometheus:
+  enabled: false
+
+tempo:
+  enabled: true
+
+grafana:
+  enabled: true
