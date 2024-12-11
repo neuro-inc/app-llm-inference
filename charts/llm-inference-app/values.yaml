@@ -91,14 +91,3 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 2
   targetCPUUtilizationPercentage: 30
-
-keda:
-  fullnameOverride: keda
-  namespaceOverride: ""
-  watchNamespace: ""
-  operator:
-    namespace: ""
-  metricsServer:
-    enabled: true
-  prometheusMetrics:
-    enabled: true
