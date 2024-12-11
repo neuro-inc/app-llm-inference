@@ -94,10 +94,10 @@ autoscaling:
 
 keda:
   fullnameOverride: keda
-  namespaceOverride: {{ .Release.Namespace }}
-  watchNamespace: {{ .Release.Namespace }}
+  namespaceOverride: "{{ .Release.Namespace }}"
+  watchNamespace: "{{ .Release.Namespace }}"
   operator:
-    namespace: {{ .Release.Namespace }}
+    namespace: "{{ .Release.Namespace }}"
   metricsServer:
     enabled: true
   prometheusMetrics:
