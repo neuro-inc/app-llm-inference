@@ -23,7 +23,7 @@ spec:
   {{- else if eq .Values.autoscaling.basedOn "prometheus" }}
   - type: prometheus
     metadata:
-      serverAddress: http://platform-prometheus-proxy:9090
+      serverAddress: http://prometheus-prometheus.platform.svc.cluster.local:9090
       query: avg(rate(traefik_service_requests_total{code="200", exported_service="platform-jobs-job-6d1687f6-d012-4d6f-8cb0-606f82f8c75e-80@kubernetes"}[5m]))
       threshold: '1'
       activationThreshold: '1'
