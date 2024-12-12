@@ -96,18 +96,18 @@ spec:
             - name: {{ $k }}
               value: {{ $v | quote }}
           {{- end }}
-            - name: TORCH_USE_HIP_DSA
-              value: "1"
-            - name: HSA_FORCE_FINE_GRAIN_PCIE
-              value: "1"
-            - name: HSA_ENABLE_SDMA
-              value: "0"
-            - name: ROCM_DISABLE_CU_MASK
-              value: "1"
-            - name: VLLM_USE_TRITON_FLASH_ATTN
-              value: "0"
-            - name: ROCR_VISIBLE_DEVICES
-              value: "0"
+            # - name: TORCH_USE_HIP_DSA
+            #   value: "1"
+            # - name: HSA_FORCE_FINE_GRAIN_PCIE
+            #   value: "1"
+            # - name: HSA_ENABLE_SDMA
+            #   value: "0"
+            # - name: ROCM_DISABLE_CU_MASK
+            #   value: "1"
+            # - name: VLLM_USE_TRITON_FLASH_ATTN
+            #   value: "0"
+            # - name: ROCR_VISIBLE_DEVICES
+            #   value: "0"
             - name: HIP_VISIBLE_DEVICES
               value: "0"
           command:
