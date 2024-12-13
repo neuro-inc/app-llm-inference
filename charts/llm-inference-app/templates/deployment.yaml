@@ -123,6 +123,7 @@ spec:
             - --tokenizer={{ .Values.llm.tokenizerHFName }}
             {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            - --max-model-len=4096
             {{- end }}
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
