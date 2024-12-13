@@ -104,8 +104,8 @@ spec:
             #   value: "0"
             # - name: ROCM_DISABLE_CU_MASK
             #   value: "1"
-            # - name: VLLM_USE_TRITON_FLASH_ATTN
-            #   value: "0"
+            - name: VLLM_USE_TRITON_FLASH_ATTN
+              value: "0"
             # - name: ROCR_VISIBLE_DEVICES
             #   value: "0"
             - name: HIP_VISIBLE_DEVICES
@@ -124,6 +124,8 @@ spec:
             {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             - --max-model-len=4096
+            - --enforce-eager
+            - --tokenizer-mode=mistral
             {{- end }}
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
