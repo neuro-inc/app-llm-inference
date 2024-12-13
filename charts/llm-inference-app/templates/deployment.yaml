@@ -126,6 +126,7 @@ spec:
             - --max-model-len=4096
             - --enforce-eager
             - --dtype=half
+            - --disable-sliding-window
             {{- end }}
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
