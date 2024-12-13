@@ -111,20 +111,8 @@ spec:
             - name: HIP_VISIBLE_DEVICES
               value: "0"
           command:
-            - /bin/bash
-            - -c
-            - |
-              set -e
-              echo "Checking ROCm version..."
-              /opt/rocm/bin/rocm_agent_enumerator -v
-              echo "Running ROCm SMI to check GPU status..."
-              rocminfo && rocm-smi
-              echo "Checking PyTorch config..."
-              python -c "import torch; print(torch.__config__.show())"
-              echo "Checking PyTorch version..." 
-              python3 -c 'import torch; print("PyTorch version:", torch.__version__)'
-              echo "Starting vLLM server..."
-              python3 -m vllm.entrypoints.openai.api_server
+            - vllm
+            - serve
           args:
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
