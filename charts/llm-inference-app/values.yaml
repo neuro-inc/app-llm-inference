@@ -19,9 +19,9 @@ serverExtraArgs: []
 replicaCount: 1
 
 image:
-  repository: vllm/vllm-openai
+  repository: rocm/vllm-ci
   pullPolicy: IfNotPresent
-  tag: v0.5.3.post1
+  tag: 77daa0f1a9aabdd378c218e9bf17fa2112bb9344
   imagePullSecrets: []
 
 resources: {}
@@ -55,7 +55,7 @@ tolerations:
   - key: platform.neuromation.io/job
     operator: Exists
     effect: NoSchedule
-  - key: nvidia.com/gpu
+  - key: amd.com/gpu
     operator: Exists
     effect: NoSchedule
 
