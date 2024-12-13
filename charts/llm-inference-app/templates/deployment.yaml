@@ -114,10 +114,9 @@ spec:
             - vllm
             - serve
           args:
-            - {{ .Values.model.modelHFName}}
+            - {{ .Values.model.modelHFName }}
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
-            - --model={{ or .Values.llm.modelHFName .Values.model.modelHFName }}
             {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
             - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
             {{- end }}
