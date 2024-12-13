@@ -126,6 +126,7 @@ spec:
             - --max-model-len=4096
             - --enforce-eager
             - --tokenizer-mode=mistral
+            - --dtype=half
             {{- end }}
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
