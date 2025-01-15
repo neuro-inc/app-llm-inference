@@ -1,0 +1,125 @@
+kind: batch
+title: "vLLM environment variable crash test (AMD)"
+
+defaults:
+  preset: mi210x1
+  max_parallel: 2
+  fail_fast: false
+  workdir: /app
+  volumes:
+    - storage:${{ flow.project_id }}/vllm-tests:/app/vllm-tests
+
+params:
+  experiment_name:
+    default: "vllm_crash_test"
+    descr: "Name of the experiment or run."
+
+volumes:
+  vllm_tests:
+    remote: storage:${{ flow.project_id }}/vllm-tests
+    mount: /app/vllm-tests
+
+images:
+  vllm_test_env:
+    ref: "rocm/vllm-ci:77daa0f1a9aabdd378c218e9bf17fa2112bb9344"
+
+tasks:
+  - strategy:
+      matrix:
+        # Models to test
+        model: [
+          "lmsys/vicuna-7b-v1.3",
+          "meta-llama/Llama-3.3-70B-Instruct",
+          "Qwen/Qwen2-7B-Instruct"
+        ]
+
+        # Environment variables that are most likely to crash on AMD
+        vllm_use_triton_flash_attn: [ "0", "1" ]
+        vllm_fp8_padding:           [ "0", "1" ]
+        torch_use_hip_dsa:          [ "0", "1" ]
+        hsa_force_fine_grain_pcie:  [ "0", "1" ]
+        hsa_enable_sdma:            [ "0", "1" ]
+        rocm_disable_cu_mask:       [ "0", "1" ]
+
+    # Use a single-line string for 'id', with triple replace:
+    id: "amd_crash_test_model_${{ replace(replace(replace(str(matrix.model), '/', '_'), '-', '_'), '.', '_') }}_flash_${{ matrix.vllm_use_triton_flash_attn }}_fp8_${{ matrix.vllm_fp8_padding }}_hipDsa_${{ matrix.torch_use_hip_dsa }}_finePCIE_${{ matrix.hsa_force_fine_grain_pcie }}_sdma_${{ matrix.hsa_enable_sdma }}_cuMask_${{ matrix.rocm_disable_cu_mask }}"
+
+    title: >
+      Crash-test model=${{ matrix.model }},
+      flashAttn=${{ matrix.vllm_use_triton_flash_attn }},
+      fp8Pad=${{ matrix.vllm_fp8_padding }},
+      hipDsa=${{ matrix.torch_use_hip_dsa }},
+      finePCIE=${{ matrix.hsa_force_fine_grain_pcie }},
+      sdma=${{ matrix.hsa_enable_sdma }},
+      cuMask=${{ matrix.rocm_disable_cu_mask }}
+
+    image: ${{ images.vllm_test_env.ref }}
+
+    env:
+      # Matrix-based environment vars
+      VLLM_USE_TRITON_FLASH_ATTN:  ${{ matrix.vllm_use_triton_flash_attn }}
+      VLLM_FP8_PADDING:            ${{ matrix.vllm_fp8_padding }}
+      TORCH_USE_HIP_DSA:           ${{ matrix.torch_use_hip_dsa }}
+      HSA_FORCE_FINE_GRAIN_PCIE:   ${{ matrix.hsa_force_fine_grain_pcie }}
+      HSA_ENABLE_SDMA:             ${{ matrix.hsa_enable_sdma }}
+      ROCM_DISABLE_CU_MASK:        ${{ matrix.rocm_disable_cu_mask }}
+
+      # Model name
+      TARGET_MODEL: ${{ matrix.model }}
+
+      # Experiment name
+      EXPERIMENT_NAME: ${{ params.experiment_name }}
+
+      # Example: HF token (or use a secret)
+      HUGGING_FACE_HUB_TOKEN: secret:HF_TOKEN
+
+    bash: |
+      set -euxo pipefail
+
+      echo "==============================================="
+      echo "Starting AMD crash test with environment vars:"
+      env | grep -E '^VLLM|^HIP|^TORCH|^HSA|^ROCM|^TARGET_MODEL|^EXPERIMENT_NAME'
+      echo "==============================================="
+
+      # Start vLLM in the background and redirect logs to a file
+      echo "Running vLLM with model=${TARGET_MODEL}"
+      vllm serve "${TARGET_MODEL}" \
+        --host=0.0.0.0 \
+        --port=8000 \
+        --max-model-len=2048 \
+        --enforce-eager \
+        --dtype=half \
+        > vllm_out.log 2>&1 &
+
+      VLLM_PID=$!
+
+      # Give the server up to 30s to start up & log success
+      # This approach looks for “Started server process” or “Uvicorn running on ...”
+      # You can tailor the pattern to your logs.
+      SECS=7200
+      for i in $(seq 1 $SECS); do
+        # If the background process crashed, 'kill -0' will fail
+        if ! kill -0 "$VLLM_PID" 2>/dev/null; then
+          echo "vLLM has crashed/exited unexpectedly. Marking as FAIL."
+          cat vllm_out.log
+          exit 1
+        fi
+
+        # Check for a success marker in logs. 
+        # "Started server process" is typical in uvicorn logs 
+        # or "Uvicorn running on http://0.0.0.0:8000" 
+        if grep -Eq "Started server process|Uvicorn running on " vllm_out.log; then
+          echo "vLLM started successfully. Marking as SUCCESS."
+          cat vllm_out.log
+          # Terminate the server or keep it running if you prefer
+          kill "$VLLM_PID" || true
+          exit 0
+        fi
+
+        sleep 1
+      done
+
+      echo "Timed out waiting for vLLM to start. Marking as FAIL."
+      kill "$VLLM_PID" || true
+      cat vllm_out.log
+      exit 1
