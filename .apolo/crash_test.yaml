@@ -28,9 +28,22 @@ tasks:
       matrix:
         # Models to test
         model: [
-          "lmsys/vicuna-7b-v1.3",
-          "meta-llama/Llama-3.3-70B-Instruct",
-          "Qwen/Qwen2-7B-Instruct"
+          "stabilityai/stablelm-tuned-alpha-7b",
+          "internlm/internlm-chat-7b"
+
+
+          # "Qwen/Qwen-7B-Chat",
+          # "bigcode/starcoder",
+          # "mosaicml/mpt-7b",
+          # "EleutherAI/gpt-j-6b",
+          # "EleutherAI/gpt-neox-20b",
+          # "gpt2",
+          # "meta-llama/Llama-2-7b-hf",
+          # "tiiuae/falcon-7b-instruct",
+          # "mistralai/Mistral-7B-v0.1"
+          # "lmsys/vicuna-7b-v1.3",
+          # "meta-llama/Llama-3.3-70B-Instruct",
+          # "Qwen/Qwen2-7B-Instruct"
         ]
 
         # Environment variables that are most likely to crash on AMD
@@ -89,6 +102,7 @@ tasks:
         --max-model-len=2048 \
         --enforce-eager \
         --dtype=half \
+        --trust-remote-code \
         > vllm_out.log 2>&1 &
 
       VLLM_PID=$!
