@@ -6,6 +6,8 @@ defaults:
   max_parallel: 2
   fail_fast: false
   workdir: /app
+  cache: 
+    strategy: none
   volumes:
     - storage:${{ flow.project_id }}/vllm-tests:/app/vllm-tests
 
@@ -32,10 +34,10 @@ tasks:
           # "internlm/internlm-chat-7b"
           # "Qwen/Qwen-7B-Chat",
           # "bigcode/starcoder",
-          "mosaicml/mpt-7b",
-          "EleutherAI/gpt-j-6b",
-          # "EleutherAI/gpt-neox-20b",
-          # "gpt2",
+          # "mosaicml/mpt-7b",
+          # "EleutherAI/gpt-j-6b",
+          "EleutherAI/gpt-neox-20b",
+          "gpt2",
           # "meta-llama/Llama-2-7b-hf",
           # "tiiuae/falcon-7b-instruct",
           # "tiiuae/Falcon3-7B-Base",
