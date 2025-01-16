@@ -1,0 +1,83 @@
+Parsed 140 lines matching tasks. CSV written to ./tests/vllm_results.csv.
+Wrote config popularity to ./tests/vllm_config_popularity.csv.
+
+=== Configuration popularity ranking ===
+- Config flash=1, fp8=0, hipDsa=0, finePCIE=1, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=0, finePCIE=1, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=1, finePCIE=0, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=1, finePCIE=0, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=1, finePCIE=0, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=0, finePCIE=1, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=0, finePCIE=1, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=1, finePCIE=0, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=0, finePCIE=1, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=0, finePCIE=0, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=1, finePCIE=1, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=1, finePCIE=0, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=0, finePCIE=0, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=0, finePCIE=1, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=0, finePCIE=1, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=0, finePCIE=0, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=1, finePCIE=1, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=0, finePCIE=0, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=0, finePCIE=0, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=0, finePCIE=1, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=1, finePCIE=1, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=1, finePCIE=1, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=1, finePCIE=1, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=1, finePCIE=0, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=1, finePCIE=1, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=1, finePCIE=0, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=0, finePCIE=0, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=1, finePCIE=1, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=1, finePCIE=1, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=1, finePCIE=1, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=0, finePCIE=0, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=0, finePCIE=0, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=1, finePCIE=0, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=1, finePCIE=0, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=0, finePCIE=0, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=0, finePCIE=0, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=1, finePCIE=1, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=0, finePCIE=1, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=1, finePCIE=0, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=0, finePCIE=1, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=1, finePCIE=1, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=1, finePCIE=0, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=0, finePCIE=0, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=1, finePCIE=0, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=0, finePCIE=1, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=0, finePCIE=1, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=0, finePCIE=0, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=0, finePCIE=0, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=1, finePCIE=1, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=0, finePCIE=1, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=1, finePCIE=0, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=1, finePCIE=1, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=1, finePCIE=1, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=0, hipDsa=0, finePCIE=0, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=1, finePCIE=0, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=1, finePCIE=1, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=0, finePCIE=1, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=1, fp8=1, hipDsa=1, finePCIE=0, sdma=1, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=1, finePCIE=0, sdma=0, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=0, finePCIE=1, sdma=0, cuMask=1: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=1, finePCIE=1, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=0, hipDsa=0, finePCIE=1, sdma=1, cuMask=0: 2 successes => ['internlm_internlm_chat_7b', 'stabilityai_stablelm_tuned_alpha_7b']
+- Config flash=0, fp8=1, hipDsa=0, finePCIE=0, sdma=1, cuMask=1: 1 successes => ['internlm_internlm_chat_7b']
+- Config flash=1, fp8=1, hipDsa=0, finePCIE=0, sdma=1, cuMask=1: 1 successes => ['internlm_internlm_chat_7b']
+
+No single config was successful for *ALL* models.
+
+
+No configuration worked for these models:
+
+  - lmsys_vicuna_7b_v1_3
+  - meta_llama_Llama_3_3_70B_Instruct
+  - Qwen_Qwen2_7B_Instruct
+  - meta_llama_Llama_2_7b_hf
+  - tiiuae_falcon_7b_instruct
+  - mistralai_Mistral_7B_v0_1
+  - baichuan_inc_Baichuan2_13B_Chat
+  - THUDM_chatglm2_6b
+  - bigscience_bloomz

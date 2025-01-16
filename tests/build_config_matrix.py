@@ -227,8 +227,8 @@ if __name__ == "__main__":
     ]
 
     parse_logs_and_create_csv(
-        logfile_path="apolo_output.log",              # Your raw log file
+        logfile_path="./tests/crash_test.log",              # Your raw log file
         models=models_tested,
-        csv_output_path="vllm_results.csv",
-        popularity_csv="vllm_config_popularity.csv"  
+        csv_output_path="./tests/vllm_results.csv",
+        popularity_csv="./tests/vllm_config_popularity.csv"  
     )
