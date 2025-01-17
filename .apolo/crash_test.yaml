@@ -36,12 +36,12 @@ tasks:
           # "bigcode/starcoder",
           # "mosaicml/mpt-7b",
           # "EleutherAI/gpt-j-6b",
-          "EleutherAI/gpt-neox-20b",
-          "gpt2",
+          # "EleutherAI/gpt-neox-20b",
+          # "gpt2",
           # "meta-llama/Llama-2-7b-hf",
           # "tiiuae/falcon-7b-instruct",
-          # "tiiuae/Falcon3-7B-Base",
-          # "mistralai/Mistral-7B-v0.1"
+          "tiiuae/Falcon3-7B-Base",
+          "mistralai/Mistral-7B-v0.1"
           # "lmsys/vicuna-7b-v1.3",
           # "meta-llama/Llama-3.3-70B-Instruct",
           # "Qwen/Qwen2-7B-Instruct",
