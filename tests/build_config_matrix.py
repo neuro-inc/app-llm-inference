@@ -252,7 +252,14 @@ if __name__ == "__main__":
         "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
         "Qwen/Qwen2.5-72B-Instruct",
         "meta-llama/Meta-Llama-3-8B-Instruct",
-        "Qwen/Qwen2.5-7B-Instruct"
+        "Qwen/Qwen2.5-7B-Instruct",
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+        "deepseek-ai/DeepSeek-R1",
+        "Qwen/QwQ-32B-preview",
+        "AIDC-AI/Marco-o1",
+        "deepseek-ai/DeepSeek-V3",
+        "Daemontatox/RA_Reasoner",
+         
     ]
 
     parse_logs_and_create_csv(
