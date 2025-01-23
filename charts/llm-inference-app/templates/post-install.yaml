@@ -15,6 +15,7 @@ spec:
         release: {{ .Release.Name }}
     spec:
       restartPolicy: Never
+      serviceAccountName: {{ .Release.Name }}-sa
       containers:
       - name: post-install-job
         image: ghcr.io/neuro-inc/post-install-hook-kostia:latest
