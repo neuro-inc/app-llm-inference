@@ -28,36 +28,36 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.modelDownload.initEnabled }}
-      initContainers:
-        - name: download-model
-          image: "{{ .Values.modelDownload.image.repository }}:{{ .Values.modelDownload.image.tag }}"
-          volumeMounts:
-            {{- if .Values.cache.enabled }}
-            - name: huggingface-cache
-              mountPath: /root/.cache/huggingface
-            {{- end }}
-            {{- range .Values.volumes }}
-            - name: {{ .pvcName }}
-              mountPath: {{ .mountPath }}
-              readOnly: {{ .mountReadOnly }}
-              subPath: {{ .volumeSubPath }}
-            {{- end }}
-          env:
-          {{- range $k, $v := .Values.env }}
-            - name: {{ $k }}
-              value: {{ $v | quote }}
-          {{- end }}
-          command: ["huggingface-cli"]
-          args:
-            - download
-            - --resume-download
-            - --repo-type=model
-            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
-            - --revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
-            {{- end }}
-            - "{{ or .Values.llm.modelHFName .Values.model.modelHFName }}"
-      {{- end }}
+{{/*      {{- if .Values.modelDownload.initEnabled }}*/}}
+{{/*      initContainers:*/}}
+{{/*        - name: download-model*/}}
+{{/*          image: "{{ .Values.modelDownload.image.repository }}:{{ .Values.modelDownload.image.tag }}"*/}}
+{{/*          volumeMounts:*/}}
+{{/*            {{- if .Values.cache.enabled }}*/}}
+{{/*            - name: huggingface-cache*/}}
+{{/*              mountPath: /root/.cache/huggingface*/}}
+{{/*            {{- end }}*/}}
+{{/*            {{- range .Values.volumes }}*/}}
+{{/*            - name: {{ .pvcName }}*/}}
+{{/*              mountPath: {{ .mountPath }}*/}}
+{{/*              readOnly: {{ .mountReadOnly }}*/}}
+{{/*              subPath: {{ .volumeSubPath }}*/}}
+{{/*            {{- end }}*/}}
+{{/*          env:*/}}
+{{/*          {{- range $k, $v := .Values.env }}*/}}
+{{/*            - name: {{ $k }}*/}}
+{{/*              value: {{ $v | quote }}*/}}
+{{/*          {{- end }}*/}}
+{{/*          command: ["huggingface-cli"]*/}}
+{{/*          args:*/}}
+{{/*            - download*/}}
+{{/*            - --resume-download*/}}
+{{/*            - --repo-type=model*/}}
+{{/*            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}*/}}
+{{/*            - --revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}*/}}
+{{/*            {{- end }}*/}}
+{{/*            - "{{ or .Values.llm.modelHFName .Values.model.modelHFName }}"*/}}
+{{/*      {{- end }}*/}}
       containers:
         - name: health-check
           image: python:3.9-slim
