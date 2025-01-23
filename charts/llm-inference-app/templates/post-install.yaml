@@ -7,7 +7,6 @@ metadata:
     release: {{ .Release.Name }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
     metadata:
@@ -15,7 +14,7 @@ spec:
         app: hook-test
         release: {{ .Release.Name }}
     spec:
-      restartPolicy: OnFailure
+      restartPolicy: Never
       containers:
       - name: post-install-job
         image: ghcr.io/neuro-inc/post-install-hook-kostia:latest
