@@ -21,3 +21,4 @@ spec:
         image: ghcr.io/neuro-inc/post-install-hook-kostia:latest
         command:
         - 'update-outputs'
+        - {{ .Values | toJson | quote }}

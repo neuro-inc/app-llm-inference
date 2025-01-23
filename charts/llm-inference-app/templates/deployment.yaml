@@ -59,57 +59,83 @@ spec:
             - "{{ or .Values.llm.modelHFName .Values.model.modelHFName }}"
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          livenessProbe:
-            initialDelaySeconds: {{ .Values.healthChecksDelay }}
-            httpGet:
-              path: /health
-              port: http
-          readinessProbe:
-            initialDelaySeconds: {{ .Values.healthChecksDelay }}
-            httpGet:
-              path: /health
-              port: http
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-            - mountPath: /dev/shm
-              name: dshm
-            {{- if .Values.cache.enabled }}
-            - name: huggingface-cache
-              mountPath: /root/.cache/huggingface
-            {{- end }}
-            {{- range .Values.PVCVolumes }}
-            - name: {{ .pvcName }}
-              mountPath: {{ .mountPath }}
-              readOnly: {{ .mountReadOnly }}
-              subPath: {{ .volumeSubPath }}
-            {{- end }}
-          env:
-          {{- range $k, $v := .Values.env }}
-            - name: {{ $k }}
-              value: {{ $v | quote }}
-          {{- end }}
+        - name: health-check
+          image: python:3.9-slim
+          command: [ "/bin/sh", "-c" ]
           args:
-            - --host=0.0.0.0
-            - --port={{ .Values.service.port }}
-            - --model={{ or .Values.llm.modelHFName .Values.model.modelHFName }}
-            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
-            - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
-            {{- end }}
-            - --tokenizer={{ .Values.llm.tokenizerHFName }}
-            {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
-            - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
-            {{- end }}
-          {{- with .Values.serverExtraArgs -}}
-          {{- toYaml . | nindent 12 }}
-          {{- end }}
+            - |
+              pip install flask
+              python3 -c '
+              import flask
+              app = flask.Flask(__name__)
+
+              @app.route("/health")
+              def health():
+                  return "OK", 200
+
+              if __name__ == "__main__":
+                  app.run(host="0.0.0.0", port=8000)
+              '
+{{/*      ports:*/}}
+{{/*          - containerPort: 8000*/}}
+{{/*      resources:*/}}
+{{/*        limits:*/}}
+{{/*          cpu: 100m*/}}
+{{/*          memory: 128Mi*/}}
+{{/*        requests:*/}}
+{{/*          cpu: 50m*/}}
+{{/*          memory: 64Mi*/}}
+{{/*        - name: {{ .Chart.Name }}*/}}
+{{/*          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"*/}}
+{{/*          imagePullPolicy: {{ .Values.image.pullPolicy }}*/}}
+{{/*          ports:*/}}
+{{/*            - name: http*/}}
+{{/*              containerPort: {{ .Values.service.port }}*/}}
+{{/*              protocol: TCP*/}}
+{{/*          livenessProbe:*/}}
+{{/*            initialDelaySeconds: {{ .Values.healthChecksDelay }}*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /health*/}}
+{{/*              port: http*/}}
+{{/*          readinessProbe:*/}}
+{{/*            initialDelaySeconds: {{ .Values.healthChecksDelay }}*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /health*/}}
+{{/*              port: http*/}}
+{{/*          resources:*/}}
+{{/*            {{- toYaml .Values.resources | nindent 12 }}*/}}
+{{/*          volumeMounts:*/}}
+{{/*            - mountPath: /dev/shm*/}}
+{{/*              name: dshm*/}}
+{{/*            {{- if .Values.cache.enabled }}*/}}
+{{/*            - name: huggingface-cache*/}}
+{{/*              mountPath: /root/.cache/huggingface*/}}
+{{/*            {{- end }}*/}}
+{{/*            {{- range .Values.PVCVolumes }}*/}}
+{{/*            - name: {{ .pvcName }}*/}}
+{{/*              mountPath: {{ .mountPath }}*/}}
+{{/*              readOnly: {{ .mountReadOnly }}*/}}
+{{/*              subPath: {{ .volumeSubPath }}*/}}
+{{/*            {{- end }}*/}}
+{{/*          env:*/}}
+{{/*          {{- range $k, $v := .Values.env }}*/}}
+{{/*            - name: {{ $k }}*/}}
+{{/*              value: {{ $v | quote }}*/}}
+{{/*          {{- end }}*/}}
+{{/*          args:*/}}
+{{/*            - --host=0.0.0.0*/}}
+{{/*            - --port={{ .Values.service.port }}*/}}
+{{/*            - --model={{ or .Values.llm.modelHFName .Values.model.modelHFName }}*/}}
+{{/*            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}*/}}
+{{/*            - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}*/}}
+{{/*            {{- end }}*/}}
+{{/*            - --tokenizer={{ .Values.llm.tokenizerHFName }}*/}}
+{{/*            {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}*/}}
+{{/*            - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}*/}}
+{{/*            {{- end }}*/}}
+{{/*          {{- with .Values.serverExtraArgs -}}*/}}
+{{/*          {{- toYaml . | nindent 12 }}*/}}
+{{/*          {{- end }}*/}}
       {{- if or .Values.volumes .Values.cache.enabled }}
       volumes:
         - name: dshm
