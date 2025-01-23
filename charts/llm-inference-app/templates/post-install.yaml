@@ -18,6 +18,6 @@ spec:
       containers:
       - name: post-install-job
         image: ghcr.io/neuro-inc/post-install-hook-kostia:latest
-        command:
+        args:
         - 'update-outputs'
         - {{ .Values | toJson | quote }}
