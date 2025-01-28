@@ -1,5 +1,5 @@
 kind: batch
-title: "vLLM environment variable crash test (AMD)"
+title: "vLLM environment variable optimization test (AMD)"
 
 defaults:
   preset: mi210x2
@@ -13,7 +13,7 @@ defaults:
 
 params:
   experiment_name:
-    default: "vllm_crash_test"
+    default: "vllm_optimization_test"
     descr: "Name of the experiment or run."
 
 volumes:
@@ -24,7 +24,6 @@ volumes:
 images:
   vllm_test_env:
     ref: "rocm/vllm-ci:16366ee8bbdc30aad9776b74121cfc4d8f8c897d"
-    # ref: "vllm/vllm-openai:v0.6.6.post1"
 
 tasks:
   - strategy:
@@ -76,48 +75,45 @@ tasks:
           # "meta-llama/Meta-Llama-3-8B-Instruct",
           # "Qwen/Qwen2.5-7B-Instruct"
         ]
-        vllm_use_triton_flash_attn:    [ "0", "1" ]
-        vllm_fp8_padding:              [ "0", "1" ]
-        torch_use_hip_dsa:             [ "0", "1" ]
-        hsa_force_fine_grain_pcie:     [ "0", "1" ]
-        hsa_enable_sdma:               [ "0", "1" ]
-        rocm_disable_cu_mask:          [ "0", "1" ]
-        vllm_worker_multiproc_method:  [ "spawn" ]  # [ "spawn", "fork" ]
-        hip_visible_devices:           [ "0,1" ]  # [ "0,1", "0" ]
-        rocr_visible_devices:          [ "0,1" ]  # [ "0,1", "0" ]
-        nccl_p2p_disable:              ["1" ]  # [ "0", "1" ]
+        # model specific
+        vllm_use_triton_flash_attn: [ "0" ]  # Use CK flash attention for better SWA support
+        
+        # amd specific
+        torch_use_hip_dsa:          [ "1" ]
+        hsa_force_fine_grain_pcie:  [ "1" ]
+        hsa_enable_sdma:            [ "1" ]
+        rocm_disable_cu_mask:       [ "0" ]
+        vllm_worker_multiproc_method: [ "spawn" ]
+        hip_visible_devices:        [ "0,1" ]
+        rocr_visible_devices:       [ "0,1" ]
 
-    id: "amd_crash_test_model_${{ replace(replace(replace(str(matrix.model), '/', '_'), '-', '_'), '.', '_') }}_flash_${{ matrix.vllm_use_triton_flash_attn }}_fp8_${{ matrix.vllm_fp8_padding }}_hipDsa_${{ matrix.torch_use_hip_dsa }}_finePCIE_${{ matrix.hsa_force_fine_grain_pcie }}_sdma_${{ matrix.hsa_enable_sdma }}_cuMask_${{ matrix.rocm_disable_cu_mask }}_multiproc_${{ matrix.vllm_worker_multiproc_method }}_hip_${{ matrix.hip_visible_devices }}_nccl_${{ matrix.nccl_p2p_disable }}_rocr_${{ matrix.rocr_visible_devices }}"
+    id: "amd_optimization_test_${{ replace(replace(replace(replace(str(matrix.model + '_flash_' + matrix.vllm_use_triton_flash_attn + '_hipDsa_' + matrix.torch_use_hip_dsa + '_finePCIE_' + matrix.hsa_force_fine_grain_pcie + '_sdma_' + matrix.hsa_enable_sdma + '_cuMask_' + matrix.rocm_disable_cu_mask + '_multiproc_' + matrix.vllm_worker_multiproc_method + '_hip_' + matrix.hip_visible_devices + '_rocr_' + matrix.rocr_visible_devices), '/', '_'), '-', '_'), '.', '_'), ',', '_') }}"
 
     title: >
-      Crash-test model=${{ matrix.model }},
+      Optimization test model=${{ matrix.model }},
       flashAttn=${{ matrix.vllm_use_triton_flash_attn }},
-      fp8Pad=${{ matrix.vllm_fp8_padding }},
       hipDsa=${{ matrix.torch_use_hip_dsa }},
       finePCIE=${{ matrix.hsa_force_fine_grain_pcie }},
       sdma=${{ matrix.hsa_enable_sdma }},
       cuMask=${{ matrix.rocm_disable_cu_mask }},
       multiproc=${{ matrix.vllm_worker_multiproc_method }},
       hip=${{ matrix.hip_visible_devices }},
-      nccl=${{ matrix.nccl_p2p_disable }},
       rocr=${{ matrix.rocr_visible_devices }}
 
     image: ${{ images.vllm_test_env.ref }}
 
     env:
-      VLLM_USE_TRITON_FLASH_ATTN:   ${{ matrix.vllm_use_triton_flash_attn }}
-      VLLM_FP8_PADDING:             ${{ matrix.vllm_fp8_padding }}
-      TORCH_USE_HIP_DSA:            ${{ matrix.torch_use_hip_dsa }}
-      HSA_FORCE_FINE_GRAIN_PCIE:    ${{ matrix.hsa_force_fine_grain_pcie }}
-      HSA_ENABLE_SDMA:              ${{ matrix.hsa_enable_sdma }}
-      ROCM_DISABLE_CU_MASK:         ${{ matrix.rocm_disable_cu_mask }}
+      VLLM_USE_TRITON_FLASH_ATTN:  ${{ matrix.vllm_use_triton_flash_attn }}
+      TORCH_USE_HIP_DSA:           ${{ matrix.torch_use_hip_dsa }}
+      HSA_FORCE_FINE_GRAIN_PCIE:   ${{ matrix.hsa_force_fine_grain_pcie }}
+      HSA_ENABLE_SDMA:             ${{ matrix.hsa_enable_sdma }}
+      ROCM_DISABLE_CU_MASK:        ${{ matrix.rocm_disable_cu_mask }}
       VLLM_WORKER_MULTIPROC_METHOD: ${{ matrix.vllm_worker_multiproc_method }}
-      HIP_VISIBLE_DEVICES:          ${{ matrix.hip_visible_devices }}
-      ROCR_VISIBLE_DEVICES:         ${{ matrix.rocr_visible_devices }}
-      NCCL_P2P_DISABLE:             ${{ matrix.nccl_p2p_disable }}
-      TARGET_MODEL:                 ${{ matrix.model }}
-      EXPERIMENT_NAME:              ${{ params.experiment_name }}
-      HUGGING_FACE_HUB_TOKEN:       secret:HF_TOKEN
+      HIP_VISIBLE_DEVICES:        ${{ matrix.hip_visible_devices }}
+      ROCR_VISIBLE_DEVICES:       ${{ matrix.rocr_visible_devices }}
+      TARGET_MODEL: ${{ matrix.model }}
+      EXPERIMENT_NAME: ${{ params.experiment_name }}
+      HUGGING_FACE_HUB_TOKEN: secret:HF_TOKEN
 
     bash: |
       set -euxo pipefail
@@ -125,8 +121,10 @@ tasks:
       export VLLM_LOGGING_LEVEL=DEBUG
       export NCCL_DEBUG=TRACE
       export VLLM_TRACE_FUNCTION=1
+
       rocminfo
       rocm-smi
+
       apt-get update && apt-get install -y wget
       wget https://raw.githubusercontent.com/vllm-project/vllm/main/collect_env.py
       
@@ -135,7 +133,7 @@ tasks:
       echo "======================End Collecting Environment========================="
 
       echo "==============================================="
-      echo "Starting AMD crash test with environment vars:"
+      echo "Starting AMD optimization test with environment vars:"
       env | grep -E '^VLLM|^HIP|^TORCH|^HSA|^ROCM|^TARGET_MODEL|^EXPERIMENT_NAME' 
       echo "==============================================="
 
@@ -147,31 +145,32 @@ tasks:
         --enforce-eager \
         --dtype=half \
         --tensor-parallel-size 2 \
-        --disable-custom-all-reduce \
         --trust-remote-code \
-        > vllm_out.log 2>&1 &
+        --gpu-memory-utilization 0.9 
+      #   \
+      #   > vllm_out.log 2>&1 &
 
-      VLLM_PID=$!
+      # VLLM_PID=$!
 
-      SECS=7200
-      for i in $(seq 1 $SECS); do
-        if ! kill -0 "$VLLM_PID" 2>/dev/null; then
-          echo "vLLM has crashed/exited unexpectedly. Marking as FAIL."
-          cat vllm_out.log
-          exit 1
-        fi
+      # SECS=7200
+      # for i in $(seq 1 $SECS); do
+      #   if ! kill -0 "$VLLM_PID" 2>/dev/null; then
+      #     echo "vLLM has crashed/exited unexpectedly. Marking as FAIL."
+      #     cat vllm_out.log
+      #     exit 1
+      #   fi
 
-        if grep -Eq "Started server process|Uvicorn running on " vllm_out.log; then
-          echo "vLLM started successfully. Marking as SUCCESS."
-          cat vllm_out.log
-          kill "$VLLM_PID" || true
-          exit 0
-        fi
+      #   if grep -Eq "Started server process|Uvicorn running on " vllm_out.log; then
+      #     echo "vLLM started successfully. Marking as SUCCESS."
+      #     cat vllm_out.log
+      #     kill "$VLLM_PID" || true
+      #     exit 0
+      #   fi
 
-        sleep 1
-      done
+      #   sleep 1
+      # done
 
-      echo "Timed out waiting for vLLM to start. Marking as FAIL."
-      kill "$VLLM_PID" || true
-      cat vllm_out.log
-      exit 1
+      # echo "Timed out waiting for vLLM to start. Marking as FAIL."
+      # kill "$VLLM_PID" || true
+      # cat vllm_out.log
+      # exit 1
