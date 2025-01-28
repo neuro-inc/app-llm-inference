@@ -96,16 +96,26 @@ spec:
             - name: {{ $k }}
               value: {{ $v | quote }}
           {{- end }}
+            - name: VLLM_USE_TRITON_FLASH_ATTN
+              value: "0"
+            - name: HIP_VISIBLE_DEVICES
+              value: "0"
+          command:
+            - vllm
+            - serve
           args:
+            - {{ .Values.model.modelHFName }}
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
-            - --model={{ or .Values.llm.modelHFName .Values.model.modelHFName }}
             {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
             - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
             {{- end }}
             - --tokenizer={{ .Values.llm.tokenizerHFName }}
             {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            - --max-model-len=4096
+            - --enforce-eager
+            - --dtype=half
             {{- end }}
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
