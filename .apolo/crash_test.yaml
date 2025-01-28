@@ -2,8 +2,8 @@ kind: batch
 title: "vLLM environment variable crash test (AMD)"
 
 defaults:
-  preset: mi210x1
-  max_parallel: 2
+  preset: mi210x2
+  max_parallel: 1
   fail_fast: false
   workdir: /app
   cache: 
@@ -23,7 +23,8 @@ volumes:
 
 images:
   vllm_test_env:
-    ref: "rocm/vllm-ci:77daa0f1a9aabdd378c218e9bf17fa2112bb9344"
+    ref: "rocm/vllm-ci:16366ee8bbdc30aad9776b74121cfc4d8f8c897d"
+    # ref: "vllm/vllm-openai:v0.6.6.post1"
 
 tasks:
   - strategy:
@@ -48,15 +49,15 @@ tasks:
           # "openbmb/MiniCPM-o-2_6",
           # "microsoft/phi-4",
           # "NovaSky-AI/Sky-T1-32B-Preview",
-          "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+          # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
          
-          # "Qwen/QwQ-32B-preview",
+          "Qwen/QwQ-32B-preview",
           # "AIDC-AI/Marco-o1",
           # "meta-llama/Llama-3.3-70B-Instruct",
-          # "deepseek-ai/DeepSeek-R1",
-          # "deepseek-ai/DeepSeek-V3",
           # "Daemontatox/RA_Reasoner",
          
+          # "deepseek-ai/DeepSeek-R1",
+          # "deepseek-ai/DeepSeek-V3",
           # "MiniMaxAI/MiniMax-Text-01",
           # "internlm/internlm3-8b-instruct",
           # "kyutai/helium-1-preview-2b",
@@ -84,8 +85,14 @@ tasks:
         hsa_force_fine_grain_pcie:  [ "0", "1" ]
         hsa_enable_sdma:            [ "0", "1" ]
         rocm_disable_cu_mask:       [ "0", "1" ]
+        # vllm_worker_multiproc_method: [ "spawn", "fork" ]
+        # nccl_p2p_disable:           [ "0", "1" ]
+        # hip_visible_devices:        [ "0", "0,1" ]
+        # rocr_visible_devices:       [ "0", "0,1" ]
+        # hip_force_p2p_host:         [ "0", "1" ]
 
     # Use a single-line string for 'id', with triple replace:
+    # id: "amd_crash_test_model_${{ replace(replace(replace(str(matrix.model), '/', '_'), '-', '_'), '.', '_') }}_flash_${{ matrix.vllm_use_triton_flash_attn }}_fp8_${{ matrix.vllm_fp8_padding }}_hipDsa_${{ matrix.torch_use_hip_dsa }}_finePCIE_${{ matrix.hsa_force_fine_grain_pcie }}_sdma_${{ matrix.hsa_enable_sdma }}_cuMask_${{ matrix.rocm_disable_cu_mask }}_multiproc_${{ matrix.vllm_worker_multiproc_method }}_ncclP2P_${{ matrix.nccl_p2p_disable }}_hipVis_${{ matrix.hip_visible_devices }}_rocrVis_${{ matrix.rocr_visible_devices }}_hipP2PHost_${{ matrix.hip_force_p2p_host }}"
     id: "amd_crash_test_model_${{ replace(replace(replace(str(matrix.model), '/', '_'), '-', '_'), '.', '_') }}_flash_${{ matrix.vllm_use_triton_flash_attn }}_fp8_${{ matrix.vllm_fp8_padding }}_hipDsa_${{ matrix.torch_use_hip_dsa }}_finePCIE_${{ matrix.hsa_force_fine_grain_pcie }}_sdma_${{ matrix.hsa_enable_sdma }}_cuMask_${{ matrix.rocm_disable_cu_mask }}"
 
     title: >
@@ -96,6 +103,13 @@ tasks:
       finePCIE=${{ matrix.hsa_force_fine_grain_pcie }},
       sdma=${{ matrix.hsa_enable_sdma }},
       cuMask=${{ matrix.rocm_disable_cu_mask }}
+     
+    # multiproc=${{ matrix.vllm_worker_multiproc_method }},
+    # ncclP2P=${{ matrix.nccl_p2p_disable }},
+    # HIP_VISIBLE_DEVICES=${{ matrix.hip_visible_devices }},
+    # ROCR_VISIBLE_DEVICES=${{ matrix.rocr_visible_devices }}
+    # HIP_FORCE_P2P_HOST=${{ matrix.hip_force_p2p_host }}
+    # HSA_ENABLE_SDMA=${{ matrix.hsa_enable_sdma }}
 
     image: ${{ images.vllm_test_env.ref }}
 
@@ -107,6 +121,19 @@ tasks:
       HSA_FORCE_FINE_GRAIN_PCIE:   ${{ matrix.hsa_force_fine_grain_pcie }}
       HSA_ENABLE_SDMA:             ${{ matrix.hsa_enable_sdma }}
       ROCM_DISABLE_CU_MASK:        ${{ matrix.rocm_disable_cu_mask }}
+      
+      # NCCL_P2P_DISABLE:            ${{ matrix.nccl_p2p_disable }}
+      # VLLM_WORKER_MULTIPROC_METHOD: ${{ matrix.vllm_worker_multiproc_method }}
+      # HIP_VISIBLE_DEVICES:         ${{ matrix.hip_visible_devices }}
+      # ROCR_VISIBLE_DEVICES:        ${{ matrix.rocr_visible_devices }}
+      # HIP_FORCE_P2P_HOST:          ${{ matrix.hip_force_p2p_host }}
+      # Matrix-based environment vars
+      # VLLM_USE_TRITON_FLASH_ATTN:  0
+      # VLLM_FP8_PADDING:            0
+      # TORCH_USE_HIP_DSA:           1
+      # HSA_FORCE_FINE_GRAIN_PCIE:   0
+      # HSA_ENABLE_SDMA:             0
+      # ROCM_DISABLE_CU_MASK:        0
 
       # Model name
       TARGET_MODEL: ${{ matrix.model }}
@@ -116,13 +143,55 @@ tasks:
 
       # Example: HF token (or use a secret)
       HUGGING_FACE_HUB_TOKEN: secret:HF_TOKEN
+    # bash: |
+    #   export VLLM_LOGGING_LEVEL=DEBUG
+    #   export NCCL_DEBUG=TRACE
+    #   export VLLM_TRACE_FUNCTION=1
+    #   export VLLM_WORKER_MULTIPROC_METHOD=spawn
+    #   export HIP_VISIBLE_DEVICES=0,1
+    #   export ROCR_VISIBLE_DEVICES=0,1
+    #   # export HIP_FORCE_P2P_HOST=1
+    #   # export HSA_ENABLE_SDMA=1
+
+    #   export NCCL_P2P_DISABLE=1
+
+
+    #   rocminfo
+    #   rocm-smi
+
+    #   vllm serve "${TARGET_MODEL}" \
+    #     --host=0.0.0.0 \
+    #     --port=8000 \
+    #     --max-model-len=2048 \
+    #     --enforce-eager \
+    #     --dtype=half \
+    #     --tensor-parallel-size 2 \
+    #     --disable-custom-all-reduce \
+    #     --trust-remote-code
 
     bash: |
       set -euxo pipefail
+      
+      export VLLM_LOGGING_LEVEL=DEBUG
+      export NCCL_DEBUG=TRACE
+      export VLLM_TRACE_FUNCTION=1
+      export VLLM_WORKER_MULTIPROC_METHOD=spawn
+      export HIP_VISIBLE_DEVICES=0,1
+      export ROCR_VISIBLE_DEVICES=0,1
+      # export HIP_FORCE_P2P_HOST=1
+      # export HSA_ENABLE_SDMA=1
+
+      export NCCL_P2P_DISABLE=1
+      rocminfo
+      rocm-smi
+      apt-get update && apt-get install -y wget
+      wget https://raw.githubusercontent.com/vllm-project/vllm/main/collect_env.py
+      # For security purposes, please feel free to check the contents of collect_env.py before running it.
+      python collect_env.py
 
       echo "==============================================="
       echo "Starting AMD crash test with environment vars:"
-      env | grep -E '^VLLM|^HIP|^TORCH|^HSA|^ROCM|^TARGET_MODEL|^EXPERIMENT_NAME'
+      env | grep -E '^VLLM|^HIP|^TORCH|^HSA|^ROCM|^TARGET_MODEL|^EXPERIMENT_NAME' 
       echo "==============================================="
 
       # Start vLLM in the background and redirect logs to a file
@@ -133,6 +202,8 @@ tasks:
         --max-model-len=2048 \
         --enforce-eager \
         --dtype=half \
+        --tensor-parallel-size 2 \
+        --disable-custom-all-reduce \
         --trust-remote-code \
         > vllm_out.log 2>&1 &
 
