@@ -1,7 +1,57 @@
 nameOverride: ""
 fullnameOverride: ""
 
-# Deployment
+replicaCount: 1
+
+########################################
+# GPU provider selection: "amd" or "nvidia"
+########################################
+gpuProvider: "amd"
+
+########################################
+# AMD image & env defaults
+########################################
+amdImage:
+  repository: rocm/vllm-ci
+  tag: 16366ee8bbdc30aad9776b74121cfc4d8f8c897d
+  pullPolicy: IfNotPresent
+
+envAmd:
+  # Example AMD-specific defaults:
+  VLLM_USE_TRITON_FLASH_ATTN: "0"
+  TORCH_USE_HIP_DSA: "1"
+  HSA_FORCE_FINE_GRAIN_PCIE: "1"
+  HSA_ENABLE_SDMA: "1"
+  ROCM_DISABLE_CU_MASK: "0"
+  VLLM_WORKER_MULTIPROC_METHOD: "spawn"
+  HIP_VISIBLE_DEVICES: "0,1"
+  ROCR_VISIBLE_DEVICES: "0,1"
+  NCCL_P2P_DISABLE: "0"
+
+########################################
+# NVIDIA image & env defaults
+########################################
+nvidiaImage:
+  repository: vllm/vllm-openai
+  tag: v0.5.3.post1
+  pullPolicy: IfNotPresent
+
+envNvidia:
+  # Example Nvidia-specific defaults:
+  NVIDIA_VISIBLE_DEVICES: "all"
+  NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+  # If you want to set a default FLASH_ATTENTION, etc., put them here:
+  VLLM_USE_TRITON_FLASH_ATTN: "1"
+
+########################################
+# Common environment variables (shared)
+########################################
+env:
+  HUGGING_FACE_HUB_TOKEN: ""
+
+########################################
+# LLM Config
+########################################
 llm:
   modelHFName: ""
   modelRevision: ""
@@ -14,71 +64,54 @@ model:
   tokenizerHFName: ""
   tokenizerRevision: ""
 
+########################################
+# Additional CLI arguments for vLLM
+########################################
 serverExtraArgs: []
 
-replicaCount: 1
-
-image:
-  repository: rocm/vllm-ci
-  pullPolicy: IfNotPresent
-  tag: 16366ee8bbdc30aad9776b74121cfc4d8f8c897d
-  imagePullSecrets: []
-
+########################################
+# Default container resources
+########################################
 resources: {}
 
 healthChecksDelay: 60
 
+########################################
+# Volumes, PVC, caching
+########################################
 volumesManage: false
 PVCVolumes: []
-
-  # - pvcName: huggingface-cache
-  #   autocreate: false
-  #   accessMode: ReadWriteOnce
-  #   storageClassName: ""
-  #   storage: 300Gi
-  #   mountPath: /root/.cache/huggingface
-  #   mountReadOnly: false
-  #   volumeSubPath: "llm-cache"
 
 cache:
   enabled: true
   sizeLimit: 100Gi
 
-env:
-  HUGGING_FACE_HUB_TOKEN: ""
-
-  # AMD-specific vars (with example defaults):
-  VLLM_USE_TRITON_FLASH_ATTN: "0"
-  TORCH_USE_HIP_DSA: "1"
-  HSA_FORCE_FINE_GRAIN_PCIE: "1"
-  HSA_ENABLE_SDMA: "1"
-  ROCM_DISABLE_CU_MASK: "0"
-  VLLM_WORKER_MULTIPROC_METHOD: "spawn"
-  HIP_VISIBLE_DEVICES: "0,1"
-  ROCR_VISIBLE_DEVICES: "0,1"
-
-  # p2p disable (default 0 => p2p is enabled by default)
-  NCCL_P2P_DISABLE: "0"
-
+########################################
+# Pod placement
+########################################
 podAnnotations: {}
-
 nodeSelector: {}
+affinity: {}
 
 tolerations:
   - key: platform.neuromation.io/job
     operator: Exists
     effect: NoSchedule
+  # By default, keep the old Nvidia toleration and add AMD as needed:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+  # For AMD, you might also add:
   - key: amd.com/gpu
     operator: Exists
     effect: NoSchedule
 
-affinity: {}
-
 priorityClassName: ""
 
-# Model download hook
+########################################
+# Model download hook (optional)
+########################################
 modelDownload:
-  # hook is WIP, use initEnabled for now
   hookEnabled: false
   initEnabled: true
   image:
@@ -87,11 +120,12 @@ modelDownload:
     pullPolicy: IfNotPresent
   resources: {}
 
-# Service
+########################################
+# Service & Ingress
+########################################
 service:
   port: 8000
 
-# Ingress
 ingress:
   enabled: false
   clusterName: ""

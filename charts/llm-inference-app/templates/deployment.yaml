@@ -1,5 +1,3 @@
-# charts/llm-inference-app/templates/deployment.yaml
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -11,15 +9,20 @@ spec:
   selector:
     matchLabels:
       {{- include "app.selectorLabels" . | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
   template:
     metadata:
-      labels:
-        {{- include "app.labels" . | nindent 8 }}
-        {{- include "app.apoloPodLabels" . | nindent 8 }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+        {{- include "app.apoloPodLabels" . | nindent 8 }}
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:
@@ -28,8 +31,21 @@ spec:
 
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          # Switch based on gpuProvider:
+          image: >
+            {{- if eq .Values.gpuProvider "amd" -}}
+              {{ .Values.amdImage.repository }}:{{ .Values.amdImage.tag }}
+            {{- else -}}
+              {{ .Values.nvidiaImage.repository }}:{{ .Values.nvidiaImage.tag }}
+            {{- end }}
+          imagePullPolicy: >
+            {{- if eq .Values.gpuProvider "amd" -}}
+              {{ .Values.amdImage.pullPolicy }}
+            {{- else -}}
+              {{ .Values.nvidiaImage.pullPolicy }}
+            {{- end }}
+
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -44,15 +60,12 @@ spec:
             httpGet:
               path: /health
               port: http
-
-          # These resources are from values.yaml:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          # Mount volumes, if any
           volumeMounts:
-            - name: dshm
-              mountPath: /dev/shm
+            - mountPath: /dev/shm
+              name: dshm
             {{- if .Values.cache.enabled }}
             - name: huggingface-cache
               mountPath: /root/.cache/huggingface
@@ -64,21 +77,33 @@ spec:
               subPath: {{ .volumeSubPath }}
             {{- end }}
 
-          # Add environment from .Values.env, including AMD-specific, flash attn, p2p, etc.
+          # 1) Common environment variables from .Values.env:
           env:
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
 
-          command:
-            - vllm
-            - serve
-          args:
-            # Model name from values:
-            - {{ .Values.model.modelHFName }}
+            # 2) Additional AMD or NVIDIA env variables:
+            {{- if eq .Values.gpuProvider "amd" }}
+              {{- range $k, $v := .Values.envAmd }}
+              - name: {{ $k }}
+                value: {{ $v | quote }}
+              {{- end }}
+            {{- else }}
+              {{- range $k, $v := .Values.envNvidia }}
+              - name: {{ $k }}
+                value: {{ $v | quote }}
+              {{- end }}
+            {{- end }}
 
-            # "Optimal test" style defaults:
+          # Example "optimal" vLLM arguments
+          command: ["vllm", "serve"]
+          args:
+            # Basic model
+            - {{ or .Values.llm.modelHFName .Values.model.modelHFName }}
+
+            # Additional typical arguments
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
             - --max-model-len=2048
@@ -88,14 +113,23 @@ spec:
             - --trust-remote-code
             - --gpu-memory-utilization=0.9
 
-            # Optional user-provided extra args:
-            {{- if .Values.serverExtraArgs }}
+            # Optionally pass code/model revisions
+            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
+            - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
+            {{- end }}
+            {{- if .Values.llm.tokenizerHFName }}
+            - --tokenizer={{ .Values.llm.tokenizerHFName }}
+            {{- end }}
+            {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            {{- end }}
+
+            # If user wants extra flags:
             {{- range .Values.serverExtraArgs }}
             - {{ . }}
             {{- end }}
-            {{- end }}
 
-      {{- if or .Values.volumes .Values.cache.enabled }}
+      # Volumes, caching, etc.
       volumes:
         - name: dshm
           emptyDir:
@@ -110,7 +144,6 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .pvcName }}
         {{- end }}
-      {{- end }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
