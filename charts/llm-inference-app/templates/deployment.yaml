@@ -149,6 +149,11 @@ spec:
             {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             {{- end }}
+            - --max-model-len=4096
+            - --enforce-eager
+            - --trust-remote-code
+            - --gpu-memory-utilization 0.9
+            - --dtype=half
             {{- with .Values.serverExtraArgs -}}
             {{- toYaml . | nindent 12 }}
             {{- end}}
