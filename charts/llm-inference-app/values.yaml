@@ -24,15 +24,15 @@ amdImage:
 
 envAmd:
   # Example AMD-specific defaults:
-  VLLM_USE_TRITON_FLASH_ATTN: "0"
-  TORCH_USE_HIP_DSA: "1"
-  HSA_FORCE_FINE_GRAIN_PCIE: "1"
-  HSA_ENABLE_SDMA: "1"
-  ROCM_DISABLE_CU_MASK: "0"
-  VLLM_WORKER_MULTIPROC_METHOD: "spawn"
-  HIP_VISIBLE_DEVICES: "0,1"
-  ROCR_VISIBLE_DEVICES: "0,1"
-  NCCL_P2P_DISABLE: "0"
+  - VLLM_USE_TRITON_FLASH_ATTN: "0"
+  - TORCH_USE_HIP_DSA: "1"
+  - HSA_FORCE_FINE_GRAIN_PCIE: "1"
+  - HSA_ENABLE_SDMA: "1"
+  - ROCM_DISABLE_CU_MASK: "0"
+  - VLLM_WORKER_MULTIPROC_METHOD: "spawn"
+  - HIP_VISIBLE_DEVICES: "0,1"
+  - ROCR_VISIBLE_DEVICES: "0,1"
+  - NCCL_P2P_DISABLE: "0"
 
 ########################################
 # NVIDIA image & env defaults
@@ -44,15 +44,15 @@ nvidiaImage:
 
 envNvidia:
   # Example Nvidia-specific defaults:
-  NVIDIA_VISIBLE_DEVICES: "all"
-  NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
-  VLLM_USE_TRITON_FLASH_ATTN: "1"
+  - NVIDIA_VISIBLE_DEVICES: "all"
+  - NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+  - VLLM_USE_TRITON_FLASH_ATTN: "1"
 
 ########################################
 # Common environment variables (shared)
 ########################################
 env:
-  HUGGING_FACE_HUB_TOKEN: ""
+  - HUGGING_FACE_HUB_TOKEN: ""
 
 ########################################
 # LLM Config
