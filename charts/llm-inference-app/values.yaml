@@ -1,6 +1,14 @@
 nameOverride: ""
 fullnameOverride: ""
 
+image:
+  repository: rocm/vllm-ci
+  pullPolicy: IfNotPresent
+  tag: v0.7.0
+
+  # Provide a default list (even if empty) so it's not nil:
+  imagePullSecrets: []
+
 ########################################
 # Main toggle: "amd" or "nvidia"
 ########################################
