@@ -85,7 +85,7 @@ preset_name: ""
 ########################################
 # (NEW) GPU provider logic
 ########################################
-gpuProvider: "amd"
+gpuProvider: "nvidia"
 
 ########################################
 # (NEW) AMD image & env
