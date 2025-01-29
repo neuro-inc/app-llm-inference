@@ -133,7 +133,26 @@ spec:
               value: {{ $v | quote }}
               {{- end }}
             {{- end }}
-
+          
+          {{- if eq .Values.gpuProvider "amd" }}
+          command:
+            - vllm
+            - serve
+          args:
+            - {{ .Values.model.modelHFName }}
+            - --host=0.0.0.0
+            - --port={{ .Values.service.port }}
+            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
+            - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
+            {{- end }}
+            - --tokenizer={{ .Values.llm.tokenizerHFName }}
+            {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            {{- end }}
+            {{- with .Values.serverExtraArgs -}}
+            {{- toYaml . | nindent 12 }}
+            {{- end}}
+          {{- else }}
           args:
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
@@ -147,6 +166,7 @@ spec:
             {{- end }}
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- end }}
 
       {{- if or .Values.volumes .Values.cache.enabled }}
