@@ -1,9 +1,111 @@
-#!/usr/bin/env python3
-
+import subprocess
 import time
 import requests
 import statistics
+import csv
+import os
 import matplotlib.pyplot as plt
+from typing import Optional
+
+CSV_FILENAME = "vllm_benchmark_results.csv"
+
+def append_csv_row(
+    preset: str,
+    model_name: str,
+    gpu_provider: str,
+    tokens_per_sec: float
+):
+    """
+    Opens the CSV in append mode and writes a single row:
+    [preset, model_name, gpu_provider, tokens_per_sec]
+
+    If the file doesn't exist yet, we write the header first.
+    """
+    file_exists = os.path.exists(CSV_FILENAME)
+    with open(CSV_FILENAME, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["preset", "model", "gpu_provider", "tokens_per_second"])
+        writer.writerow([preset, model_name, gpu_provider, tokens_per_sec])
+
+
+def deploy_preset(preset: str) -> None:
+    """
+    Runs an Apolo command to deploy the vLLM on the given preset.
+    Adjust the command as needed for your actual environment.
+    """
+    # Decide AMD vs. NVIDIA vs. CPU
+    if preset in ["mi210x1", "mi210x2"]:
+        gpu_provider = "amd"
+    elif preset in ["gpu-small", "gpu-medium", "gpu-large", "gpu-xlarge", "H100X1", "H100X2"]:
+        gpu_provider = "nvidia"
+    else:
+        gpu_provider = "cpu"
+
+    # Example environment overrides (like HIP_VISIBLE_DEVICES or NVIDIA_VISIBLE_DEVICES)
+    env_flags = []
+    if gpu_provider == "amd":
+        # Single or dual AMD
+        if preset == "mi210x1":
+            env_flags.append('--set "envAmd.HIP_VISIBLE_DEVICES=0"')
+        else:
+            env_flags.append('--set "envAmd.HIP_VISIBLE_DEVICES=0,1"')
+    elif gpu_provider == "nvidia":
+        # Decide how many GPUs
+        if preset in ["gpu-small", "H100X1"]:
+            env_flags.append('--set "envNvidia.NVIDIA_VISIBLE_DEVICES=0"')
+        elif preset in ["gpu-medium", "H100X2"]:
+            env_flags.append('--set "envNvidia.NVIDIA_VISIBLE_DEVICES=0,1"')
+        elif preset == "gpu-large":
+            env_flags.append('--set "envNvidia.NVIDIA_VISIBLE_DEVICES=0,1,2,3"')
+        elif preset == "gpu-xlarge":
+            env_flags.append('--set "envNvidia.NVIDIA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7"')
+
+    base_command = [
+        "apolo",
+        "run",
+        "--pass-config",
+        "image://novoserve/apolo/taddeus/app-deployment",
+        "--",
+        "install",
+        "https://github.com/neuro-inc/app-llm-inference",
+        "llm-inference",   # helm release name
+        preset,            # you can use the preset as the instance name
+        "charts/llm-inference-app",
+        "--timeout=5m",
+        f'--set "preset_name={preset}"',
+        f'--set "gpuProvider={gpu_provider}"',
+        '--set "env.HUGGING_FACE_HUB_TOKEN=YOUR_TOKEN_HERE"',
+        '--set "ingress.enabled=true"',
+        '--set "ingress.clusterName=novoserve"',
+        '--set "model.modelRevision=main"',
+        '--set "model.tokenizerRevision=main"',
+    ] + env_flags
+
+    print(f"Deploying preset={preset} with command:\n  {' \\\n  '.join(base_command)}\n")
+    subprocess.run(" ".join(base_command), shell=True, check=False)
+
+
+def wait_for_endpoint(api_url: str, timeout_seconds: int = 300) -> bool:
+    """
+    Polls the /v1/models (or a custom endpoint) every 5 seconds until
+    the service is up or we hit timeout_seconds.
+    Returns True if the endpoint responded 200 OK, else False.
+    """
+    start = time.time()
+    while time.time() - start < timeout_seconds:
+        try:
+            resp = requests.get(api_url + "/models", timeout=5)
+            if resp.status_code == 200:
+                print(f"[{api_url}] is online!")
+                return True
+        except requests.RequestException:
+            pass
+        print(f"Waiting for [{api_url}] to come online...")
+        time.sleep(5)
+    print(f"Timed out waiting for [{api_url}] to become available.")
+    return False
+
 
 def measure_throughput(
     api_url: str,
@@ -12,7 +114,7 @@ def measure_throughput(
     num_requests: int = 3,
     max_tokens: int = 64,
     is_chat: bool = False,
-    api_key: str = None,
+    api_key: Optional[str] = None,
     verbose: bool = True,
 ) -> float:
     """
@@ -79,11 +181,18 @@ def measure_throughput(
             print(f"[{api_url}] No valid TPS measurements collected.")
         return 0.0
 
-if __name__ == "__main__":
+
+def is_multi_gpu_preset(preset: str) -> bool:
     """
-    Map each preset to a running vLLM server URL.
-    Fill in real endpoints for each hardware type.
+    Simple helper to identify multi-GPU presets
+    (so we can decide to test large 32B model).
     """
+    multi_gpu_list = ["gpu-medium", "gpu-large", "gpu-xlarge", "mi210x2", "H100X2"]
+    return preset in multi_gpu_list
+
+
+def main():
+    # Preset -> endpoint
     vllm_servers = {
         "cpu-small":   "http://cpu-small.example.com:8000/v1",
         "cpu-medium":  "http://cpu-medium.example.com:8000/v1",
@@ -98,44 +207,117 @@ if __name__ == "__main__":
         "H100X2":      "http://h100x2.example.com:8000/v1",
     }
 
-    model_to_test = "lmsys/vicuna-7b-v1.3"
-    prompt_text = "Summarize the following text about machine learning..."
+    # Models to test
+    llama_8b = "meta-llama/Llama-3.1-8B"
+    qwen_32b = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 
-    results = {}
+    # We'll also keep an in-memory list for final chart building
+    results_in_memory = []
 
-    # Run the throughput test on each preset
     for preset, url in vllm_servers.items():
-        print(f"\n=== Measuring throughput on {preset} ({url}) ===")
-        tps = measure_throughput(
-            api_url=url,
-            model_name=model_to_test,
-            prompt=prompt_text,
-            num_requests=3,
-            max_tokens=64,
-            is_chat=False,
-            api_key=None,
-            verbose=True
-        )
-        results[preset] = tps
+        print(f"\n=== Deploying & Benchmarking: {preset} ===\n")
 
-    # Create a bar chart with one bar per preset
-    presets_order = sorted(results.keys())   # Sort alphabetically or any order you like
-    x_vals = range(len(presets_order))
-    tps_vals = [results[p] for p in presets_order]
+        # 1) Deploy
+        deploy_preset(preset)
 
-    plt.figure(figsize=(10, 5))
-    plt.bar(x_vals, tps_vals, color="skyblue")
-    plt.xticks(x_vals, presets_order, rotation=45, ha="right")
-    plt.ylabel("Tokens/second (avg)")
-    plt.title(f"vLLM Throughput ({model_to_test}) on Different Presets")
+        # 2) Wait until endpoint is up
+        online = wait_for_endpoint(url, timeout_seconds=300)
+        if not online:
+            print(f"[{preset}] Endpoint never came online. Skipping.")
+            continue
+
+        # 3) Decide which model(s) to test
+        test_models = [llama_8b]
+        if is_multi_gpu_preset(preset):
+            test_models.append(qwen_32b)
+
+        # 4) Determine gpu provider
+        if preset in ["mi210x1", "mi210x2"]:
+            gpu_provider = "amd"
+        elif preset.startswith("gpu") or preset.startswith("H100"):
+            gpu_provider = "nvidia"
+        else:
+            gpu_provider = "cpu"
+
+        # 5) For each model, measure throughput & append results to CSV
+        for model_name in test_models:
+            print(f"\n=== Measuring throughput on {preset} with {model_name} ===")
+            tps = measure_throughput(
+                api_url=url,
+                model_name=model_name,
+                prompt="Summarize the following text about machine learning...",
+                num_requests=3,
+                max_tokens=64,
+                is_chat=False,
+                api_key=None,
+                verbose=True
+            )
+
+            # Immediately append to CSV
+            append_csv_row(preset, model_name, gpu_provider, tps)
+            # Also store in memory for final chart
+            results_in_memory.append((preset, model_name, gpu_provider, tps))
+
+    # 6) Create bar chart from in-memory results
+    if not results_in_memory:
+        print("\nNo results to chart, exiting.")
+        return
+
+    print("\nCreating bar chart from in-memory results...")
+
+    # Unique presets in order of first appearance
+    seen_presets = []
+    for r in results_in_memory:
+        if r[0] not in seen_presets:
+            seen_presets.append(r[0])
+
+    # Unique models in order of first appearance
+    seen_models = []
+    for r in results_in_memory:
+        if r[1] not in seen_models:
+            seen_models.append(r[1])
+
+    # Build data dict: data[(preset, model)] = tps
+    data_dict = {}
+    for (preset, model, provider, tps) in results_in_memory:
+        data_dict[(preset, model)] = tps
+
+    fig, ax = plt.subplots(figsize=(12,6))
+    x_range = range(len(seen_presets))
+
+    # If multiple models, we do grouped bars
+    num_models = len(seen_models)
+    if num_models <= 1:
+        bar_width = 0.5
+        offsets = [0]
+    else:
+        bar_width = 0.8 / num_models
+        offsets = [(-0.4 + (i * bar_width)) for i in range(num_models)]
+
+    for i, model_name in enumerate(seen_models):
+        x_positions = []
+        heights = []
+        for j, preset in enumerate(seen_presets):
+            x_positions.append(j + offsets[i])
+            tps_val = data_dict.get((preset, model_name), 0)
+            heights.append(tps_val)
+        ax.bar(x_positions, heights, width=bar_width, label=model_name)
+
+    ax.set_xticks(range(len(seen_presets)))
+    ax.set_xticklabels(seen_presets, rotation=45, ha="right")
+    ax.set_ylabel("Tokens/second (avg)")
+    ax.set_title("vLLM Throughput Comparison")
+    ax.legend()
     plt.tight_layout()
-    plt.savefig("vllm_throughput_comparison.png")
+    chart_filename = "vllm_throughput_comparison.png"
+    plt.savefig(chart_filename)
+    print(f"Chart saved to {chart_filename}.")
 
-    print("\n=== Final Results (tokens/s) ===")
-    for preset in presets_order:
-        val = results[preset]
-        print(f"{preset}: {val:.2f} tokens/s")
+    print("\n=== Final Results ===")
+    for row in results_in_memory:
+        p, m, gp, t = row
+        print(f"Preset={p}, Model={m}, GPU={gp}, TPS={t:.2f}")
 
-    print("\nBar chart saved to 'vllm_throughput_comparison.png'.")
-    # If you want to pop up a window interactively:
-    # plt.show()
+
+if __name__ == "__main__":
+    main()
