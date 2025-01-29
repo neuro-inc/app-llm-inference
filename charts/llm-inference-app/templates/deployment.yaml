@@ -152,7 +152,6 @@ spec:
             - --max-model-len=4096
             - --enforce-eager
             - --trust-remote-code
-            - --gpu-memory-utilization 0.9
             - --dtype=half
             {{- with .Values.serverExtraArgs -}}
             {{- toYaml . | nindent 12 }}
