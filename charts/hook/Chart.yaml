@@ -1,6 +1,6 @@
 apiVersion: v2
 type: application
-name: llm-inference-app
+name: post-outputs
 description: A Helm chart for Kubernetes
 version: 0.1.0
 appVersion: "1.16.0"
