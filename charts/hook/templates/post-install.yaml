@@ -1,24 +1,24 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "app.fullname" . }}-post-install
+  name: argocd-hook
   labels:
     app: hook-test
-    release: {{ .Release.Name }}
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   template:
     metadata:
       labels:
         app: hook-test
-        release: {{ .Release.Name }}
     spec:
       restartPolicy: Never
       serviceAccountName: {{ .Release.Name }}-sa
       containers:
-      - name: post-install-job
+      - name: post-upgrade-hook
         image: ghcr.io/neuro-inc/post-install-hook-kostia:latest
         args:
-        - 'update-outputs'
-        - {{ .Values | toJson | quote }}
+        - "update-outputs"
+        - "{{ .Values | toJson | quote }}"
