@@ -10,7 +10,26 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
   rules:
+  {{- if .Values.ingress.hosts }}
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "app.fullname" $ }}
+                port:
+                  name: http
+          {{- end }}
+    {{- end }}
+  {{- else }}
     - host: {{ .Release.Namespace }}.apps.{{ .Values.ingress.clusterName }}.org.neu.ro
       http:
         paths:
@@ -21,4 +40,5 @@ spec:
                 name: {{ include "app.fullname" $ }}
                 port:
                   name: http
+  {{- end }}
 {{- end }}
