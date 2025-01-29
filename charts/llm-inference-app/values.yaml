@@ -1,10 +1,8 @@
 nameOverride: ""
 fullnameOverride: ""
 
-replicaCount: 1
-
 ########################################
-# GPU provider selection: "amd" or "nvidia"
+# Main toggle: "amd" or "nvidia"
 ########################################
 gpuProvider: "amd"
 
@@ -40,7 +38,6 @@ envNvidia:
   # Example Nvidia-specific defaults:
   NVIDIA_VISIBLE_DEVICES: "all"
   NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
-  # If you want to set a default FLASH_ATTENTION, etc., put them here:
   VLLM_USE_TRITON_FLASH_ATTN: "1"
 
 ########################################
@@ -70,46 +67,68 @@ model:
 serverExtraArgs: []
 
 ########################################
-# Default container resources
+# Number of replicas
+########################################
+replicaCount: 1
+
+########################################
+# Container resources
 ########################################
 resources: {}
 
+########################################
+# Health check
+########################################
 healthChecksDelay: 60
 
 ########################################
-# Volumes, PVC, caching
+# Volume/PVC config
 ########################################
 volumesManage: false
 PVCVolumes: []
+  # Example:
+  # - pvcName: huggingface-cache
+  #   autocreate: false
+  #   accessMode: ReadWriteOnce
+  #   storageClassName: ""
+  #   storage: 300Gi
+  #   mountPath: /root/.cache/huggingface
+  #   mountReadOnly: false
+  #   volumeSubPath: "llm-cache"
 
 cache:
   enabled: true
   sizeLimit: 100Gi
 
 ########################################
-# Pod placement
+# Pod metadata
 ########################################
 podAnnotations: {}
-nodeSelector: {}
-affinity: {}
 
+########################################
+# Node scheduling
+########################################
+nodeSelector: {}
 tolerations:
   - key: platform.neuromation.io/job
     operator: Exists
     effect: NoSchedule
-  # By default, keep the old Nvidia toleration and add AMD as needed:
   - key: nvidia.com/gpu
     operator: Exists
     effect: NoSchedule
-  # For AMD, you might also add:
   - key: amd.com/gpu
     operator: Exists
     effect: NoSchedule
 
+affinity: {}
+
+########################################
+# Priority Class
+########################################
 priorityClassName: ""
 
 ########################################
-# Model download hook (optional)
+# Model download hook (init / job)
 ########################################
 modelDownload:
   hookEnabled: false

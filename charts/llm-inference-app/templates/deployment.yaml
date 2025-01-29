@@ -16,29 +16,61 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+        {{- include "app.apoloPodLabels" . | nindent 8 }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      labels:
-        {{- include "app.labels" . | nindent 8 }}
-        {{- include "app.apoloPodLabels" . | nindent 8 }}
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
+      {{- if .Values.modelDownload.initEnabled }}
+      initContainers:
+        - name: download-model
+          image: "{{ .Values.modelDownload.image.repository }}:{{ .Values.modelDownload.image.tag }}"
+          volumeMounts:
+            {{- if .Values.cache.enabled }}
+            - name: huggingface-cache
+              mountPath: /root/.cache/huggingface
+            {{- end }}
+            {{- range .Values.volumes }}
+            - name: {{ .pvcName }}
+              mountPath: {{ .mountPath }}
+              readOnly: {{ .mountReadOnly }}
+              subPath: {{ .volumeSubPath }}
+            {{- end }}
+          env:
+            {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          command: ["huggingface-cli"]
+          args:
+            - download
+            - --resume-download
+            - --repo-type=model
+            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
+            - --revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
+            {{- end }}
+            - "{{ or .Values.llm.modelHFName .Values.model.modelHFName }}"
+      {{- end }}
+
       containers:
         - name: {{ .Chart.Name }}
 
-          # Switch based on gpuProvider:
+          # Conditional image based on gpuProvider
           image: >
             {{- if eq .Values.gpuProvider "amd" -}}
               {{ .Values.amdImage.repository }}:{{ .Values.amdImage.tag }}
             {{- else -}}
               {{ .Values.nvidiaImage.repository }}:{{ .Values.nvidiaImage.tag }}
             {{- end }}
+
           imagePullPolicy: >
             {{- if eq .Values.gpuProvider "amd" -}}
               {{ .Values.amdImage.pullPolicy }}
@@ -64,8 +96,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
 
           volumeMounts:
-            - mountPath: /dev/shm
-              name: dshm
+            - name: dshm
+              mountPath: /dev/shm
             {{- if .Values.cache.enabled }}
             - name: huggingface-cache
               mountPath: /root/.cache/huggingface
@@ -77,33 +109,34 @@ spec:
               subPath: {{ .volumeSubPath }}
             {{- end }}
 
-          # 1) Common environment variables from .Values.env:
           env:
+            # Common environment variables
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
 
-            # 2) Additional AMD or NVIDIA env variables:
+            # GPU-specific environment variables
             {{- if eq .Values.gpuProvider "amd" }}
               {{- range $k, $v := .Values.envAmd }}
-              - name: {{ $k }}
-                value: {{ $v | quote }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
               {{- end }}
             {{- else }}
               {{- range $k, $v := .Values.envNvidia }}
-              - name: {{ $k }}
-                value: {{ $v | quote }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
               {{- end }}
             {{- end }}
 
-          # Example "optimal" vLLM arguments
-          command: ["vllm", "serve"]
+          command:
+            - vllm
+            - serve
           args:
-            # Basic model
+            # Model name from values
             - {{ or .Values.llm.modelHFName .Values.model.modelHFName }}
 
-            # Additional typical arguments
+            # Basic "optimal" defaults
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
             - --max-model-len=2048
@@ -124,12 +157,12 @@ spec:
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             {{- end }}
 
-            # If user wants extra flags:
+            # Add user-specified extra arguments if present
             {{- range .Values.serverExtraArgs }}
             - {{ . }}
             {{- end }}
 
-      # Volumes, caching, etc.
+      # Volumes
       volumes:
         - name: dshm
           emptyDir:
