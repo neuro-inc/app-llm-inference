@@ -1,3 +1,5 @@
+# charts/llm-inference-app/templates/deployment.yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,55 +11,21 @@ spec:
   selector:
     matchLabels:
       {{- include "app.selectorLabels" . | nindent 6 }}
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
-    type: RollingUpdate
   template:
     metadata:
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+        {{- include "app.apoloPodLabels" . | nindent 8 }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      labels:
-        {{- include "app.labels" . | nindent 8 }}
-        {{- include "app.apoloPodLabels" . | nindent 8 }}
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.modelDownload.initEnabled }}
-      initContainers:
-        - name: download-model
-          image: "{{ .Values.modelDownload.image.repository }}:{{ .Values.modelDownload.image.tag }}"
-          volumeMounts:
-            {{- if .Values.cache.enabled }}
-            - name: huggingface-cache
-              mountPath: /root/.cache/huggingface
-            {{- end }}
-            {{- range .Values.volumes }}
-            - name: {{ .pvcName }}
-              mountPath: {{ .mountPath }}
-              readOnly: {{ .mountReadOnly }}
-              subPath: {{ .volumeSubPath }}
-            {{- end }}
-          env:
-          {{- range $k, $v := .Values.env }}
-            - name: {{ $k }}
-              value: {{ $v | quote }}
-          {{- end }}
-          command: ["huggingface-cli"]
-          args:
-            - download
-            - --resume-download
-            - --repo-type=model
-            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
-            - --revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
-            {{- end }}
-            - "{{ or .Values.llm.modelHFName .Values.model.modelHFName }}"
-      {{- end }}
+
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -76,11 +44,15 @@ spec:
             httpGet:
               path: /health
               port: http
+
+          # These resources are from values.yaml:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
+          # Mount volumes, if any
           volumeMounts:
-            - mountPath: /dev/shm
-              name: dshm
+            - name: dshm
+              mountPath: /dev/shm
             {{- if .Values.cache.enabled }}
             - name: huggingface-cache
               mountPath: /root/.cache/huggingface
@@ -91,51 +63,55 @@ spec:
               readOnly: {{ .mountReadOnly }}
               subPath: {{ .volumeSubPath }}
             {{- end }}
+
+          # Add environment from .Values.env, including AMD-specific, flash attn, p2p, etc.
           env:
-          {{- range $k, $v := .Values.env }}
+            {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
-          {{- end }}
-            - name: VLLM_USE_TRITON_FLASH_ATTN
-              value: "0"
-            - name: HIP_VISIBLE_DEVICES
-              value: "0"
+            {{- end }}
+
           command:
             - vllm
             - serve
           args:
+            # Model name from values:
             - {{ .Values.model.modelHFName }}
+
+            # "Optimal test" style defaults:
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
-            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
-            - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
-            {{- end }}
-            - --tokenizer={{ .Values.llm.tokenizerHFName }}
-            {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
-            - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
-            - --max-model-len=4096
+            - --max-model-len=2048
             - --enforce-eager
             - --dtype=half
+            - --tensor-parallel-size=2
+            - --trust-remote-code
+            - --gpu-memory-utilization=0.9
+
+            # Optional user-provided extra args:
+            {{- if .Values.serverExtraArgs }}
+            {{- range .Values.serverExtraArgs }}
+            - {{ . }}
             {{- end }}
-          {{- with .Values.serverExtraArgs -}}
-          {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- end }}
+
       {{- if or .Values.volumes .Values.cache.enabled }}
       volumes:
         - name: dshm
           emptyDir:
             medium: Memory
-      {{- if .Values.cache.enabled }}
+        {{- if .Values.cache.enabled }}
         - name: huggingface-cache
           emptyDir:
             sizeLimit: {{ .Values.cache.sizeLimit }}
-      {{- end }}
-      {{- range .Values.PVCVolumes }}
+        {{- end }}
+        {{- range .Values.PVCVolumes }}
         - name: {{ .pvcName }}
           persistentVolumeClaim:
             claimName: {{ .pvcName }}
+        {{- end }}
       {{- end }}
-      {{- end }}
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

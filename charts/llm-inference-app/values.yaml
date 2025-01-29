@@ -47,6 +47,19 @@ cache:
 env:
   HUGGING_FACE_HUB_TOKEN: ""
 
+  # AMD-specific vars (with example defaults):
+  VLLM_USE_TRITON_FLASH_ATTN: "0"
+  TORCH_USE_HIP_DSA: "1"
+  HSA_FORCE_FINE_GRAIN_PCIE: "1"
+  HSA_ENABLE_SDMA: "1"
+  ROCM_DISABLE_CU_MASK: "0"
+  VLLM_WORKER_MULTIPROC_METHOD: "spawn"
+  HIP_VISIBLE_DEVICES: "0,1"
+  ROCR_VISIBLE_DEVICES: "0,1"
+
+  # p2p disable (default 0 => p2p is enabled by default)
+  NCCL_P2P_DISABLE: "0"
+
 podAnnotations: {}
 
 nodeSelector: {}
