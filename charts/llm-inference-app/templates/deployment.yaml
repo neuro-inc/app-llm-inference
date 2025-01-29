@@ -110,21 +110,19 @@ spec:
             {{- end }}
 
           env:
-            # Common environment variables
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
-            {{- if eq .Values.gpuProvider "cpu" }}
-              # Skip GPU environment altogether
-            {{- end }}
-            # GPU-specific environment variables
+
             {{- if eq .Values.gpuProvider "amd" }}
               {{- range $k, $v := .Values.envAmd }}
             - name: {{ $k }}
               value: {{ $v | quote }}
               {{- end }}
-            {{- else }}
+            {{- end }}
+
+            {{- if eq .Values.gpuProvider "nvidia" }}
               {{- range $k, $v := .Values.envNvidia }}
             - name: {{ $k }}
               value: {{ $v | quote }}
