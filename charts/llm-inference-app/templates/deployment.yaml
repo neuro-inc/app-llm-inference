@@ -63,35 +63,36 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
 
-          # Conditional image based on gpuProvider
-          image: >
-            {{- if eq .Values.gpuProvider "amd" -}}
-              {{ .Values.amdImage.repository }}:{{ .Values.amdImage.tag }}
-            {{- else -}}
-              {{ .Values.nvidiaImage.repository }}:{{ .Values.nvidiaImage.tag }}
-            {{- end }}
+          # Select the image based on gpuProvider
+          image: "{{- if eq .Values.gpuProvider "amd" -}}
+{{ .Values.amdImage.repository }}:{{ .Values.amdImage.tag }}
+{{- else -}}
+{{ .Values.nvidiaImage.repository }}:{{ .Values.nvidiaImage.tag }}
+{{- end }}"
 
-          imagePullPolicy: >
-            {{- if eq .Values.gpuProvider "amd" -}}
-              {{ .Values.amdImage.pullPolicy }}
-            {{- else -}}
-              {{ .Values.nvidiaImage.pullPolicy }}
-            {{- end }}
+          imagePullPolicy: "{{- if eq .Values.gpuProvider "amd" -}}
+{{ .Values.amdImage.pullPolicy }}
+{{- else -}}
+{{ .Values.nvidiaImage.pullPolicy }}
+{{- end }}"
 
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+
           livenessProbe:
             initialDelaySeconds: {{ .Values.healthChecksDelay }}
             httpGet:
               path: /health
               port: http
+
           readinessProbe:
             initialDelaySeconds: {{ .Values.healthChecksDelay }}
             httpGet:
               path: /health
               port: http
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
@@ -110,11 +111,13 @@ spec:
             {{- end }}
 
           env:
+            # Common environment variables
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
 
+            # AMD-specific variables if gpuProvider=amd
             {{- if eq .Values.gpuProvider "amd" }}
               {{- range $k, $v := .Values.envAmd }}
             - name: {{ $k }}
@@ -122,6 +125,7 @@ spec:
               {{- end }}
             {{- end }}
 
+            # Nvidia-specific variables if gpuProvider=nvidia
             {{- if eq .Values.gpuProvider "nvidia" }}
               {{- range $k, $v := .Values.envNvidia }}
             - name: {{ $k }}
@@ -132,8 +136,9 @@ spec:
           command:
             - vllm
             - serve
+
           args:
-            # Model name from values
+            # Model from .Values
             - {{ or .Values.llm.modelHFName .Values.model.modelHFName }}
 
             # Basic "optimal" defaults
@@ -146,7 +151,7 @@ spec:
             - --trust-remote-code
             - --gpu-memory-utilization=0.9
 
-            # Optionally pass code/model revisions
+            # Optional code/model revisions
             {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
             - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
             {{- end }}
@@ -157,7 +162,7 @@ spec:
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             {{- end }}
 
-            # Add user-specified extra arguments if present
+            # Additional user-specified args
             {{- range .Values.serverExtraArgs }}
             - {{ . }}
             {{- end }}

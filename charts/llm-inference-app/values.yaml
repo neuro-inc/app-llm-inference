@@ -1,62 +1,35 @@
-nameOverride: ""
-fullnameOverride: ""
+gpuProvider: "amd"
 
 image:
   repository: rocm/vllm-ci
   pullPolicy: IfNotPresent
   tag: v0.7.0
 
-  # Provide a default list (even if empty) so it's not nil:
+  # Provide at least an empty list so it’s not nil:
   imagePullSecrets: []
 
-########################################
-# Main toggle: "amd" or "nvidia"
-########################################
-gpuProvider: "amd"
-
-########################################
-# AMD image & env defaults
-########################################
 amdImage:
   repository: rocm/vllm-ci
   tag: 16366ee8bbdc30aad9776b74121cfc4d8f8c897d
   pullPolicy: IfNotPresent
 
-envAmd:
-  # Example AMD-specific defaults:
-  - VLLM_USE_TRITON_FLASH_ATTN: "0"
-  - TORCH_USE_HIP_DSA: "1"
-  - HSA_FORCE_FINE_GRAIN_PCIE: "1"
-  - HSA_ENABLE_SDMA: "1"
-  - ROCM_DISABLE_CU_MASK: "0"
-  - VLLM_WORKER_MULTIPROC_METHOD: "spawn"
-  - HIP_VISIBLE_DEVICES: "0,1"
-  - ROCR_VISIBLE_DEVICES: "0,1"
-  - NCCL_P2P_DISABLE: "0"
-
-########################################
-# NVIDIA image & env defaults
-########################################
 nvidiaImage:
   repository: vllm/vllm-openai
   tag: v0.5.3.post1
   pullPolicy: IfNotPresent
 
-envNvidia:
-  # Example Nvidia-specific defaults:
-  - NVIDIA_VISIBLE_DEVICES: "all"
-  - NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
-  - VLLM_USE_TRITON_FLASH_ATTN: "1"
-
-########################################
-# Common environment variables (shared)
-########################################
 env:
-  - HUGGING_FACE_HUB_TOKEN: ""
+  HUGGING_FACE_HUB_TOKEN: ""
 
-########################################
-# LLM Config
-########################################
+envAmd:
+  HIP_VISIBLE_DEVICES: "0,1"
+  TORCH_USE_HIP_DSA: "1"
+  # etc.
+
+envNvidia:
+  NVIDIA_VISIBLE_DEVICES: "all"
+  VLLM_USE_TRITON_FLASH_ATTN: "1"
+
 llm:
   modelHFName: ""
   modelRevision: ""
@@ -69,54 +42,31 @@ model:
   tokenizerHFName: ""
   tokenizerRevision: ""
 
-########################################
-# Additional CLI arguments for vLLM
-########################################
-serverExtraArgs: []
-
-########################################
-# Number of replicas
-########################################
-replicaCount: 1
-
-########################################
-# Container resources
-########################################
-resources: {}
-
-########################################
-# Health check
-########################################
-healthChecksDelay: 60
-
-########################################
-# Volume/PVC config
-########################################
-volumesManage: false
-PVCVolumes: []
-  # Example:
-  # - pvcName: huggingface-cache
-  #   autocreate: false
-  #   accessMode: ReadWriteOnce
-  #   storageClassName: ""
-  #   storage: 300Gi
-  #   mountPath: /root/.cache/huggingface
-  #   mountReadOnly: false
-  #   volumeSubPath: "llm-cache"
-
 cache:
   enabled: true
   sizeLimit: 100Gi
 
-########################################
-# Pod metadata
-########################################
-podAnnotations: {}
+service:
+  port: 8000
 
-########################################
-# Node scheduling
-########################################
-nodeSelector: {}
+ingress:
+  enabled: false
+  clusterName: ""
+
+replicaCount: 1
+healthChecksDelay: 60
+resources: {}
+serverExtraArgs: []
+
+modelDownload:
+  hookEnabled: false
+  initEnabled: true
+  image:
+    repository: huggingface/downloader
+    tag: 0.17.3
+    pullPolicy: IfNotPresent
+  resources: {}
+
 tolerations:
   - key: platform.neuromation.io/job
     operator: Exists
@@ -128,33 +78,3 @@ tolerations:
     operator: Exists
     effect: NoSchedule
 
-affinity: {}
-
-########################################
-# Priority Class
-########################################
-priorityClassName: ""
-
-########################################
-# Model download hook (init / job)
-########################################
-modelDownload:
-  hookEnabled: false
-  initEnabled: true
-  image:
-    repository: huggingface/downloader
-    tag: 0.17.3
-    pullPolicy: IfNotPresent
-  resources: {}
-
-########################################
-# Service & Ingress
-########################################
-service:
-  port: 8000
-
-ingress:
-  enabled: false
-  clusterName: ""
-
-preset_name: ""
