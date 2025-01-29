@@ -115,7 +115,9 @@ spec:
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
-
+            {{- if eq .Values.gpuProvider "cpu" }}
+              # Skip GPU environment altogether
+            {{- end }}
             # GPU-specific environment variables
             {{- if eq .Values.gpuProvider "amd" }}
               {{- range $k, $v := .Values.envAmd }}
