@@ -16,13 +16,13 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      labels:
-        {{- include "app.labels" . | nindent 8 }}
-        {{- include "app.apoloPodLabels" . | nindent 8 }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+        {{- include "app.apoloPodLabels" . | nindent 8 }}
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:
@@ -45,10 +45,10 @@ spec:
               subPath: {{ .volumeSubPath }}
             {{- end }}
           env:
-            {{- range $k, $v := .Values.env }}
+          {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
-            {{- end }}
+          {{- end }}
           command: ["huggingface-cli"]
           args:
             - download
@@ -62,19 +62,23 @@ spec:
 
       containers:
         - name: {{ .Chart.Name }}
+          image: >-
+            {{- if eq .Values.gpuProvider "amd" }}
+            {{ .Values.amdImage.repository }}:{{ .Values.amdImage.tag }}
+            {{- else if eq .Values.gpuProvider "nvidia" }}
+            {{ .Values.nvidiaImage.repository }}:{{ .Values.nvidiaImage.tag }}
+            {{- else }}
+            {{ .Values.image.repository }}:{{ .Values.image.tag }}
+            {{- end }}
 
-          # Select the image based on gpuProvider
-          image: "{{- if eq .Values.gpuProvider "amd" -}}
-{{ .Values.amdImage.repository }}:{{ .Values.amdImage.tag }}
-{{- else -}}
-{{ .Values.nvidiaImage.repository }}:{{ .Values.nvidiaImage.tag }}
-{{- end }}"
-
-          imagePullPolicy: "{{- if eq .Values.gpuProvider "amd" -}}
-{{ .Values.amdImage.pullPolicy }}
-{{- else -}}
-{{ .Values.nvidiaImage.pullPolicy }}
-{{- end }}"
+          imagePullPolicy: >-
+            {{- if eq .Values.gpuProvider "amd" }}
+            {{ .Values.amdImage.pullPolicy }}
+            {{- else if eq .Values.gpuProvider "nvidia" }}
+            {{ .Values.nvidiaImage.pullPolicy }}
+            {{- else }}
+            {{ .Values.image.pullPolicy }}
+            {{- end }}
 
           ports:
             - name: http
@@ -97,8 +101,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
 
           volumeMounts:
-            - name: dshm
-              mountPath: /dev/shm
+            - mountPath: /dev/shm
+              name: dshm
             {{- if .Values.cache.enabled }}
             - name: huggingface-cache
               mountPath: /root/.cache/huggingface
@@ -111,13 +115,11 @@ spec:
             {{- end }}
 
           env:
-            # Common environment variables
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
 
-            # AMD-specific variables if gpuProvider=amd
             {{- if eq .Values.gpuProvider "amd" }}
               {{- range $k, $v := .Values.envAmd }}
             - name: {{ $k }}
@@ -125,7 +127,6 @@ spec:
               {{- end }}
             {{- end }}
 
-            # Nvidia-specific variables if gpuProvider=nvidia
             {{- if eq .Values.gpuProvider "nvidia" }}
               {{- range $k, $v := .Values.envNvidia }}
             - name: {{ $k }}
@@ -133,41 +134,22 @@ spec:
               {{- end }}
             {{- end }}
 
-          command:
-            - vllm
-            - serve
-
           args:
-            # Model from .Values
-            - {{ or .Values.llm.modelHFName .Values.model.modelHFName }}
-
-            # Basic "optimal" defaults
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
-            - --max-model-len=2048
-            - --enforce-eager
-            - --dtype=half
-            - --tensor-parallel-size=2
-            - --trust-remote-code
-            - --gpu-memory-utilization=0.9
-
-            # Optional code/model revisions
+            - --model={{ or .Values.llm.modelHFName .Values.model.modelHFName }}
             {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
             - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
             {{- end }}
-            {{- if .Values.llm.tokenizerHFName }}
             - --tokenizer={{ .Values.llm.tokenizerHFName }}
-            {{- end }}
             {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             {{- end }}
+          {{- with .Values.serverExtraArgs -}}
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
 
-            # Additional user-specified args
-            {{- range .Values.serverExtraArgs }}
-            - {{ . }}
-            {{- end }}
-
-      # Volumes
+      {{- if or .Values.volumes .Values.cache.enabled }}
       volumes:
         - name: dshm
           emptyDir:
@@ -182,19 +164,36 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .pvcName }}
         {{- end }}
+      {{- end }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+
+      # Good tolerations block: 
+      # 1) If .Values.tolerations is a list, dump it via toYaml
+      # 2) Add GPU item conditionally
       tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- if .Values.tolerations }}
+        {{ toYaml .Values.tolerations | nindent 8 }}
+        {{- end }}
+
+        {{- if eq .Values.gpuProvider "amd" }}
+        - key: amd.com/gpu
+          operator: Exists
+          effect: NoSchedule
+        {{- else if eq .Values.gpuProvider "nvidia" }}
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+        {{- end }}
+
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}

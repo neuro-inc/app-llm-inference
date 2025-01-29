@@ -1,35 +1,7 @@
-gpuProvider: "amd"
+nameOverride: ""
+fullnameOverride: ""
 
-image:
-  repository: rocm/vllm-ci
-  pullPolicy: IfNotPresent
-  tag: v0.7.0
-
-  # Provide at least an empty list so it’s not nil:
-  imagePullSecrets: []
-
-amdImage:
-  repository: rocm/vllm-ci
-  tag: 16366ee8bbdc30aad9776b74121cfc4d8f8c897d
-  pullPolicy: IfNotPresent
-
-nvidiaImage:
-  repository: vllm/vllm-openai
-  tag: v0.5.3.post1
-  pullPolicy: IfNotPresent
-
-env:
-  HUGGING_FACE_HUB_TOKEN: ""
-
-envAmd:
-  HIP_VISIBLE_DEVICES: "0,1"
-  TORCH_USE_HIP_DSA: "1"
-  # etc.
-
-envNvidia:
-  NVIDIA_VISIBLE_DEVICES: "all"
-  VLLM_USE_TRITON_FLASH_ATTN: "1"
-
+# Deployment
 llm:
   modelHFName: ""
   modelRevision: ""
@@ -42,23 +14,55 @@ model:
   tokenizerHFName: ""
   tokenizerRevision: ""
 
+serverExtraArgs: []
+
+replicaCount: 1
+
+# Old default image
+image:
+  repository: vllm/vllm-openai
+  pullPolicy: IfNotPresent
+  tag: v0.5.3.post1
+  imagePullSecrets: []
+
+resources: {}
+
+healthChecksDelay: 60
+
+volumesManage: false
+PVCVolumes: []
+  # - pvcName: huggingface-cache
+  #   autocreate: false
+  #   accessMode: ReadWriteOnce
+  #   storageClassName: ""
+  #   storage: 300Gi
+  #   mountPath: /root/.cache/huggingface
+  #   mountReadOnly: false
+  #   volumeSubPath: "llm-cache"
+
 cache:
   enabled: true
   sizeLimit: 100Gi
 
-service:
-  port: 8000
+env:
+  HUGGING_FACE_HUB_TOKEN: ""
 
-ingress:
-  enabled: false
-  clusterName: ""
+podAnnotations: {}
 
-replicaCount: 1
-healthChecksDelay: 60
-resources: {}
-serverExtraArgs: []
+nodeSelector: {}
 
+tolerations:
+  - key: platform.neuromation.io/job
+    operator: Exists
+    effect: NoSchedule
+
+affinity: {}
+
+priorityClassName: ""
+
+# Model download hook
 modelDownload:
+  # hook is WIP, use initEnabled for now
   hookEnabled: false
   initEnabled: true
   image:
@@ -67,14 +71,50 @@ modelDownload:
     pullPolicy: IfNotPresent
   resources: {}
 
-tolerations:
-  - key: platform.neuromation.io/job
-    operator: Exists
-    effect: NoSchedule
-  - key: nvidia.com/gpu
-    operator: Exists
-    effect: NoSchedule
-  - key: amd.com/gpu
-    operator: Exists
-    effect: NoSchedule
+# Service
+service:
+  port: 8000
 
+# Ingress
+ingress:
+  enabled: false
+  clusterName: ""
+
+preset_name: ""
+
+########################################
+# (NEW) GPU provider logic
+########################################
+gpuProvider: "amd"
+
+########################################
+# (NEW) AMD image & env
+########################################
+amdImage:
+  repository: rocm/vllm-ci
+  tag: "16366ee8bbdc30aad9776b74121cfc4d8f8c897d"
+  pullPolicy: IfNotPresent
+
+envAmd:
+  HIP_VISIBLE_DEVICES: "0,1"
+  TORCH_USE_HIP_DSA: "1"
+  HSA_FORCE_FINE_GRAIN_PCIE: "1"
+  HSA_ENABLE_SDMA: "1"
+  ROCM_DISABLE_CU_MASK: "0"
+  VLLM_WORKER_MULTIPROC_METHOD: "spawn"
+  ROCR_VISIBLE_DEVICES: "0,1"
+  NCCL_P2P_DISABLE: "0"
+  VLLM_USE_TRITON_FLASH_ATTN: "0"
+
+########################################
+# (NEW) NVIDIA image & env
+########################################
+nvidiaImage:
+  repository: vllm/vllm-openai
+  tag: "v0.5.3.post1"
+  pullPolicy: IfNotPresent
+
+envNvidia:
+  NVIDIA_VISIBLE_DEVICES: "all"
+  NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+  VLLM_USE_TRITON_FLASH_ATTN: "1"
