@@ -6,7 +6,6 @@ import os
 import re
 import argparse
 import threading
-import math
 import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional, List, Dict
@@ -151,7 +150,8 @@ def build_apolo_deploy_command(preset: str, model_hf_name: str) -> List[str]:
 
     server_extra_args = []
     if n_gpus > 1:
-        server_extra_args.append(f'--tensor-parallel-size={n_gpus}')
+        server_extra_args.append(f'--pipeline-parallel-size={n_gpus}')
+        # server_extra_args.append(f'--tensor-parallel-size={n_gpus}')
     if gpu_provider == "nvidia":
         server_extra_args.append('--dtype=half')
     server_extra_args.append('--max-model-len=2048')
