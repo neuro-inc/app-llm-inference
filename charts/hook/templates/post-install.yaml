@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: argocd-hook
+  name: {{ include "app.fullname" . }}
   labels:
-    app: hook-test
+    {{- include "app.labels" . | nindent 4 }}
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/sync-wave: "1"
@@ -11,7 +11,8 @@ spec:
   template:
     metadata:
       labels:
-        app: hook-test
+        {{- include "app.labels" . | nindent 8 }}
+        {{- include "app.apoloPodLabels" . | nindent 8 }}
     spec:
       restartPolicy: Never
       serviceAccountName: {{ .Release.Name }}-sa
