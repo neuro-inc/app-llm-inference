@@ -12,7 +12,6 @@ spec:
     metadata:
       labels:
         {{- include "app.labels" . | nindent 8 }}
-        {{- include "app.apoloPodLabels" . | nindent 8 }}
     spec:
       restartPolicy: Never
       serviceAccountName: {{ .Release.Name }}-sa
@@ -21,4 +20,4 @@ spec:
         image: ghcr.io/neuro-inc/post-install-hook-kostia:latest
         args:
         - "update-outputs"
-        - "{{ .Values | toJson | quote }}"
+        - "{{ .Values }}"
