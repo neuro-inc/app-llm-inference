@@ -152,10 +152,11 @@ def build_apolo_deploy_command(preset: str, model_hf_name: str) -> List[str]:
     if n_gpus > 1:
         server_extra_args.append(f'--pipeline-parallel-size={n_gpus}')
         # server_extra_args.append(f'--tensor-parallel-size={n_gpus}')
-    if gpu_provider == "nvidia":
-        server_extra_args.append('--dtype=half')
+    server_extra_args.append('--dtype=half')
     server_extra_args.append('--max-model-len=131072')
-
+    server_extra_args.append('--enforce-eager')
+    server_extra_args.append('--trust-remote-code')
+   
     server_arg_sets = []
     for i, val in enumerate(server_extra_args):
         server_arg_sets.append(f'--set "serverExtraArgs[{i}]={val}"')
