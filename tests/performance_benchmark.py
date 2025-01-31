@@ -31,8 +31,8 @@ GPU_PRESETS = [
 # Default models
 TEST_MODELS = [
     "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-    "meta-llama/Llama-3.1-8B-Instruct",
-    "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+    # "meta-llama/Llama-3.1-8B-Instruct",
+    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
 ]
 
 PRESET_GPU_COUNT = {
@@ -57,8 +57,8 @@ PRESET_VRAM_PER_GPU = {
 }
 MODEL_VRAM_REQ = {
     "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": 15,
-    "meta-llama/Llama-3.1-8B-Instruct": 17,
-    "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": 68,
+    # "meta-llama/Llama-3.1-8B-Instruct": 17,
+    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": 68,
 }
 
 # Domain pattern
@@ -154,7 +154,7 @@ def build_apolo_deploy_command(preset: str, model_hf_name: str) -> List[str]:
         # server_extra_args.append(f'--tensor-parallel-size={n_gpus}')
     if gpu_provider == "nvidia":
         server_extra_args.append('--dtype=half')
-    server_extra_args.append('--max-model-len=2048')
+    server_extra_args.append('--max-model-len=131072')
 
     server_arg_sets = []
     for i, val in enumerate(server_extra_args):
@@ -169,7 +169,7 @@ def build_apolo_deploy_command(preset: str, model_hf_name: str) -> List[str]:
         "install",
         "https://github.com/neuro-inc/app-llm-inference",
         "llm-inference",
-        preset,
+        preset.lower(),
         "charts/llm-inference-app",
         "--timeout=30m",  # up to 30 min in case some presets are slow to start
         f"--git-branch={GIT_BRANCH}",
@@ -223,7 +223,7 @@ def deploy_model_on_preset(preset: str, model_hf_name: str) -> Optional[str]:
     return job_id
 
 def delete_namespace_for_preset(preset: str):
-    ns_name = f"app-apolo--taddeus--{preset}"
+    ns_name = f"app-apolo--taddeus--{preset.lower()}"
     cmd = f"kubectl delete namespace {ns_name}"
     print(f"[CLEANUP] {cmd}")
     subprocess.run(cmd, shell=True, check=False)

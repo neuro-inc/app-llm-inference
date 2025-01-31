@@ -92,7 +92,7 @@ gpuProvider: "nvidia"
 ########################################
 amdImage:
   repository: rocm/vllm-ci
-  tag: "16366ee8bbdc30aad9776b74121cfc4d8f8c897d"
+  tag: "7a8987dac5f0ed0c798a73e8b4ec8f5e640bc63a"
   pullPolicy: IfNotPresent
 
 envAmd:
