@@ -65,7 +65,7 @@ MODEL_VRAM_REQ = {
 DOMAIN_FORMAT = "https://app-apolo--taddeus--{}.apps.novoserve.org.neu.ro"
 
 # Insert your real HF token
-HUGGING_FACE_TOKEN = ""
+HUGGING_FACE_TOKEN = os.getenv("HF_TOKEN")
 GIT_BRANCH = "MLO-12-config-matrix"
 
 # We'll measure these 7 metrics in the background collector:
@@ -146,12 +146,12 @@ def build_apolo_deploy_command(preset: str, model_hf_name: str) -> List[str]:
         env_sets.append(f'--set "envAmd.HIP_VISIBLE_DEVICES={device_list_escaped}"')
         env_sets.append(f'--set "envAmd.ROCR_VISIBLE_DEVICES={device_list_escaped}"')
     else:
-        env_sets.append(f'--set "env.CUDA_VISIBLE_DEVICES={device_list_escaped}"')
+        env_sets.append(f'--set "envNvidia.CUDA_VISIBLE_DEVICES={device_list_escaped}"')
 
     server_extra_args = []
     if n_gpus > 1:
-        server_extra_args.append(f'--pipeline-parallel-size={n_gpus}')
-        # server_extra_args.append(f'--tensor-parallel-size={n_gpus}')
+        # server_extra_args.append(f'--pipeline-parallel-size={n_gpus}')
+        server_extra_args.append(f'--tensor-parallel-size={n_gpus}')
     server_extra_args.append('--dtype=half')
     server_extra_args.append('--max-model-len=131072')
     server_extra_args.append('--enforce-eager')
@@ -226,6 +226,8 @@ def deploy_model_on_preset(preset: str, model_hf_name: str) -> Optional[str]:
 def delete_namespace_for_preset(preset: str):
     ns_name = f"app-apolo--taddeus--{preset.lower()}"
     cmd = f"kubectl delete namespace {ns_name}"
+    # wait for a minute before deleting
+    time.sleep(5*60)
     print(f"[CLEANUP] {cmd}")
     subprocess.run(cmd, shell=True, check=False)
 
@@ -388,7 +390,7 @@ def main():
                         help="Skip combos found in CSV.")
     parser.add_argument("--num-requests",
                         type=int,
-                        default=500,
+                        default=1000,
                         help="Total requests to send in parallel.")
     parser.add_argument("--concurrency",
                         type=int,
