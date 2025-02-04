@@ -1,0 +1,1301 @@
++ export VLLM_LOGGING_LEVEL=DEBUG
++ VLLM_LOGGING_LEVEL=DEBUG
++ export NCCL_DEBUG=TRACE
++ NCCL_DEBUG=TRACE
++ export VLLM_TRACE_FUNCTION=1
++ VLLM_TRACE_FUNCTION=1
++ export VLLM_WORKER_MULTIPROC_METHOD=spawn
++ VLLM_WORKER_MULTIPROC_METHOD=spawn
++ export HIP_VISIBLE_DEVICES=0,1
++ HIP_VISIBLE_DEVICES=0,1
++ export ROCR_VISIBLE_DEVICES=0,1
++ ROCR_VISIBLE_DEVICES=0,1
++ export NCCL_P2P_DISABLE=1
++ NCCL_P2P_DISABLE=1
++ echo ====================================================
+====================================================
+All environment variables (Full List):
+----------------------------------------------------
++ echo 'All environment variables (Full List):'
++ echo ----------------------------------------------------
++ env
+NEURO_JOB_NAME=
+KUBERNETES_SERVICE_PORT_HTTPS=443
+KUBERNETES_SERVICE_PORT=443
+HOSTNAME=job-5890cc3a-18f3-4fce-86f2-994407407ffb
+TORCH_USE_HIP_DSA=1
+NCCL_P2P_DISABLE=1
+NEURO_JOB_OWNER=taddeus
+NEURO_JOB_HTTP_PORT=
+PWD=/app
+NEURO_JOB_INTERNAL_HOSTNAME=job-5890cc3a-18f3-4fce-86f2-994407407ffb.platform-jobs
+TARGET_MODEL=Qwen/QwQ-32B-preview
+ROCR_VISIBLE_DEVICES=0,1
+NCCL_DEBUG=TRACE
+VLLM_WORKER_MULTIPROC_METHOD=spawn
+NEURO_JOB_PRESET=mi210x2
+HOME=/root
+KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+NEURO_JOB_CLUSTER=novoserve
+NEURO_JOB_ID=job-5890cc3a-18f3-4fce-86f2-994407407ffb
+HIP_VISIBLE_DEVICES=0,1
+HSA_ENABLE_SDMA=0
+NEURO_JOB_INTERNAL_HOSTNAME_NAMED=
+VLLM_FP8_PADDING=0
+VLLM_TRACE_FUNCTION=1
+ROCM_DISABLE_CU_MASK=0
+PYTORCH_ROCM_ARCH=gfx90a;gfx942
+SHLVL=1
+EXPERIMENT_NAME=vllm_crash_test
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+NEURO_JOB_HTTP_AUTH=
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+ROCM_PATH=/opt/rocm
+LD_LIBRARY_PATH=/opt/rocm/lib:/usr/local/lib:
+KUBERNETES_SERVICE_HOST=10.96.0.1
+KUBERNETES_PORT=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP_PORT=443
+VLLM_LOGGING_LEVEL=DEBUG
+PATH=/opt/rocm/llvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HSA_FORCE_FINE_GRAIN_PCIE=0
+VLLM_USE_TRITON_FLASH_ATTN=0
+DEBIAN_FRONTEND=noninteractive
+_=/usr/bin/env
+====================================================
+Filtered environment variables (ROCm/Torch/vLLM/Model):
++ echo ====================================================
++ echo 'Filtered environment variables (ROCm/Torch/vLLM/Model):'
+----------------------------------------------------
++ echo ----------------------------------------------------
++ env
++ grep -E '^VLLM|^HIP|^TORCH|^HSA|^ROCM|^TARGET_MODEL|^EXPERIMENT_NAME'
+TORCH_USE_HIP_DSA=1
+TARGET_MODEL=Qwen/QwQ-32B-preview
+VLLM_WORKER_MULTIPROC_METHOD=spawn
+HIP_VISIBLE_DEVICES=0,1
+HSA_ENABLE_SDMA=0
+VLLM_FP8_PADDING=0
+VLLM_TRACE_FUNCTION=1
+ROCM_DISABLE_CU_MASK=0
+EXPERIMENT_NAME=vllm_crash_test
+ROCM_PATH=/opt/rocm
+VLLM_LOGGING_LEVEL=DEBUG
+HSA_FORCE_FINE_GRAIN_PCIE=0
+VLLM_USE_TRITON_FLASH_ATTN=0
++ echo ====================================================
++ echo '=== Checking ROCm utilities ==='
+====================================================
+=== Checking ROCm utilities ===
++ which rocminfo
+/usr/bin/rocminfo
++ rocminfo
+ROCk module version 6.3.6 is loaded
+=====================    
+HSA System Attributes    
+=====================    
+Runtime Version:         1.14
+Runtime Ext Version:     1.6
+System Timestamp Freq.:  1000.000000MHz
+Sig. Max Wait Duration:  18446744073709551615 (0xFFFFFFFFFFFFFFFF) (timestamp count)
+Machine Model:           LARGE                              
+System Endianness:       LITTLE                             
+Mwaitx:                  DISABLED
+DMAbuf Support:          YES
+
+==========               
+HSA Agents               
+==========               
+*******                  
+Agent 1                  
+*******                  
+  Name:                    AMD EPYC 7542 32-Core Processor    
+  Uuid:                    CPU-XX                             
+  Marketing Name:          AMD EPYC 7542 32-Core Processor    
+  Vendor Name:             CPU                                
+  Feature:                 None specified                     
+  Profile:                 FULL_PROFILE                       
+  Float Round Mode:        NEAR                               
+  Max Queue Number:        0(0x0)                             
+  Queue Min Size:          0(0x0)                             
+  Queue Max Size:          0(0x0)                             
+  Queue Type:              MULTI                              
+  Node:                    0                                  
+  Device Type:             CPU                                
+  Cache Info:              
+    L1:                      32768(0x8000) KB                   
+  Chip ID:                 0(0x0)                             
+  ASIC Revision:           0(0x0)                             
+  Cacheline Size:          64(0x40)                           
+  Max Clock Freq. (MHz):   2900                               
+  BDFID:                   0                                  
+  Internal Node ID:        0                                  
+  Compute Unit:            64                                 
+  SIMDs per CU:            0                                  
+  Shader Engines:          0                                  
+  Shader Arrs. per Eng.:   0                                  
+  WatchPts on Addr. Ranges:1                                  
+  Memory Properties:       
+  Features:                None
+  Pool Info:               
+    Pool 1                   
+      Segment:                 GLOBAL; FLAGS: FINE GRAINED        
+      Size:                    263968508(0xfbbd6fc) KB            
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+    Pool 2                   
+      Segment:                 GLOBAL; FLAGS: EXTENDED FINE GRAINED
+      Size:                    263968508(0xfbbd6fc) KB            
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+    Pool 3                   
+      Segment:                 GLOBAL; FLAGS: KERNARG, FINE GRAINED
+      Size:                    263968508(0xfbbd6fc) KB            
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+    Pool 4                   
+      Segment:                 GLOBAL; FLAGS: COARSE GRAINED      
+      Size:                    263968508(0xfbbd6fc) KB            
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+  ISA Info:                
+*******                  
+Agent 2                  
+*******                  
+  Name:                    AMD EPYC 7542 32-Core Processor    
+  Uuid:                    CPU-XX                             
+  Marketing Name:          AMD EPYC 7542 32-Core Processor    
+  Vendor Name:             CPU                                
+  Feature:                 None specified                     
+  Profile:                 FULL_PROFILE                       
+  Float Round Mode:        NEAR                               
+  Max Queue Number:        0(0x0)                             
+  Queue Min Size:          0(0x0)                             
+  Queue Max Size:          0(0x0)                             
+  Queue Type:              MULTI                              
+  Node:                    1                                  
+  Device Type:             CPU                                
+  Cache Info:              
+    L1:                      32768(0x8000) KB                   
+  Chip ID:                 0(0x0)                             
+  ASIC Revision:           0(0x0)                             
+  Cacheline Size:          64(0x40)                           
+  Max Clock Freq. (MHz):   2900                               
+  BDFID:                   0                                  
+  Internal Node ID:        1                                  
+  Compute Unit:            64                                 
+  SIMDs per CU:            0                                  
+  Shader Engines:          0                                  
+  Shader Arrs. per Eng.:   0                                  
+  WatchPts on Addr. Ranges:1                                  
+  Memory Properties:       
+  Features:                None
+  Pool Info:               
+    Pool 1                   
+      Segment:                 GLOBAL; FLAGS: FINE GRAINED        
+      Size:                    264216460(0xfbf9f8c) KB            
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+    Pool 2                   
+      Segment:                 GLOBAL; FLAGS: EXTENDED FINE GRAINED
+      Size:                    264216460(0xfbf9f8c) KB            
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+    Pool 3                   
+      Segment:                 GLOBAL; FLAGS: KERNARG, FINE GRAINED
+      Size:                    264216460(0xfbf9f8c) KB            
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+    Pool 4                   
+      Segment:                 GLOBAL; FLAGS: COARSE GRAINED      
+      Size:                    264216460(0xfbf9f8c) KB            
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:4KB                                
+      Alloc Alignment:         4KB                                
+      Accessible by all:       TRUE                               
+  ISA Info:                
+*******                  
+Agent 3                  
+*******                  
+  Name:                    gfx90a                             
+  Uuid:                    GPU-ba30cba7ad498b3c               
+  Marketing Name:          AMD Instinct MI210                 
+  Vendor Name:             AMD                                
+  Feature:                 KERNEL_DISPATCH                    
+  Profile:                 BASE_PROFILE                       
+  Float Round Mode:        NEAR                               
+  Max Queue Number:        128(0x80)                          
+  Queue Min Size:          64(0x40)                           
+  Queue Max Size:          131072(0x20000)                    
+  Queue Type:              MULTI                              
+  Node:                    2                                  
+  Device Type:             GPU                                
+  Cache Info:              
+    L1:                      16(0x10) KB                        
+    L2:                      8192(0x2000) KB                    
+  Chip ID:                 29711(0x740f)                      
+  ASIC Revision:           1(0x1)                             
+  Cacheline Size:          64(0x40)                           
+  Max Clock Freq. (MHz):   1700                               
+  BDFID:                   17152                              
+  Internal Node ID:        2                                  
+  Compute Unit:            104                                
+  SIMDs per CU:            4                                  
+  Shader Engines:          8                                  
+  Shader Arrs. per Eng.:   1                                  
+  WatchPts on Addr. Ranges:4                                  
+  Coherent Host Access:    FALSE                              
+  Memory Properties:       
+  Features:                KERNEL_DISPATCH 
+  Fast F16 Operation:      TRUE                               
+  Wavefront Size:          64(0x40)                           
+  Workgroup Max Size:      1024(0x400)                        
+  Workgroup Max Size per Dimension:
+    x                        1024(0x400)                        
+    y                        1024(0x400)                        
+    z                        1024(0x400)                        
+  Max Waves Per CU:        32(0x20)                           
+  Max Work-item Per CU:    2048(0x800)                        
+  Grid Max Size:           4294967295(0xffffffff)             
+  Grid Max Size per Dimension:
+    x                        4294967295(0xffffffff)             
+    y                        4294967295(0xffffffff)             
+    z                        4294967295(0xffffffff)             
+  Max fbarriers/Workgrp:   32                                 
+  Packet Processor uCode:: 78                                 
+  SDMA engine uCode::      8                                  
+  IOMMU Support::          None                               
+  Pool Info:               
+    Pool 1                   
+      Segment:                 GLOBAL; FLAGS: COARSE GRAINED      
+      Size:                    67092480(0x3ffc000) KB             
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:2048KB                             
+      Alloc Alignment:         4KB                                
+      Accessible by all:       FALSE                              
+    Pool 2                   
+      Segment:                 GLOBAL; FLAGS: EXTENDED FINE GRAINED
+      Size:                    67092480(0x3ffc000) KB             
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:2048KB                             
+      Alloc Alignment:         4KB                                
+      Accessible by all:       FALSE                              
+    Pool 3                   
+      Segment:                 GROUP                              
+      Size:                    64(0x40) KB                        
+      Allocatable:             FALSE                              
+      Alloc Granule:           0KB                                
+      Alloc Recommended Granule:0KB                                
+      Alloc Alignment:         0KB                                
+      Accessible by all:       FALSE                              
+  ISA Info:                
+    ISA 1                    
+      Name:                    amdgcn-amd-amdhsa--gfx90a:sramecc+:xnack-
+      Machine Models:          HSA_MACHINE_MODEL_LARGE            
+      Profiles:                HSA_PROFILE_BASE                   
+      Default Rounding Mode:   NEAR                               
+      Default Rounding Mode:   NEAR                               
+      Fast f16:                TRUE                               
+      Workgroup Max Size:      1024(0x400)                        
+      Workgroup Max Size per Dimension:
+        x                        1024(0x400)                        
+        y                        1024(0x400)                        
+        z                        1024(0x400)                        
+      Grid Max Size:           4294967295(0xffffffff)             
+      Grid Max Size per Dimension:
+        x                        4294967295(0xffffffff)             
+        y                        4294967295(0xffffffff)             
+        z                        4294967295(0xffffffff)             
+      FBarrier Max Size:       32                                 
+*******                  
+Agent 4                  
+*******                  
+  Name:                    gfx90a                             
+  Uuid:                    GPU-3a43cf58c3011bae               
+  Marketing Name:          AMD Instinct MI210                 
+  Vendor Name:             AMD                                
+  Feature:                 KERNEL_DISPATCH                    
+  Profile:                 BASE_PROFILE                       
+  Float Round Mode:        NEAR                               
+  Max Queue Number:        128(0x80)                          
+  Queue Min Size:          64(0x40)                           
+  Queue Max Size:          131072(0x20000)                    
+  Queue Type:              MULTI                              
+  Node:                    3                                  
+  Device Type:             GPU                                
+  Cache Info:              
+    L1:                      16(0x10) KB                        
+    L2:                      8192(0x2000) KB                    
+  Chip ID:                 29711(0x740f)                      
+  ASIC Revision:           1(0x1)                             
+  Cacheline Size:          64(0x40)                           
+  Max Clock Freq. (MHz):   1700                               
+  BDFID:                   9984                               
+  Internal Node ID:        3                                  
+  Compute Unit:            104                                
+  SIMDs per CU:            4                                  
+  Shader Engines:          8                                  
+  Shader Arrs. per Eng.:   1                                  
+  WatchPts on Addr. Ranges:4                                  
+  Coherent Host Access:    FALSE                              
+  Memory Properties:       
+  Features:                KERNEL_DISPATCH 
+  Fast F16 Operation:      TRUE                               
+  Wavefront Size:          64(0x40)                           
+  Workgroup Max Size:      1024(0x400)                        
+  Workgroup Max Size per Dimension:
+    x                        1024(0x400)                        
+    y                        1024(0x400)                        
+    z                        1024(0x400)                        
+  Max Waves Per CU:        32(0x20)                           
+  Max Work-item Per CU:    2048(0x800)                        
+  Grid Max Size:           4294967295(0xffffffff)             
+  Grid Max Size per Dimension:
+    x                        4294967295(0xffffffff)             
+    y                        4294967295(0xffffffff)             
+    z                        4294967295(0xffffffff)             
+  Max fbarriers/Workgrp:   32                                 
+  Packet Processor uCode:: 78                                 
+  SDMA engine uCode::      8                                  
+  IOMMU Support::          None                               
+  Pool Info:               
+    Pool 1                   
+      Segment:                 GLOBAL; FLAGS: COARSE GRAINED      
+      Size:                    67092480(0x3ffc000) KB             
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:2048KB                             
+      Alloc Alignment:         4KB                                
+      Accessible by all:       FALSE                              
+    Pool 2                   
+      Segment:                 GLOBAL; FLAGS: EXTENDED FINE GRAINED
+      Size:                    67092480(0x3ffc000) KB             
+      Allocatable:             TRUE                               
+      Alloc Granule:           4KB                                
+      Alloc Recommended Granule:2048KB                             
+      Alloc Alignment:         4KB                                
+      Accessible by all:       FALSE                              
+    Pool 3                   
+      Segment:                 GROUP                              
+      Size:                    64(0x40) KB                        
+      Allocatable:             FALSE                              
+      Alloc Granule:           0KB                                
+      Alloc Recommended Granule:0KB                                
+      Alloc Alignment:         0KB                                
+      Accessible by all:       FALSE                              
+  ISA Info:                
+    ISA 1                    
+      Name:                    amdgcn-amd-amdhsa--gfx90a:sramecc+:xnack-
+      Machine Models:          HSA_MACHINE_MODEL_LARGE            
+      Profiles:                HSA_PROFILE_BASE                   
+      Default Rounding Mode:   NEAR                               
+      Default Rounding Mode:   NEAR                               
+      Fast f16:                TRUE                               
+      Workgroup Max Size:      1024(0x400)                        
+      Workgroup Max Size per Dimension:
+        x                        1024(0x400)                        
+        y                        1024(0x400)                        
+        z                        1024(0x400)                        
+      Grid Max Size:           4294967295(0xffffffff)             
+      Grid Max Size per Dimension:
+        x                        4294967295(0xffffffff)             
+        y                        4294967295(0xffffffff)             
+        z                        4294967295(0xffffffff)             
+      FBarrier Max Size:       32                                 
+*** Done ***             
++ which rocm-smi
+/usr/bin/rocm-smi
++ rocm-smi
+
+
+========================================= ROCm System Management Interface =========================================
+=================================================== Concise Info ===================================================
+Device  Node  IDs              Temp    Power  Partitions          SCLK    MCLK     Fan  Perf  PwrCap  VRAM%  GPU%  
+              (DID,     GUID)  (Edge)  (Avg)  (Mem, Compute, ID)                                                   
+====================================================================================================================
+0       5     0x740f,   4493   52.0°C  41.0W  N/A, N/A, 0         800Mhz  1600Mhz  0%   auto  300.0W  0%     0%    
+1       3     0x740f,   25466  47.0°C  41.0W  N/A, N/A, 0         800Mhz  1600Mhz  0%   auto  300.0W  0%     0%    
+====================================================================================================================
+=============================================== End of ROCm SMI Log ================================================
++ echo '=== Checking wget ==='
++ apt-get update
+=== Checking wget ===
+Get:1 http://security.ubuntu.com/ubuntu jammy-security InRelease [129 kB]
+Get:2 http://archive.ubuntu.com/ubuntu jammy InRelease [270 kB]
+Get:3 https://repo.radeon.com/amdgpu/6.3.1/ubuntu jammy InRelease [5435 B]
+Get:4 https://repo.radeon.com/rocm/apt/6.3.1 jammy InRelease [2605 B]
+Get:5 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [128 kB]
+Get:6 http://archive.ubuntu.com/ubuntu jammy-backports InRelease [127 kB]
+Get:7 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy InRelease [18.1 kB]
+Get:8 https://repo.radeon.com/amdgpu/6.3.1/ubuntu jammy/main amd64 Packages [14.1 kB]
+Get:9 http://security.ubuntu.com/ubuntu jammy-security/main amd64 Packages [2561 kB]
+Get:10 http://security.ubuntu.com/ubuntu jammy-security/universe amd64 Packages [1229 kB]
+Get:11 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 Packages [45.2 kB]
+Get:12 http://security.ubuntu.com/ubuntu jammy-security/restricted amd64 Packages [3527 kB]
+Get:13 https://repo.radeon.com/rocm/apt/6.3.1 jammy/main amd64 Packages [75.4 kB]
+Get:14 http://archive.ubuntu.com/ubuntu jammy/universe amd64 Packages [17.5 MB]
+Get:15 http://archive.ubuntu.com/ubuntu jammy/main amd64 Packages [1792 kB]
+Get:16 http://archive.ubuntu.com/ubuntu jammy/restricted amd64 Packages [164 kB]
+Get:17 http://archive.ubuntu.com/ubuntu jammy/multiverse amd64 Packages [266 kB]
+Get:18 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 Packages [1521 kB]
+Get:19 http://archive.ubuntu.com/ubuntu jammy-updates/multiverse amd64 Packages [53.3 kB]
+Get:20 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 Packages [2861 kB]
+Get:21 http://archive.ubuntu.com/ubuntu jammy-updates/restricted amd64 Packages [3663 kB]
+Get:22 http://archive.ubuntu.com/ubuntu jammy-backports/main amd64 Packages [81.4 kB]
+Get:23 http://archive.ubuntu.com/ubuntu jammy-backports/universe amd64 Packages [35.2 kB]
+Get:24 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy/main amd64 Packages [32.9 kB]
+Fetched 36.1 MB in 2s (18.2 MB/s)
+Reading package lists...
+W: https://repo.radeon.com/amdgpu/6.3.1/ubuntu/dists/jammy/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+W: https://repo.radeon.com/rocm/apt/6.3.1/dists/jammy/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
++ apt-get install -y wget
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following packages were automatically installed and are no longer required:
+  composablekernel-dev half hipcub-dev rccl rccl-dev
+Use 'apt autoremove' to remove them.
+The following NEW packages will be installed:
+  wget
+0 upgraded, 1 newly installed, 0 to remove and 19 not upgraded.
+Need to get 339 kB of archives.
+After this operation, 950 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 wget amd64 1.21.2-2ubuntu1.1 [339 kB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 339 kB in 0s (4632 kB/s)
+Selecting previously unselected package wget.
+(Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 51890 files and directories currently installed.)
+Preparing to unpack .../wget_1.21.2-2ubuntu1.1_amd64.deb ...
+Unpacking wget (1.21.2-2ubuntu1.1) ...
+Setting up wget (1.21.2-2ubuntu1.1) ...
++ wget https://raw.githubusercontent.com/vllm-project/vllm/main/collect_env.py
+--2025-01-27 18:16:47--  https://raw.githubusercontent.com/vllm-project/vllm/main/collect_env.py
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 185.199.108.133, 185.199.110.133, 185.199.111.133, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|185.199.108.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 26218 (26K) [text/plain]
+Saving to: 'collect_env.py'
+
+     0K .......... .......... .....                           100% 25.4M=0.001s
+
+2025-01-27 18:16:47 (25.4 MB/s) - 'collect_env.py' saved [26218/26218]
+
++ python collect_env.py
+DEBUG 01-27 18:16:52 __init__.py:26] No plugins for group vllm.platform_plugins found.
+INFO 01-27 18:16:52 __init__.py:183] Automatically detected platform rocm.
+Collecting environment information...
+PyTorch version: 2.6.0a0+git8d4926e
+Is debug build: False
+CUDA used to build PyTorch: N/A
+ROCM used to build PyTorch: 6.3.42133-1b9c17779
+
+OS: Ubuntu 22.04.5 LTS (x86_64)
+GCC version: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+Clang version: 18.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-6.3.1 24491 1e0fda770a2079fbd71e4b70974d74f62fd3af10)
+CMake version: version 3.31.4
+Libc version: glibc-2.35
+
+Python version: 3.12.8 (main, Dec  4 2024, 08:54:12) [GCC 11.4.0] (64-bit runtime)
+Python platform: Linux-5.15.0-125-generic-x86_64-with-glibc2.35
+Is CUDA available: True
+CUDA runtime version: Could not collect
+CUDA_MODULE_LOADING set to: LAZY
+GPU models and configuration: AMD Instinct MI210 (gfx90a:sramecc+:xnack-)
+Nvidia driver version: Could not collect
+cuDNN version: Could not collect
+HIP runtime version: 6.3.42133
+MIOpen runtime version: 3.3.0
+Is XNNPACK available: True
+
+CPU:
+Architecture:                         x86_64
+CPU op-mode(s):                       32-bit, 64-bit
+Address sizes:                        43 bits physical, 48 bits virtual
+Byte Order:                           Little Endian
+CPU(s):                               128
+On-line CPU(s) list:                  0-127
+Vendor ID:                            AuthenticAMD
+Model name:                           AMD EPYC 7542 32-Core Processor
+CPU family:                           23
+Model:                                49
+Thread(s) per core:                   2
+Core(s) per socket:                   32
+Socket(s):                            2
+Stepping:                             0
+Frequency boost:                      enabled
+CPU max MHz:                          2900.0000
+CPU min MHz:                          1500.0000
+BogoMIPS:                             5799.35
+Flags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sme sev sev_es
+Virtualization:                       AMD-V
+L1d cache:                            2 MiB (64 instances)
+L1i cache:                            2 MiB (64 instances)
+L2 cache:                             32 MiB (64 instances)
+L3 cache:                             256 MiB (16 instances)
+NUMA node(s):                         2
+NUMA node0 CPU(s):                    0-31,64-95
+NUMA node1 CPU(s):                    32-63,96-127
+Vulnerability Gather data sampling:   Not affected
+Vulnerability Itlb multihit:          Not affected
+Vulnerability L1tf:                   Not affected
+Vulnerability Mds:                    Not affected
+Vulnerability Meltdown:               Not affected
+Vulnerability Mmio stale data:        Not affected
+Vulnerability Reg file data sampling: Not affected
+Vulnerability Retbleed:               Mitigation; untrained return thunk; SMT enabled with STIBP protection
+Vulnerability Spec rstack overflow:   Mitigation; safe RET
+Vulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl and seccomp
+Vulnerability Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:             Mitigation; Retpolines; IBPB conditional; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                  Not affected
+Vulnerability Tsx async abort:        Not affected
+
+Versions of relevant libraries:
+[pip3] numpy==1.26.4
+[pip3] pyzmq==26.2.0
+[pip3] torch==2.6.0a0+git8d4926e
+[pip3] torchvision==0.19.1a0+6194369
+[pip3] transformers==4.48.1
+[pip3] triton==3.2.0+gite5be006a
+[conda] Could not collect
+ROCM Version: 6.3.42133-1b9c17779
+Neuron SDK Version: N/A
+vLLM Version: 0.6.4.post2.dev822+g16366ee8b
+vLLM Build Flags:
+CUDA Archs: Not Set; ROCm: Disabled; Neuron: Disabled
+GPU Topology:
+============================ ROCm System Management Interface ============================
+================================ Weight between two GPUs =================================
+       GPU0         GPU1         
+GPU0   0            40           
+GPU1   40           0            
+
+================================= Hops between two GPUs ==================================
+       GPU0         GPU1         
+GPU0   0            2            
+GPU1   2            0            
+
+=============================== Link Type between two GPUs ===============================
+       GPU0         GPU1         
+GPU0   0            PCIE         
+GPU1   PCIE         0            
+
+======================================= Numa Nodes =======================================
+GPU[0]		: (Topology) Numa Node: 0
+GPU[0]		: (Topology) Numa Affinity: 0
+GPU[1]		: (Topology) Numa Node: 0
+GPU[1]		: (Topology) Numa Affinity: 0
+================================== End of ROCm SMI Log ===================================
+
+TORCH_USE_HIP_DSA=1
+NCCL_P2P_DISABLE=1
+NCCL_DEBUG=TRACE
+VLLM_WORKER_MULTIPROC_METHOD=spawn
+VLLM_TRACE_FUNCTION=1
+PYTORCH_ROCM_ARCH=gfx90a;gfx942
+LD_LIBRARY_PATH=/usr/local/lib/python3.12/dist-packages/cv2/../../lib64:/opt/rocm/lib:/usr/local/lib:
+VLLM_LOGGING_LEVEL=DEBUG
+VLLM_USE_TRITON_FLASH_ATTN=0
+NCCL_CUMEM_ENABLE=0
+TORCHINDUCTOR_COMPILE_THREADS=1
+CUDA_MODULE_LOADING=LAZY
+
++ echo '=== Launching vLLM in background with real-time logs ==='
++ echo 'Running vLLM with model=Qwen/QwQ-32B-preview'
+=== Launching vLLM in background with real-time logs ===
+Running vLLM with model=Qwen/QwQ-32B-preview
++ vllm serve Qwen/QwQ-32B-preview --host=0.0.0.0 --port=8000 --max-model-len=2048 --enforce-eager --dtype=half --tensor-parallel-size 2 --disable-custom-all-reduce --trust-remote-code
+DEBUG 01-27 18:17:13 __init__.py:26] No plugins for group vllm.platform_plugins found.
+INFO 01-27 18:17:13 __init__.py:183] Automatically detected platform rocm.
+INFO 01-27 18:17:14 api_server.py:768] vLLM API server version 0.6.4.post2.dev822+g16366ee8b
+INFO 01-27 18:17:14 api_server.py:769] args: Namespace(subparser='serve', model_tag='Qwen/QwQ-32B-preview', config='', host='0.0.0.0', port=8000, uvicorn_log_level='info', allow_credentials=False, allowed_origins=['*'], allowed_methods=['*'], allowed_headers=['*'], api_key=None, lora_modules=None, prompt_adapters=None, chat_template=None, chat_template_content_format='auto', response_role='assistant', ssl_keyfile=None, ssl_certfile=None, ssl_ca_certs=None, ssl_cert_reqs=0, root_path=None, middleware=[], return_tokens_as_token_ids=False, disable_frontend_multiprocessing=False, enable_request_id_headers=False, enable_auto_tool_choice=False, tool_call_parser=None, tool_parser_plugin='', model='Qwen/QwQ-32B-preview', task='auto', tokenizer=None, skip_tokenizer_init=False, revision=None, code_revision=None, tokenizer_revision=None, tokenizer_mode='auto', trust_remote_code=True, allowed_local_media_path=None, download_dir=None, load_format='auto', config_format=<ConfigFormat.AUTO: 'auto'>, dtype='half', kv_cache_dtype='auto', quantization_param_path=None, max_model_len=2048, guided_decoding_backend='xgrammar', logits_processor_pattern=None, distributed_executor_backend=None, worker_use_ray=False, pipeline_parallel_size=1, tensor_parallel_size=2, max_parallel_loading_workers=None, ray_workers_use_nsight=False, block_size=None, enable_prefix_caching=None, disable_sliding_window=False, use_v2_block_manager=True, num_lookahead_slots=0, seed=0, swap_space=4, cpu_offload_gb=0, gpu_memory_utilization=0.9, num_gpu_blocks_override=None, max_num_batched_tokens=None, max_num_seqs=None, max_logprobs=20, disable_log_stats=False, quantization=None, rope_scaling=None, rope_theta=None, hf_overrides=None, enforce_eager=True, max_seq_len_to_capture=8192, disable_custom_all_reduce=True, tokenizer_pool_size=0, tokenizer_pool_type='ray', tokenizer_pool_extra_config=None, limit_mm_per_prompt=None, mm_processor_kwargs=None, disable_mm_preprocessor_cache=False, enable_lora=False, enable_lora_bias=False, max_loras=1, max_lora_rank=16, lora_extra_vocab_size=256, lora_dtype='auto', long_lora_scaling_factors=None, max_cpu_loras=None, fully_sharded_loras=False, enable_prompt_adapter=False, max_prompt_adapters=1, max_prompt_adapter_token=0, device='auto', num_scheduler_steps=1, multi_step_stream_outputs=True, scheduler_delay_factor=0.0, enable_chunked_prefill=None, speculative_model=None, speculative_model_quantization=None, num_speculative_tokens=None, speculative_disable_mqa_scorer=False, speculative_draft_tensor_parallel_size=None, speculative_max_model_len=None, speculative_disable_by_batch_size=None, ngram_prompt_lookup_max=None, ngram_prompt_lookup_min=None, spec_decoding_acceptance_method='rejection_sampler', typical_acceptance_sampler_posterior_threshold=None, typical_acceptance_sampler_posterior_alpha=None, disable_logprobs_during_spec_decoding=None, model_loader_extra_config=None, ignore_patterns=[], preemption_mode=None, served_model_name=None, qlora_adapter_name_or_path=None, otlp_traces_endpoint=None, collect_detailed_traces=None, disable_async_output_proc=False, scheduling_policy='fcfs', override_neuron_config=None, override_pooler_config=None, compilation_config=None, kv_transfer_config=None, worker_cls='auto', generation_config=None, enable_sleep_mode=False, disable_log_requests=False, max_log_len=None, disable_fastapi_docs=False, enable_prompt_tokens_details=False, dispatch_function=<function serve at 0x7f9ef9a439c0>)
+DEBUG 01-27 18:17:14 __init__.py:26] No plugins for group vllm.general_plugins found.
+DEBUG 01-27 18:17:14 api_server.py:176] Multiprocessing frontend to use ipc:///tmp/ddef63dd-382b-4290-a14d-1a4d58fb1945 for IPC Path.
+INFO 01-27 18:17:14 api_server.py:195] Started engine process with PID 855
+WARNING 01-27 18:17:16 config.py:2325] Casting torch.bfloat16 to torch.float16.
+DEBUG 01-27 18:17:18 __init__.py:26] No plugins for group vllm.platform_plugins found.
+INFO 01-27 18:17:19 __init__.py:183] Automatically detected platform rocm.
+DEBUG 01-27 18:17:19 __init__.py:26] No plugins for group vllm.general_plugins found.
+WARNING 01-27 18:17:22 config.py:2325] Casting torch.bfloat16 to torch.float16.
+INFO 01-27 18:17:38 config.py:528] This model supports multiple tasks: {'score', 'embed', 'classify', 'reward', 'generate'}. Defaulting to 'generate'.
+INFO 01-27 18:17:38 config.py:1335] Defaulting to use mp for distributed inference
+INFO 01-27 18:17:38 config.py:1365] Disabled the custom all-reduce kernel because it is not supported on AMD GPUs.
+WARNING 01-27 18:17:38 rocm.py:109] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+WARNING 01-27 18:17:38 config.py:664] Async output processing is not supported on the current platform type cuda.
+INFO 01-27 18:17:42 config.py:528] This model supports multiple tasks: {'reward', 'score', 'embed', 'classify', 'generate'}. Defaulting to 'generate'.
+INFO 01-27 18:17:42 config.py:1335] Defaulting to use mp for distributed inference
+INFO 01-27 18:17:42 config.py:1365] Disabled the custom all-reduce kernel because it is not supported on AMD GPUs.
+WARNING 01-27 18:17:42 rocm.py:109] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+WARNING 01-27 18:17:42 config.py:664] Async output processing is not supported on the current platform type cuda.
+INFO 01-27 18:17:42 llm_engine.py:232] Initializing an LLM engine (v0.6.4.post2.dev822+g16366ee8b) with config: model='Qwen/QwQ-32B-preview', speculative_config=None, tokenizer='Qwen/QwQ-32B-preview', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.float16, max_seq_len=2048, download_dir=None, load_format=LoadFormat.AUTO, tensor_parallel_size=2, pipeline_parallel_size=1, disable_custom_all_reduce=True, quantization=None, enforce_eager=True, kv_cache_dtype=auto, quantization_param_path=None, device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar'), observability_config=ObservabilityConfig(otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=0, served_model_name=Qwen/QwQ-32B-preview, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=False, chunked_prefill_enabled=False, use_async_output_proc=False, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"candidate_compile_sizes":[],"compile_sizes":[],"capture_sizes":[],"max_capture_size":0}, use_cached_outputs=True, 
+WARNING 01-27 18:17:43 multiproc_worker_utils.py:298] Reducing Torch parallelism from 128 threads to 1 to avoid unnecessary CPU contention. Set OMP_NUM_THREADS in the external environment to tune this value as needed.
+INFO 01-27 18:17:43 custom_cache_manager.py:17] Setting Triton cache manager to: vllm.triton_utils.custom_cache_manager:CustomCacheManager
+WARNING 01-27 18:17:43 logger.py:201] VLLM_TRACE_FUNCTION is enabled. It will record every function executed by Python. This will slow down the code. It is suggested to be used for debugging hang or crashes only.
+INFO 01-27 18:17:43 logger.py:205] Trace frame log is saved to /tmp/root/vllm/vllm-instance-c1065/VLLM_TRACE_FUNCTION_for_process_855_thread_139818853159104_at_2025-01-27_18:17:43.312488.log
+DEBUG 01-27 18:17:47 __init__.py:26] No plugins for group vllm.platform_plugins found.
+INFO 01-27 18:17:47 __init__.py:183] Automatically detected platform rocm.
+(VllmWorkerProcess pid=1318) INFO 01-27 18:17:48 multiproc_worker_utils.py:227] Worker ready; awaiting tasks
+(VllmWorkerProcess pid=1318) WARNING 01-27 18:17:48 logger.py:201] VLLM_TRACE_FUNCTION is enabled. It will record every function executed by Python. This will slow down the code. It is suggested to be used for debugging hang or crashes only.
+(VllmWorkerProcess pid=1318) INFO 01-27 18:17:48 logger.py:205] Trace frame log is saved to /tmp/root/vllm/vllm-instance-c1065/VLLM_TRACE_FUNCTION_for_process_1318_thread_140020751671488_at_2025-01-27_18:17:48.631413.log
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:17:48 __init__.py:26] No plugins for group vllm.general_plugins found.
+DEBUG 01-27 18:17:51 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:18:01 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:18:11 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:18:21 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:18:31 client.py:188] Waiting for output from MQLLMEngine.
+INFO 01-27 18:18:33 rocm.py:86] None is not supported in AMD GPUs.
+INFO 01-27 18:18:33 rocm.py:87] Using ROCmFlashAttention backend.
+(VllmWorkerProcess pid=1318) INFO 01-27 18:18:38 rocm.py:86] None is not supported in AMD GPUs.
+(VllmWorkerProcess pid=1318) INFO 01-27 18:18:38 rocm.py:87] Using ROCmFlashAttention backend.
+DEBUG 01-27 18:18:38 parallel_state.py:951] world_size=2 rank=0 local_rank=0 distributed_init_method=tcp://192.168.165.162:43405 backend=nccl
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:38 parallel_state.py:951] world_size=2 rank=1 local_rank=1 distributed_init_method=tcp://192.168.165.162:43405 backend=nccl
+INFO 01-27 18:18:38 utils.py:938] Found nccl from library librccl.so.1
+(VllmWorkerProcess pid=1318) INFO 01-27 18:18:38 utils.py:938] Found nccl from library librccl.so.1
+INFO 01-27 18:18:38 pynccl.py:67] vLLM is using nccl==2.21.5
+(VllmWorkerProcess pid=1318) INFO 01-27 18:18:38 pynccl.py:67] vLLM is using nccl==2.21.5
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Bootstrap : Using eth0:192.168.165.162<0>
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO NET/Plugin: No plugin found (librccl-net.so)
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO NET/Plugin: Plugin load returned 2 : librccl-net.so: cannot open shared object file: No such file or directory : when loading librccl-net.so
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO NET/Plugin: Using internal network plugin.
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/init.cc:153 NCCL WARN NUMA auto balancing enabled which can lead to variability in the RCCL performance! Disable by "sudo sysctl kernel.numa_balancing=0"
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Kernel version: 5.15.0-125-generic
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/init.cc:174 NCCL WARN Missing "iommu=pt" from kernel command line which can lead to system instablity or hang!
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO ROCr version 1.14
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+RCCL version : 2.21.5-HEAD:648a58d
+HIP version  : 6.3.42133-1b9c17779
+ROCm version : 6.3.1.0-48-cbc70b5
+Hostname     : job-5890cc3a-18f3-4fce-86f2-994407407ffb
+Librccl path : /usr/local/lib/librccl.so.1
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Failed to open libibverbs.so[.1]
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO NET/Socket : Using [0]eth0:192.168.165.162<0>
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Using non-device net plugin version 0
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Using network Socket
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO ROCr version 1.14
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Bootstrap : Using eth0:192.168.165.162<0>
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO NET/Plugin: No plugin found (librccl-net.so)
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO NET/Plugin: Plugin load returned 2 : librccl-net.so: cannot open shared object file: No such file or directory : when loading librccl-net.so
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO NET/Plugin: Using internal network plugin.
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/init.cc:153 NCCL WARN NUMA auto balancing enabled which can lead to variability in the RCCL performance! Disable by "sudo sysctl kernel.numa_balancing=0"
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Kernel version: 5.15.0-125-generic
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/init.cc:174 NCCL WARN Missing "iommu=pt" from kernel command line which can lead to system instablity or hang!
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Failed to open libibverbs.so[.1]
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO NET/Socket : Using [0]eth0:192.168.165.162<0>
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Using non-device net plugin version 0
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Using network Socket
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO [node_id = 5; gpu_id = 4493; unique_id = 4198427257775135662; location_id = 9984; bdf = 9984; domain = 0; partition = 0], 
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO [node_id = 3; gpu_id = 25466; unique_id = 13416447210963962684; location_id = 17152; bdf = 17152; domain = 0; partition = 0], 
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO initialized internal alternative rsmi functionality
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO ncclCommInitRank comm 0x4ac7bc80 rank 1 nranks 2 cudaDev 1 nvmlDev 0 busId 27000 commId 0xa90bb778e4b603a - Init START
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO initialized internal alternative rsmi functionality
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO initialized internal alternative rsmi functionality
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO NCCL_P2P_LEVEL set by environment to LOC
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Setting affinity for GPU 0 to ffffffff,00000000,ffffffff
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO comm 0x4ac7bc80 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Trees [0] 0/-1/-1->1->-1 [1] 0/-1/-1->1->-1 [2] 0/-1/-1->1->-1 [3] 0/-1/-1->1->-1 comm 0x4ac7bc80 nRanks 02 busId 27000
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO P2P Chunksize set to 131072
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Channel 00 : 1[27000] -> 0[43000] via SHM/direct/direct comm 0x4ac7bc80 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Channel 01 : 1[27000] -> 0[43000] via SHM/direct/direct comm 0x4ac7bc80 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Channel 02 : 1[27000] -> 0[43000] via SHM/direct/direct comm 0x4ac7bc80 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Channel 03 : 1[27000] -> 0[43000] via SHM/direct/direct comm 0x4ac7bc715 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO [node_id = 5; gpu_id = 4493; unique_id = 4198427257775135662; location_id = 9984; bdf = 9984; domain = 0; partition = 0], 
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO [node_id = 3; gpu_id = 25466; unique_id = 13416447210963962684; location_id = 17152; bdf = 17152; domain = 0; partition = 0], 
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO initialized internal alternative rsmi functionality
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO ncclCommInitRank comm 0x4212b3e0 rank 0 nranks 2 cudaDev 0 nvmlDev 1 busId 43000 commId 0xa90bb778e4b603a - Init START
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO initialized internal alternative rsmi functionality
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO initialized internal alternative rsmi functionality
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO NCCL_P2P_LEVEL set by environment to LOC
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Setting affinity for GPU 1 to ffffffff,00000000,ffffffff
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO comm 0x4212b3e0 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Channel 00/04 :    0   1
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Channel 01/04 :    0   1
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Channel 02/04 :    0   1
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Channel 03/04 :    0   1
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Trees [0] -1/-1/-1->0->1 [1] -1/-1/-1->0->1 [2] -1/-1/-1->0->1 [3] -1/-1/-1->0->1 comm 0x4212b3e0 nRanks 02 busId 43000
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO P2P Chunksize set to 131072
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Channel 00 : 0[43000] -> 1[27000] via SHM/direct/direct comm 0x4212b3e0 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Channel 01 : 0[43000] -> 1[27000] via SHM/direct/direct comm 0x4212b3e0 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Channel 02 : 0[43000] -> 1[27000] via SHM/direct/direct comm 0x4212b3e0 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Channel 03 : 0[43000] -> 1[27000] via SHM/direct/direct comm 0x4212b3e0 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Connected all rings comm 0x4212b3e0 nRanks 02 busId 43000
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Connected all trees
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 256 | 256
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO 4 coll channels, 4 collnet channels, 0 nvls channels, 4 p2p channels, 2 p2p channels per peer
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] /app/rccl/build/release/hipify/src/init.cc:2077 NCCL WARN MSCCL++: Cannot enable MSCCL++; environment is not MSCCL compatible
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO TUNER/Plugin: Plugin load returned 11 : librccl-net.so: cannot open shared object file: No such file or directory : when loading librccl-tuner.so
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO TUNER/Plugin: Using internal tuner plugin.
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:85DEBUG 01-27 18:18:39 shm_broadcast.py:215] Binding to tcp://127.0.0.1:51873
+INFO 01-27 18:18:39 shm_broadcast.py:256] vLLM message queue communication handle: Handle(connect_ip='127.0.0.1', local_reader_ranks=[1], buffer_handle=(1, 4194304, 6, 'psm_51cf27f2'), local_subscribe_port=51873, remote_subscribe_port=None)
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:39 shm_broadcast.py:280] Connecting to tcp://127.0.0.1:51873
+INFO 01-27 18:18:39 model_runner.py:1109] Starting to load model Qwen/QwQ-32B-preview...
+(VllmWorkerProcess pid=1318) INFO 01-27 18:18:39 model_runner.py:1109] Starting to load model Qwen/QwQ-32B-preview...
+WARNING 01-27 18:18:39 rocm.py:144] Model architecture 'Qwen2ForCausalLM' is partially supported by ROCm: Sliding window attention (SWA) is not yet supported in Triton flash attention. For half-precision SWA support, please use CK flash attention by setting `VLLM_USE_TRITON_FLASH_ATTN=0`
+(VllmWorkerProcess pid=1318) WARNING 01-27 18:18:39 rocm.py:144] Model architecture 'Qwen2ForCausalLM' is partially supported by ROCm: Sliding window attention (SWA) is not yet supported in Triton flash attention. For half-precision SWA support, please use CK flash attention by setting `VLLM_USE_TRITON_FLASH_ATTN=0`
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:40 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 client.py:188] Waiting for output from MQLLMEngine.
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:41 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+DEBUG 01-27 18:18:42 config.py:3334] enabled custom ops: Counter({'rms_norm': 129, 'silu_and_mul': 64, 'rotary_embedding': 1})
+DEBUG 01-27 18:18:42 config.py:3336] disabled custom ops: Counter()
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:42 rocm_flash_attn.py:394] Using CK FA in ROCmBackend
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:43 config.py:3334] enabled custom ops: Counter({'rms_norm': 129, 'silu_and_mul': 64, 'rotary_embedding': 1})
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:18:43 config.py:3336] disabled custom ops: Counter()
+INFO 01-27 18:18:44 weight_utils.py:253] Using model weights format ['*.safetensors']
+(VllmWorkerProcess pid=1318) INFO 01-27 18:18:44 weight_utils.py:253] Using model weights format ['*.safetensors']
+DEBUG 01-27 18:18:51 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:19:01 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:19:11 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:19:21 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:19:31 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:19:41 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:19:51 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:20:02 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:20:12 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:20:22 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:20:32 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:20:42 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:20:52 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:21:02 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:21:12 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:21:22 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:21:32 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:21:42 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:21:52 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:22:02 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:22:12 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:22:22 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:22:32 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:22:42 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:22:52 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:23:02 client.py:188] Waiting for output from MQLLMEngine.
+
+Loading safetensors checkpoint shards:   0% Completed | 0/17 [00:00<?, ?it/s]
+
+Loading safetensors checkpoint shards:   6% Completed | 1/17 [00:03<00:48,  3.03s/it]
+
+Loading safetensors checkpoint shards:  12% Completed | 2/17 [00:05<00:41,  2.78s/it]
+DEBUG 01-27 18:23:12 client.py:188] Waiting for output from MQLLMEngine.
+
+Loading safetensors checkpoint shards:  18% Completed | 3/17 [00:08<00:37,  2.69s/it]
+
+Loading safetensors checkpoint shards:  24% Completed | 4/17 [00:10<00:34,  2.65s/it]
+
+Loading safetensors checkpoint shards:  29% Completed | 5/17 [00:13<00:31,  2.63s/it]
+
+Loading safetensors checkpoint shards:  35% Completed | 6/17 [00:15<00:28,  2.62s/it]
+DEBUG 01-27 18:23:22 client.py:188] Waiting for output from MQLLMEngine.
+
+Loading safetensors checkpoint shards:  41% Completed | 7/17 [00:18<00:26,  2.60s/it]
+
+Loading safetensors checkpoint shards:  47% Completed | 8/17 [00:21<00:23,  2.59s/it]
+
+Loading safetensors checkpoint shards:  53% Completed | 9/17 [00:23<00:20,  2.58s/it]
+
+Loading safetensors checkpoint shards:  59% Completed | 10/17 [00:26<00:18,  2.58s/it]
+DEBUG 01-27 18:23:32 client.py:188] Waiting for output from MQLLMEngine.
+
+Loading safetensors checkpoint shards:  65% Completed | 11/17 [00:28<00:15,  2.60s/it]
+
+Loading safetensors checkpoint shards:  71% Completed | 12/17 [00:31<00:12,  2.59s/it]
+
+Loading safetensors checkpoint shards:  76% Completed | 13/17 [00:34<00:10,  2.59s/it]
+
+Loading safetensors checkpoint shards:  82% Completed | 14/17 [00:36<00:07,  2.61s/it]
+DEBUG 01-27 18:23:42 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:23:42 utils.py:152] Loaded weight lm_head.weight with shape torch.Size([76032, 5120])
+(VllmWorkerProcess pid=1318) DEBUG 01-27 18:23:43 utils.py:152] Loaded weight lm_head.weight with shape torch.Size([76032, 5120])
+
+Loading safetensors checkpoint shards:  88% Completed | 15/17 [00:39<00:05,  2.67s/it]
+
+Loading safetensors checkpoint shards:  94% Completed | 16/17 [00:42<00:02,  2.63s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:44<00:00,  2.61s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 17/17 [00:44<00:00,  2.63s/it]
+
+INFO 01-27 18:23:50 model_runner.py:1114] Loading model weights took 30.7097 GB
+DEBUG 01-27 18:23:52 client.py:188] Waiting for output from MQLLMEngine.
+(VllmWorkerProcess pid=1318) INFO 01-27 18:23:52 model_runner.py:1114] Loading model weights took 30.7097 GB
+DEBUG 01-27 18:24:02 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:24:12 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:24:22 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:24:32 client.py:188] Waiting for output from MQLLMEngine.
+5 [0] NCCL INFO ncclCommInitRank comm 0x4212b3e0 rank 0 nranks 2 cudaDev 0 nvmlDev 1 busId 43000 commId 0xa90bb778e4b603a localSize 296 used 8446112 bytes on core 79 - Init COMPLETE
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:855 [0] NCCL INFO Comm config Blocking set to 1
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] NCCL INFO Using non-device net plugin version 0
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] NCCL INFO Using network Socket
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:855:1518 [0] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-589080 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Connected all rings comm 0x4ac7bc80 nRanks 02 busId 27000
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Connected all trees
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 256 | 256
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO 4 coll channels, 4 collnet channels, 0 nvls channels, 4 p2p channels, 2 p2p channels per peer
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] /app/rccl/build/release/hipify/src/init.cc:2077 NCCL WARN MSCCL++: Cannot enable MSCCL++; environment is not MSCCL compatible
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO TUNER/Plugin: Plugin load returned 11 : librccl-net.so: cannot open shared object file: No such file or directory : when loading librccl-tuner.so
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO TUNER/Plugin: Using internal tuner plugin.
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO ncclCommInitRank comm 0x4ac7bc80 rank 1 nranks 2 cudaDev 1 nvmlDev 0 busId 27000 commId 0xa90bb778e4b603a localSize 296 used 8446112 bytes on core 29 - Init COMPLETE
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1318 [1] NCCL INFO Comm config Blocking set to 1
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Using non-device net plugin version 0
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Using network Socket
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 7
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 8
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 6
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 4
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 2
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:715 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] /app/rccl/build/release/hipify/src/misc/alt_rsmi.cc:674 NCCL WARN Could not read node # 9
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO [node_id = 5; gpu_id = 4493; unique_id = 4198427257775135662; location_id = 9984; bdf = 9984; domain = 0; partition = 0], 
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO [node_id = 3; gpu_id = 25466; unique_id = 13416447210963962684; location_id = 17152; bdf = 17152; domain = 0; partition = 0], 
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO initialized internal alternative rsmi functionality
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO ncclCommInitRank comm 0x504dc7a0 rank 1 nranks 2 cudaDev 1 nvmlDev 0 busId 27000 commId 0x5046bfb8eb7c82e4 - Init START
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO initialized internal alternative rsmi functionality
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO initialized internal alternative rsmi functionality
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Setting affinity for GPU 0 to ffffffff,00000000,ffffffff
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO comm 0x504dc7a0 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Trees [0] 0/-1/-1->1->-1 [1] 0/-1/-1->1->-1 [2] 0/-1/-1->1->-1 [3] 0/-1/-1->1->-1 comm 0x504dc7a0 nRanks 02 busId 27000
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO P2P Chunksize set to 131072
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Channel 00 : 1[27000] -> 0[43000] via SHM/direct/direct comm 0x504dc7a0 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Channel 01 : 1[27000] -> 0[43000] via SHM/direct/direct comm 0x504dc7a0 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Channel 02 : 1[27000] -> 0[43000] via SHM/direct/direct comm 0x504dc7a0 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Channel 03 : 1[27000] -> 0[43000] via SHM/direct/direct comm 0x504dc7a0 nRanks 02
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Connected all rings comm 0x504dc7a0 nRanks 02 busId 27000
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1] NCCL INFO Connected all trees
+job-5890cc3a-18f3-4fce-86f2-994407407ffb:1318:1519 [1]DEBUG 01-27 18:24:42 client.py:188] Waiting for output from MQLLMEngine.
+(VllmWorkerProcess pid=1318) INFO 01-27 18:24:42 worker.py:266] Memory profiling takes 50.09 seconds
+(VllmWorkerProcess pid=1318) INFO 01-27 18:24:42 worker.py:266] the current vLLM instance can use total_gpu_memory (63.98GiB) x gpu_memory_utilization (0.90) = 57.59GiB
+(VllmWorkerProcess pid=1318) INFO 01-27 18:24:42 worker.py:266] model weights take 30.71GiB; non_torch_memory takes 0.42GiB; PyTorch activation peak memory takes 0.31GiB; the rest of the memory reserved for KV Cache is 26.14GiB.
+INFO 01-27 18:24:42 worker.py:266] Memory profiling takes 50.33 seconds
+INFO 01-27 18:24:42 worker.py:266] the current vLLM instance can use total_gpu_memory (63.98GiB) x gpu_memory_utilization (0.90) = 57.59GiB
+INFO 01-27 18:24:42 worker.py:266] model weights take 30.71GiB; non_torch_memory takes 0.45GiB; PyTorch activation peak memory takes 1.40GiB; the rest of the memory reserved for KV Cache is 25.03GiB.
+INFO 01-27 18:24:43 executor_base.py:107] # CUDA blocks: 12814, # CPU blocks: 2048
+INFO 01-27 18:24:43 executor_base.py:112] Maximum concurrency for 2048 tokens per request: 100.11x
+INFO 01-27 18:24:44 llm_engine.py:429] init engine (profile, create kv cache, warmup model) took 52.35 seconds
+DEBUG 01-27 18:24:52 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:24:52 engine.py:131] Starting Startup Loop.
+DEBUG 01-27 18:24:52 engine.py:133] Starting Engine Loop.
+DEBUG 01-27 18:24:52 api_server.py:258] vLLM to use /tmp/tmpj_4818th as PROMETHEUS_MULTIPROC_DIR
+INFO 01-27 18:24:52 api_server.py:692] Using supplied chat template:
+INFO 01-27 18:24:52 api_server.py:692] None
+INFO 01-27 18:24:52 launcher.py:19] Available routes are:
+INFO 01-27 18:24:52 launcher.py:27] Route: /openapi.json, Methods: HEAD, GET
+INFO 01-27 18:24:52 launcher.py:27] Route: /docs, Methods: HEAD, GET
+INFO 01-27 18:24:52 launcher.py:27] Route: /docs/oauth2-redirect, Methods: HEAD, GET
+INFO 01-27 18:24:52 launcher.py:27] Route: /redoc, Methods: HEAD, GET
+INFO 01-27 18:24:52 launcher.py:27] Route: /health, Methods: GET
+INFO 01-27 18:24:52 launcher.py:27] Route: /ping, Methods: GET, POST
+INFO 01-27 18:24:52 launcher.py:27] Route: /tokenize, Methods: POST
+INFO 01-27 18:24:52 launcher.py:27] Route: /detokenize, Methods: POST
+INFO 01-27 18:24:52 launcher.py:27] Route: /v1/models, Methods: GET
+INFO 01-27 18:24:52 launcher.py:27] Route: /version, Methods: GET
+INFO 01-27 18:24:52 launcher.py:27] Route: /v1/chat/completions, Methods: POST
+INFO 01-27 18:24:52 launcher.py:27] Route: /v1/completions, Methods: POST
+INFO 01-27 18:24:52 launcher.py:27] Route: /v1/embeddings, Methods: POST
+INFO 01-27 18:24:52 launcher.py:27] Route: /pooling, Methods: POST
+INFO 01-27 18:24:52 launcher.py:27] Route: /score, Methods: POST
+INFO 01-27 18:24:52 launcher.py:27] Route: /v1/score, Methods: POST
+INFO 01-27 18:24:52 launcher.py:27] Route: /invocations, Methods: POST
+INFO:     Started server process [704]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+DEBUG 01-27 18:25:02 client.py:188] Waiting for output from MQLLMEngine.
+DEBUG 01-27 18:25:02 client.py:167] Heartbeat successful.
+DEBUG 01-27 18:25:02 metrics.py:467] Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 0.0 tokens/s, Running: 0 reqs, Swapped: 0 reqs, Pending: 0 reqs, GPU KV cache usage: 0.0%, CPU KV cache usage: 0.0%.
+DEBUG 01-27 18:25:02 engine.py:191] Waiting for new requests in engine loop.

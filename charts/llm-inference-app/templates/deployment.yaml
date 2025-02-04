@@ -28,6 +28,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       {{- if .Values.modelDownload.initEnabled }}
       initContainers:
         - name: download-model
@@ -58,26 +59,47 @@ spec:
             {{- end }}
             - "{{ or .Values.llm.modelHFName .Values.model.modelHFName }}"
       {{- end }}
+
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: >-
+            {{- if eq .Values.gpuProvider "amd" }}
+            {{ .Values.amdImage.repository }}:{{ .Values.amdImage.tag }}
+            {{- else if eq .Values.gpuProvider "nvidia" }}
+            {{ .Values.nvidiaImage.repository }}:{{ .Values.nvidiaImage.tag }}
+            {{- else }}
+            {{ .Values.image.repository }}:{{ .Values.image.tag }}
+            {{- end }}
+
+          imagePullPolicy: >-
+            {{- if eq .Values.gpuProvider "amd" }}
+            {{ .Values.amdImage.pullPolicy }}
+            {{- else if eq .Values.gpuProvider "nvidia" }}
+            {{ .Values.nvidiaImage.pullPolicy }}
+            {{- else }}
+            {{ .Values.image.pullPolicy }}
+            {{- end }}
+
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+
           livenessProbe:
             initialDelaySeconds: {{ .Values.healthChecksDelay }}
             httpGet:
               path: /health
               port: http
+
           readinessProbe:
             initialDelaySeconds: {{ .Values.healthChecksDelay }}
             httpGet:
               path: /health
               port: http
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
           volumeMounts:
             - mountPath: /dev/shm
               name: dshm
@@ -91,11 +113,46 @@ spec:
               readOnly: {{ .mountReadOnly }}
               subPath: {{ .volumeSubPath }}
             {{- end }}
+
           env:
-          {{- range $k, $v := .Values.env }}
+            {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
-          {{- end }}
+            {{- end }}
+
+            {{- if eq .Values.gpuProvider "amd" }}
+              {{- range $k, $v := .Values.envAmd }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+              {{- end }}
+            {{- end }}
+
+            {{- if eq .Values.gpuProvider "nvidia" }}
+              {{- range $k, $v := .Values.envNvidia }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+              {{- end }}
+            {{- end }}
+          
+          {{- if eq .Values.gpuProvider "amd" }}
+          command:
+            - vllm
+            - serve
+          args:
+            - {{ .Values.model.modelHFName }}
+            - --host=0.0.0.0
+            - --port={{ .Values.service.port }}
+            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
+            - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
+            {{- end }}
+            - --tokenizer={{ .Values.llm.tokenizerHFName }}
+            {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
+            {{- end }}
+            {{- with .Values.serverExtraArgs -}}
+            {{- toYaml . | nindent 12 }}
+            {{- end}}
+          {{- else }}
           args:
             - --host=0.0.0.0
             - --port={{ .Values.service.port }}
@@ -110,34 +167,53 @@ spec:
           {{- with .Values.serverExtraArgs -}}
           {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- end }}
+
       {{- if or .Values.volumes .Values.cache.enabled }}
       volumes:
         - name: dshm
           emptyDir:
             medium: Memory
-      {{- if .Values.cache.enabled }}
+        {{- if .Values.cache.enabled }}
         - name: huggingface-cache
           emptyDir:
             sizeLimit: {{ .Values.cache.sizeLimit }}
-      {{- end }}
-      {{- range .Values.PVCVolumes }}
+        {{- end }}
+        {{- range .Values.PVCVolumes }}
         - name: {{ .pvcName }}
           persistentVolumeClaim:
             claimName: {{ .pvcName }}
+        {{- end }}
       {{- end }}
-      {{- end }}
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+
+      # Good tolerations block: 
+      # 1) If .Values.tolerations is a list, dump it via toYaml
+      # 2) Add GPU item conditionally
       tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- if .Values.tolerations }}
+        {{ toYaml .Values.tolerations | nindent 8 }}
+        {{- end }}
+
+        {{- if eq .Values.gpuProvider "amd" }}
+        - key: amd.com/gpu
+          operator: Exists
+          effect: NoSchedule
+        {{- else if eq .Values.gpuProvider "nvidia" }}
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+        {{- end }}
+
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}

@@ -19,3 +19,14 @@ apolo run --pass-config ghcr.io/neuro-inc/app-deployment -- install https://gith
   --set "ingress.enabled=True" \ # optional
   --set "ingress.clusterName=scottdc" # optional
 ```
+
+## Helm install 
+```
+helm install llm-inference-app . \
+  --timeout=10m \
+  --set "model.modelHFName=lmsys/vicuna-7b-v1.3" \
+  --set "model.tokenizerHFName=lmsys/vicuna-7b-v1.3" \
+  --set "env.HUGGING_FACE_HUB_TOKEN=YOUR_TOKEN \
+  --set "ingress.enabled=true" \
+  --set "ingress.clusterName=novoserve"
+```

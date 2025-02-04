@@ -18,6 +18,7 @@ serverExtraArgs: []
 
 replicaCount: 1
 
+# Old default image
 image:
   repository: vllm/vllm-openai
   pullPolicy: IfNotPresent
@@ -26,11 +27,10 @@ image:
 
 resources: {}
 
-healthChecksDelay: 60
+healthChecksDelay: 300
 
 volumesManage: false
 PVCVolumes: []
-
   # - pvcName: huggingface-cache
   #   autocreate: false
   #   accessMode: ReadWriteOnce
@@ -53,9 +53,6 @@ nodeSelector: {}
 
 tolerations:
   - key: platform.neuromation.io/job
-    operator: Exists
-    effect: NoSchedule
-  - key: nvidia.com/gpu
     operator: Exists
     effect: NoSchedule
 
@@ -84,3 +81,40 @@ ingress:
   clusterName: ""
 
 preset_name: ""
+
+########################################
+# (NEW) GPU provider logic
+########################################
+gpuProvider: "nvidia"
+
+########################################
+# (NEW) AMD image & env
+########################################
+amdImage:
+  repository: rocm/vllm-ci
+  tag: "7a8987dac5f0ed0c798a73e8b4ec8f5e640bc63a"
+  pullPolicy: IfNotPresent
+
+envAmd:
+  HIP_VISIBLE_DEVICES: "0"
+  TORCH_USE_HIP_DSA: "1"
+  HSA_FORCE_FINE_GRAIN_PCIE: "1"
+  HSA_ENABLE_SDMA: "1"
+  ROCM_DISABLE_CU_MASK: "0"
+  VLLM_WORKER_MULTIPROC_METHOD: "spawn"
+  ROCR_VISIBLE_DEVICES: "0"
+  NCCL_P2P_DISABLE: "0"
+  VLLM_USE_TRITON_FLASH_ATTN: "0"
+
+########################################
+# (NEW) NVIDIA image & env
+########################################
+nvidiaImage:
+  repository: vllm/vllm-openai
+  tag: "v0.5.3.post1"
+  pullPolicy: IfNotPresent
+
+envNvidia:
+  NVIDIA_VISIBLE_DEVICES: "all"
+  NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+  VLLM_USE_TRITON_FLASH_ATTN: "1"

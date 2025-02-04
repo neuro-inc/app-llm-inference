@@ -1,0 +1,14 @@
+preset,model,prompt_tps,gen_tps,running,swapped,pending,gpu_cache_percent,cpu_cache_percent
+gpu-small,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,86.59,619.12,7.59,0.00,0.00,0.00,0.00
+gpu-medium,meta-llama/Llama-3.1-8B-Instruct,34.65,246.05,8.50,0.00,0.00,0.01,0.00
+gpu-large,meta-llama/Llama-3.1-8B-Instruct,29.50,205.78,8.89,0.00,0.02,0.00,0.00
+gpu-xlarge,meta-llama/Llama-3.1-8B-Instruct,20.78,147.21,9.15,0.00,0.00,0.00,0.00
+mi210x1,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,66.04,454.55,7.91,0.00,0.00,0.00,0.00
+mi210x1,meta-llama/Llama-3.1-8B-Instruct,9.55,66.07,1.88,0.00,0.00,0.00,0.00
+mi210x2,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,53.57,380.14,8.31,0.00,0.00,0.00,0.00
+mi210x2,meta-llama/Llama-3.1-8B-Instruct,41.56,292.45,8.95,0.00,0.00,0.00,0.00
+mi210x2,deepseek-ai/DeepSeek-R1-Distill-Qwen-32B,14.98,106.93,9.52,0.00,0.00,0.00,0.00
+H100X1,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,104.72,741.28,7.24,0.00,0.00,0.00,0.00
+H100X1,meta-llama/Llama-3.1-8B-Instruct,10.38,72.66,1.32,0.00,0.00,0.00,0.00
+H100X1,deepseek-ai/DeepSeek-R1-Distill-Qwen-32B,28.96,203.87,9.03,0.00,0.00,0.01,0.00
+H100X2,meta-llama/Llama-3.1-8B-Instruct,54.30,383.45,8.66,0.00,0.00,0.00,0.00
