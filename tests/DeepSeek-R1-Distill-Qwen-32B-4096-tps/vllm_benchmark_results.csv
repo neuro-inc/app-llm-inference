@@ -1,0 +1,5 @@
+preset,model,prompt_tps,gen_tps,running,swapped,pending,gpu_cache_percent,cpu_cache_percent,avg_latency_s,errors
+gpu-xlarge,deepseek-ai/DeepSeek-R1-Distill-Qwen-32B,33.84,240.80,8.84,0.00,0.00,0.29,0.00,2.6487,0
+mi210x2,deepseek-ai/DeepSeek-R1-Distill-Qwen-32B,13.82,97.61,5.05,0.00,0.00,0.12,0.00,3.5483,10
+H100X1,deepseek-ai/DeepSeek-R1-Distill-Qwen-32B,29.70,210.79,9.25,0.00,0.00,1.27,0.00,3.0207,1
+H100X2,deepseek-ai/DeepSeek-R1-Distill-Qwen-32B,37.90,269.81,8.71,0.00,0.00,0.13,0.00,2.3612,0
