@@ -12,15 +12,34 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Debug Performance Benchmark",
+            "name": "Benchmark Parallel",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/tests/performance_benchmark.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [
-                "--preset", "H100X2"
+                "--preset", "H100X2",
+                "--num-requests", "50",
+                "--concurrency", "10",
+                "--mode", "parallel",
+                "--batch-interval", "1.0"
+            ],
+        },
+        {
+            "name": "Benchmark Sequential",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/performance_benchmark.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "--preset", "H100X2",
+                "--num-requests", "50",
+                "--concurrency", "10",
+                "--mode", "sequential"
             ],
         }
+
     ]
 }

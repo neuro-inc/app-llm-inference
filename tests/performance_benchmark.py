@@ -9,7 +9,6 @@ import re
 import argparse
 import threading
 import matplotlib.pyplot as plt
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional, List, Dict, Tuple
 import numpy as np
 
@@ -63,7 +62,6 @@ PRESET_VRAM_PER_GPU = {
 }
 
 DOMAIN_FORMAT = "https://app-apolo--taddeus--{}.apps.novoserve.org.neu.ro"
-
 HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN", "YOUR_HF_TOKEN_HERE")
 
 METRIC_NAMES = [
@@ -77,27 +75,33 @@ METRIC_NAMES = [
     "avg_response_tokens_per_s",   # from the sum of actual completion tokens in all requests
 ]
 
+
 class VLLMBenchmark:
     """
-    Encapsulates data and logic for:
-      - Building/Deploying the model
-      - Checking readiness
-      - Sending concurrent requests
-      - Collecting metrics from /metrics
-      - Writing results to CSV
-      - Plotting
+    This class supports two load-testing modes:
+      1) 'sequential': Keep concurrency requests in flight; only start a new one when an old one finishes.
+      2) 'parallel': Launch a batch of concurrency requests every batch_interval seconds (possibly overlapping).
     """
     def __init__(self):
+        # Metric collection
         self.collected_samples: List[Dict[str, float]] = []
         self.metric_stop_event = threading.Event()
 
+        # Per-request aggregates
         self.all_request_latencies: List[float] = []
-        self.all_request_tps: List[float] = []  # tokens/second for each request
+        self.all_request_tps: List[float] = []
         self.error_count = 0
 
+        # vLLM counters
         self.last_counters: Dict[Tuple[str, str], Dict[str, float]] = {}
         self.response_tokens_total = 0
         self.last_response_tokens_data = {"time": time.time(), "count": 0}
+
+        # Thread-safety
+        self.lock = threading.Lock()
+
+        # We'll store references to threads if needed
+        self.active_threads: List[threading.Thread] = []
 
     ############################################################################
     # CSV
@@ -114,7 +118,7 @@ class VLLMBenchmark:
         """
         Appends a row to vllm_benchmark_results.csv:
          [preset, model, promptTPS, genTPS, running, swapped, pending,
-          gpuCache, cpuCache, avg_latency, errors, resp_tps]
+          gpuCache, cpuCache, avg_latency, errors, resp_tps, request_level_TPS]
         """
         row_data = [
             preset,
@@ -128,8 +132,8 @@ class VLLMBenchmark:
             f"{avg_metrics['cpu_cache_usage_perc']:.2f}",
             f"{avg_latency:.4f}",
             f"{error_count}",
-            f"{avg_metrics['avg_response_tokens_per_s']:.2f}",  # from /metrics perspective
-            f"{avg_request_tps:.2f}",                            # new column: average TPS from request-level perspective
+            f"{avg_metrics['avg_response_tokens_per_s']:.2f}",
+            f"{avg_request_tps:.2f}",
         ]
 
         file_exists = os.path.exists(CSV_FILENAME)
@@ -143,7 +147,7 @@ class VLLMBenchmark:
                     "gpu_cache_percent", "cpu_cache_percent",
                     "avg_latency_s", "errors",
                     "resp_tps",
-                    "request_level_TPS",  # new column
+                    "request_level_TPS",
                 ])
             writer.writerow(row_data)
 
@@ -151,9 +155,7 @@ class VLLMBenchmark:
     # Deploy
     ############################################################################
     def build_apolo_deploy_command(self, preset: str, model_hf_name: str) -> List[str]:
-
         server_extra_args = ['--max-model-len=128000']
-
         server_arg_sets = []
         for i, val in enumerate(server_extra_args):
             server_arg_sets.append(f'--set "serverExtraArgs[{i}]={val}"')
@@ -216,8 +218,7 @@ class VLLMBenchmark:
     def delete_namespace_for_preset(self, preset: str) -> None:
         ns_name = f"app-apolo--taddeus--{preset.lower()}"
         cmd = f"kubectl delete namespace {ns_name}"
-        # print(f"[CLEANUP] Deleting namespace '{ns_name}' in 1 minutes to let the pods settle.")
-        # time.sleep(1 * 60)
+        time.sleep(5 * 60)
         print(f"[CLEANUP] {cmd}")
         subprocess.run(cmd, shell=True, check=False)
 
@@ -231,10 +232,6 @@ class VLLMBenchmark:
         interval_seconds: int = 5,
         elapsed: int = 0
     ) -> bool:
-        """
-        Recursively check if /v1/models is up. If not, wait interval_seconds and try again,
-        until max_wait_seconds is reached.
-        """
         if elapsed >= max_wait_seconds:
             print(f"[TIMEOUT] {preset} not online in {max_wait_seconds} seconds.")
             return False
@@ -322,7 +319,6 @@ class VLLMBenchmark:
                 parts = line.split()
                 if len(parts) == 2:
                     try:
-                        # 0..1 => multiply by 100
                         val = float(parts[1]) * 100.0
                         result["gpu_cache_usage_perc"] = val
                     except ValueError:
@@ -375,18 +371,14 @@ class VLLMBenchmark:
             print(f"[ERROR] /metrics => {e}")
             return {k: 0.0 for k in METRIC_NAMES}
 
-    def background_collector_thread(
-        self,
-        preset: str,
-        model_name: str,
-        poll_interval: float
-    ) -> None:
+    def background_collector_thread(self, preset: str, model_name: str, poll_interval: float) -> None:
         while not self.metric_stop_event.is_set():
             data = self.fetch_realtime_metrics(preset, model_name)
 
             # measure average_response_tokens_per_s from the difference
             now = time.time()
-            current_count = self.response_tokens_total
+            with self.lock:
+                current_count = self.response_tokens_total
             delta_t = now - self.last_response_tokens_data["time"]
             if delta_t > 0:
                 delta_tokens = current_count - self.last_response_tokens_data["count"]
@@ -408,23 +400,19 @@ class VLLMBenchmark:
             time.sleep(poll_interval)
 
     ############################################################################
-    # Sending Requests
+    # Request Logic
     ############################################################################
-    def single_request_blocking(
-        self,
-        completions_url: str,
-        model_name: str
-    ) -> None:
+    def process_one_request(self, completions_url: str, model_name: str) -> None:
         """
-        Sends a single request with concurrency, measures latency, obtains completion tokens.
-        We store per-request tokens/sec in self.all_request_tps for final averaging.
+        Actually does the synchronous HTTP call,
+        capturing tokens, latency, etc.
         """
         start_t = time.time()
         headers = {"Content-Type": "application/json"}
         payload = {
             "model": model_name,
-            "prompt": """You are a helpful AI assistant. 
-            The user says: 'Explain the significance of Einstein's theory of relativity in simple terms.' 
+            "prompt": """You are a helpful AI assistant.
+            The user says: 'Explain the significance of Einstein's theory of relativity in simple terms.'
             Provide a concise but thorough answer.""",
             "max_tokens": 4096,
             "temperature": 0.7
@@ -438,10 +426,8 @@ class VLLMBenchmark:
                     data = resp.json()
                     usage = data.get("usage", {})
                     if "completion_tokens" in usage:
-                        # Official usage from vLLM might have "completion_tokens"
                         resp_count = usage["completion_tokens"]
                     else:
-                        # fallback if usage not present
                         choices = data.get("choices", [])
                         if choices:
                             text = choices[0].get("text", "")
@@ -449,60 +435,108 @@ class VLLMBenchmark:
                         else:
                             resp_count = 0
 
-                    # store total tokens for global aggregator
-                    self.response_tokens_total += resp_count
+                    with self.lock:
+                        self.response_tokens_total += resp_count
 
-                    # compute tokens/second for this single request
-                    if elapsed > 0:
-                        request_tps = float(resp_count) / elapsed
+                    request_tps = (resp_count / elapsed) if elapsed > 0 else 0.0
+                    with self.lock:
                         self.all_request_tps.append(request_tps)
-
-                    # store the request-level latency
-                    self.all_request_latencies.append(elapsed)
+                        self.all_request_latencies.append(elapsed)
 
                 except Exception as ex:
                     print(f"[WARN] Could not parse JSON usage => {ex}")
-                    # We still measure latency but tokens=0 => TPS=0
-                    self.all_request_tps.append(0.0)
-                    self.all_request_latencies.append(elapsed)
+                    with self.lock:
+                        self.all_request_tps.append(0.0)
+                        self.all_request_latencies.append(elapsed)
             else:
-                self.error_count += 1
+                with self.lock:
+                    self.error_count += 1
                 print(f"[WARN] => {resp.status_code}, {resp.text[:200]}")
 
         except requests.RequestException as e:
-            self.error_count += 1
+            with self.lock:
+                self.error_count += 1
             print(f"[ERROR] => {e}")
 
-    def run_load_test(
+    def run_load_test_sequential(
         self,
-        preset: str,
+        completions_url: str,
         model_name: str,
         num_requests: int,
         concurrency: int
     ) -> None:
         """
-        Launch requests in parallel with concurrency, each measuring tokens/s individually.
+        'Sequential mode': We maintain up to `concurrency` requests in flight.
+        Once a request finishes, we start a new one, until we have launched `num_requests`.
+        This effectively is a standard concurrency-limited approach.
         """
-        base_url = DOMAIN_FORMAT.format(preset.lower())
-        completions_url = base_url + "/v1/completions"
+        from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        print(f"[LOADTEST] Sending {num_requests} requests at concurrency={concurrency} ...")
-        start = time.time()
+        print(f"[LOADTEST:Sequential] Launching {num_requests} requests with concurrency={concurrency}.")
+        start_time = time.time()
         with ThreadPoolExecutor(max_workers=concurrency) as pool:
-            futures = [pool.submit(self.single_request_blocking, completions_url, model_name)
-                       for _ in range(num_requests)]
-            for _ in as_completed(futures):
-                pass
-        end = time.time()
+            futures = []
+            for _ in range(num_requests):
+                futures.append(pool.submit(self.process_one_request, completions_url, model_name))
 
-        print(f"[LOADTEST] Completed {num_requests} requests in {end - start:.2f}s total.")
+            # Wait for them all to finish
+            for f in as_completed(futures):
+                pass
+
+        elapsed = time.time() - start_time
+        print(f"[LOADTEST:Sequential] All {num_requests} requests done in {elapsed:.2f}s.")
+
+    def run_load_test_parallel(
+        self,
+        completions_url: str,
+        model_name: str,
+        num_requests: int,
+        concurrency: int,
+        batch_interval: float
+    ) -> None:
+        """
+        'Parallel mode': Launch a batch of `concurrency` requests every `batch_interval` seconds,
+        potentially overlapping, until we've scheduled `num_requests`.
+        """
+        print(f"[LOADTEST:Parallel] Launching {num_requests} total requests in batches of {concurrency} "
+              f"every {batch_interval}s, not waiting for them to finish.")
+        requests_launched = 0
+        start_time = time.time()
+
+        while requests_launched < num_requests:
+            remaining = num_requests - requests_launched
+            batch_size = min(remaining, concurrency)
+
+            # spawn batch_size threads at once
+            threads = []
+            for _ in range(batch_size):
+                t = threading.Thread(
+                    target=self.process_one_request,
+                    args=(completions_url, model_name),
+                    daemon=False
+                )
+                t.start()
+                threads.append(t)
+
+            with self.lock:
+                self.active_threads.extend(threads)
+
+            requests_launched += batch_size
+            if requests_launched >= num_requests:
+                break
+
+            time.sleep(batch_interval)
+
+        elapsed = time.time() - start_time
+        print(f"[LOADTEST:Parallel] Done scheduling {requests_launched} requests in {elapsed:.2f}s. "
+              "They may still be running in background threads.")
 
     ############################################################################
-    # Main Orchestrator
+    # Main
     ############################################################################
     def main(self) -> None:
         parser = argparse.ArgumentParser(
-            description="Deploy each (preset, model), measure metrics while we send requests."
+            description="Benchmark vLLM with either 'sequential' concurrency-limited or 'parallel' batch mode."
         )
         parser.add_argument("--preset",
                             type=str,
@@ -518,11 +552,20 @@ class VLLMBenchmark:
         parser.add_argument("--num-requests",
                             type=int,
                             default=10,
-                            help="Total requests to send.")
+                            help="Total requests to launch.")
         parser.add_argument("--concurrency",
                             type=int,
                             default=1,
-                            help="Number of parallel requests.")
+                            help="Number of requests to keep in flight (sequential mode) or per batch (parallel mode).")
+        parser.add_argument("--batch-interval",
+                            type=float,
+                            default=1.0,
+                            help="Seconds to wait between each batch (only used in parallel mode).")
+        parser.add_argument("--mode",
+                            type=str,
+                            default="sequential",
+                            choices=["sequential", "parallel"],
+                            help="Which load test mode to use.")
         parser.add_argument("--poll-interval",
                             type=float,
                             default=1.0,
@@ -548,9 +591,9 @@ class VLLMBenchmark:
             with open(CSV_FILENAME, "r", encoding="utf-8") as f:
                 rd = csv.reader(f)
                 hdr = next(rd, None)
-                if hdr and len(hdr) >= 11:
+                if hdr and len(hdr) >= 12:
                     for row in rd:
-                        if len(row) < 11:
+                        if len(row) < 12:
                             continue
                         p, m = row[0], row[1]
                         existing_combos.add((p, m))
@@ -597,6 +640,7 @@ class VLLMBenchmark:
                 }
                 self.response_tokens_total = 0
                 self.last_response_tokens_data = {"time": time.time(), "count": 0}
+                self.active_threads.clear()
 
                 # Start background collector
                 collector_thread = threading.Thread(
@@ -606,39 +650,38 @@ class VLLMBenchmark:
                 )
                 collector_thread.start()
 
-                # Perform load test
-                self.run_load_test(
-                    preset=preset,
-                    model_name=model_name,
-                    num_requests=args.num_requests,
-                    concurrency=args.concurrency
-                )
+                base_url = DOMAIN_FORMAT.format(preset.lower())
+                completions_url = base_url + "/v1/completions"
 
-                # Wait for requests to finalize in vLLM
-                print("[INFO] Waiting for all requests to finalize in vLLM ...")
-                while True:
-                    last_metrics = self.fetch_realtime_metrics(preset, model_name)
-                    print("[METRICS]",
-                          f"Prompt TPS: {last_metrics['avg_prompt_throughput_toks_per_s']:.1f}, "
-                          f"Gen TPS: {last_metrics['avg_generation_throughput_toks_per_s']:.1f}, "
-                          f"Running: {last_metrics['num_requests_running']:.0f}, "
-                          f"Swapped: {last_metrics['num_requests_swapped']:.0f}, "
-                          f"Pending: {last_metrics['num_requests_waiting']:.0f}, "
-                          f"GPU Cache: {last_metrics['gpu_cache_usage_perc']:.1f}%, "
-                          f"CPU Cache: {last_metrics['cpu_cache_usage_perc']:.1f}%.")
+                # MAIN LOAD TEST
+                if args.mode == "sequential":
+                    # Keep concurrency requests in flight until done
+                    self.run_load_test_sequential(
+                        completions_url=completions_url,
+                        model_name=model_name,
+                        num_requests=args.num_requests,
+                        concurrency=args.concurrency
+                    )
+                else:
+                    # "parallel": spawn concurrency requests every batch_interval
+                    self.run_load_test_parallel(
+                        completions_url=completions_url,
+                        model_name=model_name,
+                        num_requests=args.num_requests,
+                        concurrency=args.concurrency,
+                        batch_interval=args.batch_interval
+                    )
 
-                    total_pending = (last_metrics["num_requests_running"] +
-                                     last_metrics["num_requests_swapped"] +
-                                     last_metrics["num_requests_waiting"])
-                    if total_pending == 0:
-                        break
-                    time.sleep(args.poll_interval)
+                # optionally, if in parallel mode you do NOT want to wait => do nothing
+                # or if in sequential we have already waited for them. Either way, let's
+                # let the metric collector gather some data:
+                time.sleep(5.0)
 
-                # Stop the background collector
+                # Stop collector
                 self.metric_stop_event.set()
                 collector_thread.join(timeout=10.0)
 
-                # Compute average from all samples (server metrics)
+                # Summarize from collected samples
                 if len(self.collected_samples) == 0:
                     print("[WARN] No metric samples collected => zero for everything.")
                     avg_result = {mn: 0.0 for mn in METRIC_NAMES}
@@ -650,18 +693,19 @@ class VLLMBenchmark:
                     n = len(self.collected_samples)
                     avg_result = {mn: (sum_vals[mn] / n) for mn in METRIC_NAMES}
 
-                # Compute average latency from all requests
-                if self.all_request_latencies:
-                    avg_latency = sum(self.all_request_latencies) / len(self.all_request_latencies)
-                else:
-                    avg_latency = 0.0
+                # compute avg latency & request-level TPS
+                with self.lock:
+                    if self.all_request_latencies:
+                        avg_latency = sum(self.all_request_latencies) / len(self.all_request_latencies)
+                    else:
+                        avg_latency = 0.0
 
-                # Compute average request-level tokens/sec
-                # i.e. for each request: tokens/elapsed => then average across all successful requests
-                if self.all_request_tps:
-                    avg_request_tps = sum(self.all_request_tps) / len(self.all_request_tps)
-                else:
-                    avg_request_tps = 0.0
+                    if self.all_request_tps:
+                        avg_request_tps = sum(self.all_request_tps) / len(self.all_request_tps)
+                    else:
+                        avg_request_tps = 0.0
+
+                    local_err_count = self.error_count
 
                 # Write CSV row
                 self.append_csv_row(
@@ -669,14 +713,14 @@ class VLLMBenchmark:
                     model_name=model_name,
                     avg_metrics=avg_result,
                     avg_latency=avg_latency,
-                    error_count=self.error_count,
+                    error_count=local_err_count,
                     avg_request_tps=avg_request_tps
                 )
 
                 # Cleanup
                 self.delete_namespace_for_preset(preset)
 
-        # After all combos, produce bar charts if CSV file is present
+        # Chart generation if CSV is present
         if not os.path.exists(CSV_FILENAME):
             print("\nNo CSV => no charts.")
             return
@@ -694,14 +738,10 @@ class VLLMBenchmark:
         with open(CSV_FILENAME, "r", encoding="utf-8") as f:
             rd = csv.reader(f)
             hdr = next(rd, None)
-            # We'll check minimal columns
             if not hdr or len(hdr) < 12:
                 print("[WARN] CSV missing columns, skipping chart generation.")
                 return
 
-            # expected:
-            # [preset, model, prompt_tps, gen_tps, running, swapped, pending, 
-            #  gpu_cache_percent, cpu_cache_percent, avg_latency_s, errors, resp_tps, request_level_TPS]
             for row in rd:
                 if len(row) < 12:
                     continue
@@ -711,10 +751,11 @@ class VLLMBenchmark:
             print("[WARN] No CSV data => skipping charts.")
             return
 
-        # parse them into structures
+        # parse them
         data_parsed = []
         for row in rows:
-            # row => 0:preset,1:model,2:promptTPS,3:genTPS,4:run,5:swap,6:pend,7:gpu,8:cpu,9:avg_lat,10:errs,11:resp_tps,12:req_tps
+            # row => [preset, model, promptTPS, genTPS, running, swapped, pending,
+            #         gpu_cache_percent, cpu_cache_percent, avg_latency_s, errors, resp_tps, request_tps]
             p, m = row[0], row[1]
             try:
                 prompt_tps = float(row[2])
@@ -733,7 +774,7 @@ class VLLMBenchmark:
             data_parsed.append((p, m, prompt_tps, gen_tps, running, swapped,
                                 pending, gpu_cache, cpu_cache, avg_lat, errs, resp_tps, req_tps))
 
-        # group by presets and models
+        # group by
         seen_presets = []
         seen_models = []
         for (p, m, *_rest) in data_parsed:
@@ -742,7 +783,7 @@ class VLLMBenchmark:
             if m not in seen_models:
                 seen_models.append(m)
 
-        # prepare separate dict for each metric
+        # separate dict
         data_prompt = {}
         data_gen = {}
         data_run = {}
@@ -776,7 +817,6 @@ class VLLMBenchmark:
         ):
             x_presets = seen_presets[:]
             x_indices = np.arange(len(x_presets))
-            # if only 1 model, bar width can be bigger
             if len(seen_models) == 1:
                 bar_width = 0.4
             else:
@@ -822,7 +862,6 @@ class VLLMBenchmark:
         make_bar_chart(data_request_tps, "Per-Request TPS (averaged)", "tokens/s",
                        "chart_avg_request_tokens_s.png")
 
-        # Display final results
         print("\n=== Final Results from CSV ===")
         for row in data_parsed:
             (p, m, pr, gn, run_, sw, pend, gpu, cp, lat, errs, resp, rtps) = row
@@ -830,6 +869,7 @@ class VLLMBenchmark:
                   f"run={run_:.2f}, swap={sw:.2f}, pend={pend:.2f}, "
                   f"GPU={gpu:.2f}%, CPU={cp:.2f}%, avg_latency={lat:.4f}s, errors={errs}, "
                   f"respTPS={resp:.2f}, requestTPS={rtps:.2f}")
+
 
 ################################################################################
 # Entry Point
