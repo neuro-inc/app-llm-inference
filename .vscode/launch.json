@@ -21,9 +21,6 @@
             "args": [
                 "--preset", "H100X2"
             ],
-            "env": {
-                "HUGGING_FACE_TOKEN": "your_hugging_face_token_here"
-            }
         }
     ]
 }

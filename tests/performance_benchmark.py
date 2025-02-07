@@ -170,6 +170,7 @@ class VLLMBenchmark:
             preset.lower(),
             "charts/llm-inference-app",
             "--timeout=15m",
+            "--set branch=benchmarks",
             f'--set "preset_name={preset}"',
             f'--set "model.modelHFName={model_hf_name}"',
             '--set "model.modelRevision=main"',
