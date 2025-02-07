@@ -27,7 +27,7 @@ image:
 
 resources: {}
 
-healthChecksDelay: 300
+healthChecksDelay: 60
 
 volumesManage: false
 PVCVolumes: []
