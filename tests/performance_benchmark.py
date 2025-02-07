@@ -78,7 +78,10 @@ GIT_BRANCH = "MLO-12-config-matrix"
 # 5) num_requests_waiting
 # 6) gpu_cache_usage_perc
 # 7) cpu_cache_usage_perc
-
+#
+# We will add an 8th metric to capture the average "response tokens/s" from
+# actual completions (counted directly in the requests):
+# 8) avg_response_tokens_per_s
 METRIC_NAMES = [
     "avg_prompt_throughput_toks_per_s",
     "avg_generation_throughput_toks_per_s",
@@ -87,6 +90,7 @@ METRIC_NAMES = [
     "num_requests_waiting",
     "gpu_cache_usage_perc",
     "cpu_cache_usage_perc",
+    "avg_response_tokens_per_s",   # <-- new metric
 ]
 
 ################################################################################
@@ -96,7 +100,7 @@ METRIC_NAMES = [
 def append_csv_row(
     preset: str,
     model_name: str,
-    # the 7 averaged metrics
+    # the 7 + 1 new averaged metrics
     avg_metrics: Dict[str,float],
     # new columns for latency and error count
     avg_latency: float,
@@ -104,8 +108,11 @@ def append_csv_row(
 ):
     """
     Appends row:
-      [preset, model, promptTPS, genTPS, running, swapped, pending, gpuCache, cpuCache, avg_latency, errors]
+      [preset, model, promptTPS, genTPS, running, swapped, pending,
+       gpuCache, cpuCache, avg_latency, errors, resp_tps]
     to the CSV.
+
+    Note: We add `resp_tps` as a new last column so we don't break existing logic.
     """
     row_data = [
         preset,
@@ -119,6 +126,7 @@ def append_csv_row(
         f"{avg_metrics['cpu_cache_usage_perc']:.2f}",
         f"{avg_latency:.4f}",
         f"{error_count}",
+        f"{avg_metrics['avg_response_tokens_per_s']:.2f}",  # new column at the end
     ]
 
     file_exists = os.path.exists(CSV_FILENAME)
@@ -131,6 +139,7 @@ def append_csv_row(
                 "running", "swapped", "pending",
                 "gpu_cache_percent", "cpu_cache_percent",
                 "avg_latency_s", "errors",
+                "resp_tps",  # new header for the new column
             ])
         writer.writerow(row_data)
 
@@ -172,16 +181,15 @@ def build_apolo_deploy_command(preset: str, model_hf_name: str) -> List[str]:
         "apolo",
         "run",
         "--pass-config",
-        # "ghcr.io/neuro-inc/app-deployment:development",
-        "image://novoserve/apolo/taddeus/app-deployment:latest",
+        "ghcr.io/neuro-inc/app-deployment",
         "--",
         "install",
         "https://github.com/neuro-inc/app-llm-inference",
         "llm-inference",
         preset.lower(),
         "charts/llm-inference-app",
-        "--timeout=30m",
-        f"--git-branch={GIT_BRANCH}",
+        "--timeout=15m",
+        # f"--git-branch={GIT_BRANCH}",
         f'--set "preset_name={preset}"',
         f'--set "gpuProvider={gpu_provider}"',
         f'--set "model.modelHFName={model_hf_name}"',
@@ -283,13 +291,14 @@ def parse_realtime_metrics(metrics_text: str, preset: str, model_hf_name: str) -
     Then we'll compute:
       avg_prompt_throughput_toks_per_s  = (delta prompt tokens) / (delta time)
       avg_generation_throughput_toks_per_s = ...
+      [We always set avg_response_tokens_per_s = 0.0 here; it's updated separately.]
 
     Return a dict with all final metrics.
     """
     model_tag = f'model_name="{model_hf_name}"'
     now = time.time()
 
-    # Start with zero
+    # Start with zero (and 0 for the new metric placeholder)
     result = {
         "avg_prompt_throughput_toks_per_s": 0.0,
         "avg_generation_throughput_toks_per_s": 0.0,
@@ -298,9 +307,9 @@ def parse_realtime_metrics(metrics_text: str, preset: str, model_hf_name: str) -
         "num_requests_waiting": 0.0,
         "gpu_cache_usage_perc": 0.0,
         "cpu_cache_usage_perc": 0.0,
+        "avg_response_tokens_per_s": 0.0,  # new metric placeholder
     }
 
-    # We'll parse the lines to find counters
     prompt_total = None
     generation_total = None
 
@@ -406,19 +415,38 @@ def fetch_realtime_metrics(preset: str, model_hf_name: str) -> Dict[str,float]:
 collected_samples : List[Dict[str,float]] = []
 metric_stop_event = threading.Event()
 
+# Globals to track actual response tokens
+response_tokens_global = 0
+response_tokens_lock = threading.Lock()
+last_response_tokens_data = {"time": time.time(), "count": 0}
+
 def background_collector_thread(preset: str, model_name: str, poll_interval: float):
     global collected_samples
     while not metric_stop_event.is_set():
         data = fetch_realtime_metrics(preset, model_name)
+
+        # Compute "avg_response_tokens_per_s" from the difference of the global counter
+        now = time.time()
+        with response_tokens_lock:
+            current_count = response_tokens_global
+        delta_t = now - last_response_tokens_data["time"]
+        if delta_t > 0:
+            delta_tokens = current_count - last_response_tokens_data["count"]
+            data["avg_response_tokens_per_s"] = delta_tokens / delta_t
+        # Update "last_response_tokens_data"
+        last_response_tokens_data["time"] = now
+        last_response_tokens_data["count"] = current_count
+
         collected_samples.append(data)
         print("[METRICS]",
-              f"Avg prompt throughput: {data['avg_prompt_throughput_toks_per_s']:.1f} tokens/s, "
-              f"Avg generation throughput: {data['avg_generation_throughput_toks_per_s']:.1f} tokens/s, "
-              f"Running: {data['num_requests_running']:.0f} reqs, "
-              f"Swapped: {data['num_requests_swapped']:.0f} reqs, "
-              f"Pending: {data['num_requests_waiting']:.0f} reqs, "
-              f"GPU KV cache usage: {data['gpu_cache_usage_perc']:.1f}%, "
-              f"CPU KV cache usage: {data['cpu_cache_usage_perc']:.1f}%.")
+              f"Prompt TPS: {data['avg_prompt_throughput_toks_per_s']:.1f}, "
+              f"Gen TPS: {data['avg_generation_throughput_toks_per_s']:.1f}, "
+              f"Running: {data['num_requests_running']:.0f}, "
+              f"Swapped: {data['num_requests_swapped']:.0f}, "
+              f"Pending: {data['num_requests_waiting']:.0f}, "
+              f"GPU Cache: {data['gpu_cache_usage_perc']:.1f}%, "
+              f"CPU Cache: {data['cpu_cache_usage_perc']:.1f}%, "
+              f"Resp TPS: {data['avg_response_tokens_per_s']:.1f}")
         time.sleep(poll_interval)
 
 ################################################################################
@@ -431,18 +459,40 @@ error_count = 0
 error_count_lock = threading.Lock()
 
 def single_request_blocking(completions_url: str, model_name: str):
-    global error_count
+    global error_count, response_tokens_global
     start_t = time.time()
     headers = {"Content-Type": "application/json"}
     payload = {
         "model": model_name,
         "prompt": "Lets explore some architecture patterns for microservices",
-        "temperature": 0.7
+        "temperature": 0.7,
+        "max_tokens": 4000
     }
     try:
         r = requests.post(completions_url, json=payload, headers=headers, timeout=300)
         elapsed = time.time() - start_t
         if r.status_code == 200:
+            # Count tokens from the response
+            try:
+                data = r.json()
+                print(data)
+                # If usage-style data is present:
+                usage = data.get("usage", {})
+                if "completion_tokens" in usage:
+                    resp_count = usage["completion_tokens"]
+                else:
+                    # fallback: naive token count from first choice
+                    choices = data.get("choices", [])
+                    if choices:
+                        text = choices[0].get("text", "")
+                        resp_count = len(text.split())
+                    else:
+                        resp_count = 0
+                with response_tokens_lock:
+                    response_tokens_global += resp_count
+            except Exception:
+                pass
+
             with request_latencies_lock:
                 request_latencies.append(elapsed)
         else:
@@ -487,11 +537,11 @@ def main():
                         help="Skip combos found in CSV.")
     parser.add_argument("--num-requests",
                         type=int,
-                        default=1000,
+                        default=100,
                         help="Total requests to send in parallel.")
     parser.add_argument("--concurrency",
                         type=int,
-                        default=10,
+                        default=1,
                         help="Number of parallel requests.")
     parser.add_argument("--poll-interval",
                         type=float,
@@ -549,7 +599,7 @@ def main():
                 print("[ERROR] Deployment failed, skipping.")
                 continue
 
-            ready = wait_for_endpoint(preset, max_wait_seconds=1800)
+            ready = wait_for_endpoint(preset, max_wait_seconds=300)
             if not ready:
                 print(f"[{preset}/{model_name}] Not online => Cleanup.")
                 delete_namespace_for_preset(preset)
@@ -558,6 +608,7 @@ def main():
             global collected_samples, metric_stop_event
             global request_latencies, error_count
             global last_counters
+            global response_tokens_global, last_response_tokens_data
 
             collected_samples = []
             request_latencies = []
@@ -570,6 +621,10 @@ def main():
                 "prompt_total": 0.0,
                 "generation_total": 0.0,
             }
+
+            # Also reset response tokens tracking
+            response_tokens_global = 0
+            last_response_tokens_data = {"time": time.time(), "count": 0}
 
             # Start background collector
             collector = threading.Thread(
@@ -587,13 +642,13 @@ def main():
             while True:
                 last_metrics = fetch_realtime_metrics(preset, model_name)
                 print("[METRICS]",
-                      f"Avg prompt throughput: {last_metrics['avg_prompt_throughput_toks_per_s']:.1f} tokens/s, "
-                      f"Avg generation throughput: {last_metrics['avg_generation_throughput_toks_per_s']:.1f} tokens/s, "
-                      f"Running: {last_metrics['num_requests_running']:.0f} reqs, "
-                      f"Swapped: {last_metrics['num_requests_swapped']:.0f} reqs, "
-                      f"Pending: {last_metrics['num_requests_waiting']:.0f} reqs, "
-                      f"GPU KV cache usage: {last_metrics['gpu_cache_usage_perc']:.1f}%, "
-                      f"CPU KV cache usage: {last_metrics['cpu_cache_usage_perc']:.1f}%.")
+                      f"Prompt TPS: {last_metrics['avg_prompt_throughput_toks_per_s']:.1f}, "
+                      f"Gen TPS: {last_metrics['avg_generation_throughput_toks_per_s']:.1f}, "
+                      f"Running: {last_metrics['num_requests_running']:.0f}, "
+                      f"Swapped: {last_metrics['num_requests_swapped']:.0f}, "
+                      f"Pending: {last_metrics['num_requests_waiting']:.0f}, "
+                      f"GPU Cache: {last_metrics['gpu_cache_usage_perc']:.1f}%, "
+                      f"CPU Cache: {last_metrics['cpu_cache_usage_perc']:.1f}%.")
 
                 total_pending = (last_metrics["num_requests_running"] +
                                  last_metrics["num_requests_swapped"] +
@@ -642,8 +697,8 @@ def main():
         if not hdr or len(hdr) < 11:
             print("[WARN] CSV missing columns, skipping chart generation.")
             return
-        # columns => 
-        # [preset, model, prompt_tps, gen_tps, running, swapped, pending, gpu_cache%, cpu_cache%, avg_latency, errors]
+        # columns =>
+        # [preset, model, prompt_tps, gen_tps, running, swapped, pending, gpu_cache%, cpu_cache%, avg_latency, errors, resp_tps]
         for row in rd:
             if len(row) < 11:
                 continue
@@ -658,6 +713,7 @@ def main():
                 cpu_cache = float(row[8])
                 avg_lat = float(row[9])
                 errs = float(row[10])
+                # We'll ignore extra columns for charting if present (like resp_tps).
             except ValueError:
                 continue
             results.append((p,m,prompt_tps,gen_tps,running,swapped,pending,gpu_cache,cpu_cache,avg_lat,errs))
@@ -745,7 +801,7 @@ def main():
                    "Avg CPU KV-cache usage", "percent",
                    "chart_cpu_cache_usage.png")
 
-    # 2 new columns
+    # 2 new columns (avg_latency, errors)
     make_bar_chart("avg_latency", data_latency,
                    "Average Latency per Request", "seconds",
                    "chart_avg_latency.png")
