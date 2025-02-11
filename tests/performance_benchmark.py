@@ -155,7 +155,7 @@ class VLLMBenchmark:
     # Deploy
     ############################################################################
     def build_apolo_deploy_command(self, preset: str, model_hf_name: str) -> List[str]:
-        server_extra_args = ['--max-model-len=128000']
+        server_extra_args = ['--max-model-len=8192', "--enable-chunked-prefill"]
         server_arg_sets = []
         for i, val in enumerate(server_extra_args):
             server_arg_sets.append(f'--set "serverExtraArgs[{i}]={val}"')
@@ -414,7 +414,7 @@ class VLLMBenchmark:
             "prompt": """You are a helpful AI assistant.
             The user says: 'Explain the significance of Einstein's theory of relativity in simple terms.'
             Provide a concise but thorough answer.""",
-            "max_tokens": 4096,
+            "max_tokens": 2048,
             "temperature": 0.7
         }
 
@@ -551,7 +551,7 @@ class VLLMBenchmark:
                             help="Skip combos found in CSV.")
         parser.add_argument("--num-requests",
                             type=int,
-                            default=10,
+                            default=50,
                             help="Total requests to launch.")
         parser.add_argument("--concurrency",
                             type=int,

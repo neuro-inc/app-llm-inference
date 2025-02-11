@@ -35,8 +35,21 @@
             "justMyCode": false,
             "args": [
                 "--preset", "H100X2",
-                "--num-requests", "50",
-                "--concurrency", "10",
+                "--num-requests", "100",
+                "--concurrency", "1",
+                "--mode", "sequential"
+            ],
+        },
+        {
+            "name": "Benchmark Sequential all",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/performance_benchmark.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "--num-requests", "100",
+                "--concurrency", "1",
                 "--mode", "sequential"
             ],
         }
