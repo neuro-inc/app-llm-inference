@@ -159,7 +159,7 @@ class VLLMBenchmark:
     # Deploy
     ############################################################################
     def build_apolo_deploy_command(self, preset: str, model_hf_name: str) -> List[str]:
-        server_extra_args = ['--max-model-len=8192', "--enable-chunked-prefill"]
+        server_extra_args = ['--max-model-len=2048', "--enable-chunked-prefill"]
         server_arg_sets = []
         for i, val in enumerate(server_extra_args):
             server_arg_sets.append(f'--set "serverExtraArgs[{i}]={val}"')
@@ -418,7 +418,7 @@ class VLLMBenchmark:
             "prompt": """You are a helpful AI assistant.
             The user says: 'Explain the significance of Einstein's theory of relativity in simple terms.'
             Provide a concise but thorough answer.""",
-            "max_tokens": 2048,
+            "max_tokens": 512,
             "temperature": 0.7
         }
 
