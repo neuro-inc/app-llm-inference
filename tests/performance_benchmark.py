@@ -30,13 +30,17 @@ GPU_PRESETS = [
     "H100X2",
 ]
 
-# Default models
+# Default models to test
 TEST_MODELS = [
+    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
     "meta-llama/Llama-3.1-8B-Instruct",
+    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
 ]
 
 MODEL_VRAM_REQ = {
+    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": 15,
     "meta-llama/Llama-3.1-8B-Instruct": 17,
+    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": 68,
 }
 
 PRESET_GPU_COUNT = {
