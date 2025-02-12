@@ -32,14 +32,14 @@ GPU_PRESETS = [
 
 # Default models to test
 TEST_MODELS = [
-    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-    "meta-llama/Llama-3.1-8B-Instruct",
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+    # "meta-llama/Llama-3.1-8B-Instruct",
     # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
 ]
 
 MODEL_VRAM_REQ = {
-    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": 15,
-    "meta-llama/Llama-3.1-8B-Instruct": 17,
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": 15,
+    # "meta-llama/Llama-3.1-8B-Instruct": 17,
     # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": 68,
 }
 
@@ -159,7 +159,7 @@ class VLLMBenchmark:
     # Deploy
     ############################################################################
     def build_apolo_deploy_command(self, preset: str, model_hf_name: str) -> List[str]:
-        server_extra_args = ['--max-model-len=2048', "--enable-chunked-prefill"]
+        server_extra_args = ['--max-model-len=2048', "--dtype=half", "--enforce-eager", "--trust-remote-code", f"--pipeline-parallel-size={PRESET_GPU_COUNT[preset]}"]
         server_arg_sets = []
         for i, val in enumerate(server_extra_args):
             server_arg_sets.append(f'--set "serverExtraArgs[{i}]={val}"')
@@ -613,9 +613,9 @@ class VLLMBenchmark:
                     continue
 
                 req_vram = MODEL_VRAM_REQ.get(model_name, 0)
-                if total_vram < req_vram:
-                    print(f"[SKIP] {preset} has {total_vram}GB, model needs {req_vram}GB")
-                    continue
+                # if total_vram < req_vram:
+                #     print(f"[SKIP] {preset} has {total_vram}GB, model needs {req_vram}GB")
+                #     continue
 
                 print(f"\n=== Deploying {model_name} on {preset} ===")
                 job_id = self.deploy_model_on_preset(preset, model_name)

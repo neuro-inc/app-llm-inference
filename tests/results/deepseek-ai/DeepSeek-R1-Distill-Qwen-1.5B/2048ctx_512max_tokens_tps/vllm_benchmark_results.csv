@@ -1,0 +1,9 @@
+preset,model,prompt_tps,gen_tps,running,swapped,pending,gpu_cache_percent,cpu_cache_percent,avg_latency_s,errors,resp_tps,request_level_TPS
+gpu-small,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,6.07,80.73,0.96,0.00,0.00,0.09,0.00,6.0536,0,81.00,81.46
+gpu-medium,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,6.34,84.47,0.95,0.00,0.00,0.09,0.00,5.7905,0,84.48,85.16
+gpu-large,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,6.30,84.06,0.96,0.00,0.00,0.09,0.00,5.8184,0,84.17,84.77
+gpu-xlarge,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,6.32,84.16,0.96,0.00,0.00,0.09,0.00,5.8098,0,84.45,84.87
+mi210x1,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,5.55,75.31,0.97,0.00,0.00,0.01,0.00,6.6017,0,75.25,75.88
+mi210x2,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,5.41,72.87,0.94,0.00,0.00,0.01,0.00,6.8609,0,72.83,73.21
+H100X1,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,5.97,78.38,0.97,0.00,0.00,0.01,0.00,6.1432,0,78.43,79.01
+H100X2,deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,5.97,78.33,0.97,0.00,0.00,0.01,0.00,6.1518,0,78.36,78.93
