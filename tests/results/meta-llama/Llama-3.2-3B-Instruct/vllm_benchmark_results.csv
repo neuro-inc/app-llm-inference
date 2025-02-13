@@ -1,0 +1,9 @@
+preset,model,prompt_tps,gen_tps,running,swapped,pending,gpu_cache_percent,cpu_cache_percent,avg_latency_s,errors,resp_tps,request_level_TPS
+gpu-small,meta-llama/Llama-3.2-3B-Instruct,6.10,70.16,0.95,0.00,0.00,0.42,0.00,6.0111,0,70.14,70.72
+gpu-medium,meta-llama/Llama-3.2-3B-Instruct,2.05,23.66,0.99,0.00,0.00,0.16,0.02,17.9330,0,23.67,24.02
+gpu-large,meta-llama/Llama-3.2-3B-Instruct,2.36,27.03,0.99,0.00,0.00,0.08,0.02,15.6916,0,27.12,27.16
+gpu-xlarge,meta-llama/Llama-3.2-3B-Instruct,2.14,24.50,0.99,0.00,0.00,0.08,0.02,17.3105,0,24.55,24.60
+mi210x1,meta-llama/Llama-3.2-3B-Instruct,6.24,69.41,0.96,0.00,0.00,0.05,0.00,5.8833,0,69.49,69.95
+mi210x2,meta-llama/Llama-3.2-3B-Instruct,1.69,18.68,0.86,0.00,0.00,0.02,0.02,19.1742,1,18.56,21.63
+H100X1,meta-llama/Llama-3.2-3B-Instruct,6.69,74.81,0.96,0.00,0.00,0.04,0.00,5.4889,0,74.83,75.52
+H100X2,meta-llama/Llama-3.2-3B-Instruct,1.01,11.37,0.92,0.00,0.00,0.02,0.02,33.8348,2,11.16,12.45
