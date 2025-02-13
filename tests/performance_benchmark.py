@@ -33,16 +33,16 @@ GPU_PRESETS = [
 # Default models to test
 TEST_MODELS = [
     # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-    "meta-llama/Llama-3.2-3B-Instruct",
+    # "meta-llama/Llama-3.2-3B-Instruct",
     # "meta-llama/Llama-3.1-8B-Instruct",
-    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
 ]
 
 MODEL_VRAM_REQ = {
     # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": 15,
-    "meta-llama/Llama-3.2-3B-Instruct": 15,
+    # "meta-llama/Llama-3.2-3B-Instruct": 15,
     # "meta-llama/Llama-3.1-8B-Instruct": 17,
-    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": 68,
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": 68,
 }
 
 PRESET_GPU_COUNT = {
@@ -161,7 +161,7 @@ class VLLMBenchmark:
     # Deploy
     ############################################################################
     def build_apolo_deploy_command(self, preset: str, model_hf_name: str) -> List[str]:
-        server_extra_args = ['--max-model-len=2048', "--dtype=half", "--enforce-eager", "--trust-remote-code"]
+        server_extra_args = ['--max-model-len=64000', "--dtype=half", "--enforce-eager", "--trust-remote-code"]
         server_arg_sets = []
         for i, val in enumerate(server_extra_args):
             server_arg_sets.append(f'--set "serverExtraArgs[{i}]={val}"')
@@ -420,7 +420,7 @@ class VLLMBenchmark:
             "prompt": """You are a helpful AI assistant.
             The user says: 'Explain the significance of Einstein's theory of relativity in simple terms.'
             Provide a concise but thorough answer.""",
-            "max_tokens": 512,
+            "max_tokens": 2048,
             "temperature": 0.7
         }
 
