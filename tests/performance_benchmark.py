@@ -32,16 +32,16 @@ GPU_PRESETS = [
 
 # Default models to test
 TEST_MODELS = [
-    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-    # "meta-llama/Llama-3.2-3B-Instruct",
-    # "meta-llama/Llama-3.1-8B-Instruct",
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+    "meta-llama/Llama-3.2-3B-Instruct",
+    "meta-llama/Llama-3.1-8B-Instruct",
     "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
 ]
 
 MODEL_VRAM_REQ = {
-    # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": 15,
-    # "meta-llama/Llama-3.2-3B-Instruct": 15,
-    # "meta-llama/Llama-3.1-8B-Instruct": 17,
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": 15,
+    "meta-llama/Llama-3.2-3B-Instruct": 15,
+    "meta-llama/Llama-3.1-8B-Instruct": 17,
     "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": 68,
 }
 
@@ -81,6 +81,18 @@ METRIC_NAMES = [
     "avg_response_tokens_per_s",   # from the sum of actual completion tokens in all requests
 ]
 
+################################################################################
+# New configuration for max-model-length and max-tokens in the request
+################################################################################
+MAX_LENGTH_TOKEN_PAIRS = [
+    # Example pairs (you can modify or extend this list as needed):
+    (128000, 2048),
+    (64000, 2048),
+    (8192, 2048),
+    (2048, 512),
+    # etc.
+]
+
 
 class VLLMBenchmark:
     """
@@ -109,6 +121,10 @@ class VLLMBenchmark:
         # We'll store references to threads if needed
         self.active_threads: List[threading.Thread] = []
 
+        # Track current max-model-len / max-tokens in request (updated per test)
+        self.current_max_model_len = 128000
+        self.current_max_request_tokens = 2048
+
     ############################################################################
     # CSV
     ############################################################################
@@ -116,6 +132,8 @@ class VLLMBenchmark:
         self,
         preset: str,
         model_name: str,
+        max_model_len: int,
+        max_request_tokens: int,
         avg_metrics: Dict[str, float],
         avg_latency: float,
         error_count: int,
@@ -123,12 +141,14 @@ class VLLMBenchmark:
     ) -> None:
         """
         Appends a row to vllm_benchmark_results.csv:
-         [preset, model, promptTPS, genTPS, running, swapped, pending,
+         [preset, model, max_model_len, max_tokens, promptTPS, genTPS, running, swapped, pending,
           gpuCache, cpuCache, avg_latency, errors, resp_tps, request_level_TPS]
         """
         row_data = [
             preset,
             model_name,
+            f"{max_model_len}",
+            f"{max_request_tokens}",
             f"{avg_metrics['avg_prompt_throughput_toks_per_s']:.2f}",
             f"{avg_metrics['avg_generation_throughput_toks_per_s']:.2f}",
             f"{avg_metrics['num_requests_running']:.2f}",
@@ -148,6 +168,7 @@ class VLLMBenchmark:
             if not file_exists:
                 writer.writerow([
                     "preset", "model",
+                    "max_model_len", "max_tokens",
                     "prompt_tps", "gen_tps",
                     "running", "swapped", "pending",
                     "gpu_cache_percent", "cpu_cache_percent",
@@ -160,8 +181,16 @@ class VLLMBenchmark:
     ############################################################################
     # Deploy
     ############################################################################
-    def build_apolo_deploy_command(self, preset: str, model_hf_name: str) -> List[str]:
-        server_extra_args = ['--max-model-len=64000', "--dtype=half", "--enforce-eager", "--trust-remote-code"]
+    def build_apolo_deploy_command(self, preset: str, model_hf_name: str, max_model_len: int) -> List[str]:
+        # Keep the original server_extra_args as is, but override the first argument:
+        server_extra_args = [
+            "--dtype=half",
+            "--enforce-eager",
+            "--trust-remote-code",
+        ]
+        # Override the first one to match our desired max_model_len
+        server_extra_args[0] = f"--max-model-len={max_model_len}"
+
         server_arg_sets = []
         for i, val in enumerate(server_extra_args):
             server_arg_sets.append(f'--set "serverExtraArgs[{i}]={val}"')
@@ -170,7 +199,8 @@ class VLLMBenchmark:
             "apolo",
             "run",
             "--pass-config",
-            "ghcr.io/neuro-inc/app-deployment",
+            # "ghcr.io/neuro-inc/app-deployment:latest",
+            "image://novoserve/apolo/taddeus/app-deployment:latest",
             "--",
             "install",
             "https://github.com/neuro-inc/app-llm-inference",
@@ -178,7 +208,7 @@ class VLLMBenchmark:
             preset.lower(),
             "charts/llm-inference-app",
             "--timeout=15m",
-            "--set branch=benchmarks",
+            "--git-branch=benchmarks",
             f'--set "preset_name={preset}"',
             f'--set "model.modelHFName={model_hf_name}"',
             '--set "model.modelRevision=main"',
@@ -189,10 +219,10 @@ class VLLMBenchmark:
         base_cmd.extend(server_arg_sets)
         return base_cmd
 
-    def deploy_model_on_preset(self, preset: str, model_hf_name: str) -> Optional[str]:
-        cmd_list = self.build_apolo_deploy_command(preset, model_hf_name)
+    def deploy_model_on_preset(self, preset: str, model_hf_name: str, max_model_len: int) -> Optional[str]:
+        cmd_list = self.build_apolo_deploy_command(preset, model_hf_name, max_model_len)
         cmd_str = " ".join(cmd_list)
-        print(f"\n[DEPLOY] Preset={preset}, Model={model_hf_name}\nCMD:\n  {cmd_str}\n")
+        print(f"\n[DEPLOY] Preset={preset}, Model={model_hf_name}, max_model_len={max_model_len}\nCMD:\n  {cmd_str}\n")
 
         try:
             result = subprocess.run(cmd_str, shell=True, check=False, text=True, capture_output=True)
@@ -408,7 +438,7 @@ class VLLMBenchmark:
     ############################################################################
     # Request Logic
     ############################################################################
-    def process_one_request(self, completions_url: str, model_name: str) -> None:
+    def process_one_request(self, completions_url: str, model_name: str, max_request_tokens: int) -> None:
         """
         Actually does the synchronous HTTP call,
         capturing tokens, latency, etc.
@@ -420,7 +450,7 @@ class VLLMBenchmark:
             "prompt": """You are a helpful AI assistant.
             The user says: 'Explain the significance of Einstein's theory of relativity in simple terms.'
             Provide a concise but thorough answer.""",
-            "max_tokens": 2048,
+            "max_tokens": max_request_tokens,
             "temperature": 0.7
         }
 
@@ -469,7 +499,8 @@ class VLLMBenchmark:
         completions_url: str,
         model_name: str,
         num_requests: int,
-        concurrency: int
+        concurrency: int,
+        max_request_tokens: int
     ) -> None:
         """
         'Sequential mode': We maintain up to `concurrency` requests in flight.
@@ -483,7 +514,7 @@ class VLLMBenchmark:
         with ThreadPoolExecutor(max_workers=concurrency) as pool:
             futures = []
             for _ in range(num_requests):
-                futures.append(pool.submit(self.process_one_request, completions_url, model_name))
+                futures.append(pool.submit(self.process_one_request, completions_url, model_name, max_request_tokens))
 
             # Wait for them all to finish
             for f in as_completed(futures):
@@ -498,7 +529,8 @@ class VLLMBenchmark:
         model_name: str,
         num_requests: int,
         concurrency: int,
-        batch_interval: float
+        batch_interval: float,
+        max_request_tokens: int
     ) -> None:
         """
         'Parallel mode': Launch a batch of `concurrency` requests every `batch_interval` seconds,
@@ -518,7 +550,7 @@ class VLLMBenchmark:
             for _ in range(batch_size):
                 t = threading.Thread(
                     target=self.process_one_request,
-                    args=(completions_url, model_name),
+                    args=(completions_url, model_name, max_request_tokens),
                     daemon=False
                 )
                 t.start()
@@ -597,134 +629,139 @@ class VLLMBenchmark:
             with open(CSV_FILENAME, "r", encoding="utf-8") as f:
                 rd = csv.reader(f)
                 hdr = next(rd, None)
-                if hdr and len(hdr) >= 12:
+                if hdr and len(hdr) >= 14:
                     for row in rd:
-                        if len(row) < 12:
+                        if len(row) < 14:
                             continue
-                        p, m = row[0], row[1]
-                        existing_combos.add((p, m))
+                        p, m, ml, rt = row[0], row[1], row[2], row[3]
+                        existing_combos.add((p, m, ml, rt))
 
-        for preset in selected_presets:
-            ng = PRESET_GPU_COUNT.get(preset, 1)
-            vram = PRESET_VRAM_PER_GPU.get(preset, 0)
-            total_vram = ng * vram
+        # Now we iterate over all pairs of (max_model_len, max_request_tokens),
+        # then over all presets and models.
+        for (max_model_len, max_req_tokens) in MAX_LENGTH_TOKEN_PAIRS:
+            for preset in selected_presets:
+                ng = PRESET_GPU_COUNT.get(preset, 1)
+                vram = PRESET_VRAM_PER_GPU.get(preset, 0)
+                total_vram = ng * vram
 
-            for model_name in selected_models:
-                if (preset, model_name) in existing_combos:
-                    print(f"[SKIP] Already in CSV => {preset}/{model_name}")
-                    continue
+                for model_name in selected_models:
+                    if (preset, model_name, str(max_model_len), str(max_req_tokens)) in existing_combos:
+                        print(f"[SKIP] Already in CSV => {preset}/{model_name} with max_model_len={max_model_len}, max_tokens={max_req_tokens}")
+                        continue
 
-                req_vram = MODEL_VRAM_REQ.get(model_name, 0)
-                # if total_vram < req_vram:
-                #     print(f"[SKIP] {preset} has {total_vram}GB, model needs {req_vram}GB")
-                #     continue
+                    req_vram = MODEL_VRAM_REQ.get(model_name, 0)
+                    # if total_vram < req_vram:
+                    #     print(f"[SKIP] {preset} has {total_vram}GB, model needs {req_vram}GB")
+                    #     continue
 
-                print(f"\n=== Deploying {model_name} on {preset} ===")
-                job_id = self.deploy_model_on_preset(preset, model_name)
-                if not job_id:
-                    print("[ERROR] Deployment failed => skipping.")
-                    continue
+                    print(f"\n=== Deploying {model_name} on {preset} (max_model_len={max_model_len}, max_tokens={max_req_tokens}) ===")
+                    job_id = self.deploy_model_on_preset(preset, model_name, max_model_len)
+                    if not job_id:
+                        print("[ERROR] Deployment failed => skipping.")
+                        continue
 
-                # Recursive readiness check
-                ready = self.wait_for_endpoint_recursively(preset, max_wait_seconds=300, interval_seconds=5)
-                if not ready:
-                    print(f"[ERROR] {preset}/{model_name} not online => Cleanup and skip.")
+                    # Recursive readiness check
+                    ready = self.wait_for_endpoint_recursively(preset, max_wait_seconds=300, interval_seconds=5)
+                    if not ready:
+                        print(f"[ERROR] {preset}/{model_name} not online => Cleanup and skip.")
+                        self.delete_namespace_for_preset(preset)
+                        continue
+
+                    # reset collectors
+                    self.collected_samples.clear()
+                    self.all_request_latencies.clear()
+                    self.all_request_tps.clear()
+                    self.error_count = 0
+                    self.metric_stop_event.clear()
+
+                    self.last_counters[(preset, model_name)] = {
+                        "time": time.time(),
+                        "prompt_total": 0.0,
+                        "generation_total": 0.0,
+                    }
+                    self.response_tokens_total = 0
+                    self.last_response_tokens_data = {"time": time.time(), "count": 0}
+                    self.active_threads.clear()
+
+                    # Start background collector
+                    collector_thread = threading.Thread(
+                        target=self.background_collector_thread,
+                        args=(preset, model_name, args.poll_interval),
+                        daemon=True
+                    )
+                    collector_thread.start()
+
+                    base_url = DOMAIN_FORMAT.format(preset.lower())
+                    completions_url = base_url + "/v1/completions"
+
+                    # MAIN LOAD TEST
+                    if args.mode == "sequential":
+                        # Keep concurrency requests in flight until done
+                        self.run_load_test_sequential(
+                            completions_url=completions_url,
+                            model_name=model_name,
+                            num_requests=args.num_requests,
+                            concurrency=args.concurrency,
+                            max_request_tokens=max_req_tokens
+                        )
+                    else:
+                        # "parallel": spawn concurrency requests every batch_interval
+                        self.run_load_test_parallel(
+                            completions_url=completions_url,
+                            model_name=model_name,
+                            num_requests=args.num_requests,
+                            concurrency=args.concurrency,
+                            batch_interval=args.batch_interval,
+                            max_request_tokens=max_req_tokens
+                        )
+
+                    # Let metric collector gather some final data
+                    time.sleep(5.0)
+
+                    # Stop collector
+                    self.metric_stop_event.set()
+                    collector_thread.join(timeout=10.0)
+
+                    # Summarize from collected samples
+                    if len(self.collected_samples) == 0:
+                        print("[WARN] No metric samples collected => zero for everything.")
+                        avg_result = {mn: 0.0 for mn in METRIC_NAMES}
+                    else:
+                        sum_vals = {mn: 0.0 for mn in METRIC_NAMES}
+                        for sample in self.collected_samples:
+                            for mn in METRIC_NAMES:
+                                sum_vals[mn] += sample[mn]
+                        n = len(self.collected_samples)
+                        avg_result = {mn: (sum_vals[mn] / n) for mn in METRIC_NAMES}
+
+                    # compute avg latency & request-level TPS
+                    with self.lock:
+                        if self.all_request_latencies:
+                            avg_latency = sum(self.all_request_latencies) / len(self.all_request_latencies)
+                        else:
+                            avg_latency = 0.0
+
+                        if self.all_request_tps:
+                            avg_request_tps = sum(self.all_request_tps) / len(self.all_request_tps)
+                        else:
+                            avg_request_tps = 0.0
+
+                        local_err_count = self.error_count
+
+                    # Write CSV row
+                    self.append_csv_row(
+                        preset=preset,
+                        model_name=model_name,
+                        max_model_len=max_model_len,
+                        max_request_tokens=max_req_tokens,
+                        avg_metrics=avg_result,
+                        avg_latency=avg_latency,
+                        error_count=local_err_count,
+                        avg_request_tps=avg_request_tps
+                    )
+
+                    # Cleanup
                     self.delete_namespace_for_preset(preset)
-                    continue
-
-                # reset collectors
-                self.collected_samples.clear()
-                self.all_request_latencies.clear()
-                self.all_request_tps.clear()
-                self.error_count = 0
-                self.metric_stop_event.clear()
-
-                self.last_counters[(preset, model_name)] = {
-                    "time": time.time(),
-                    "prompt_total": 0.0,
-                    "generation_total": 0.0,
-                }
-                self.response_tokens_total = 0
-                self.last_response_tokens_data = {"time": time.time(), "count": 0}
-                self.active_threads.clear()
-
-                # Start background collector
-                collector_thread = threading.Thread(
-                    target=self.background_collector_thread,
-                    args=(preset, model_name, args.poll_interval),
-                    daemon=True
-                )
-                collector_thread.start()
-
-                base_url = DOMAIN_FORMAT.format(preset.lower())
-                completions_url = base_url + "/v1/completions"
-
-                # MAIN LOAD TEST
-                if args.mode == "sequential":
-                    # Keep concurrency requests in flight until done
-                    self.run_load_test_sequential(
-                        completions_url=completions_url,
-                        model_name=model_name,
-                        num_requests=args.num_requests,
-                        concurrency=args.concurrency
-                    )
-                else:
-                    # "parallel": spawn concurrency requests every batch_interval
-                    self.run_load_test_parallel(
-                        completions_url=completions_url,
-                        model_name=model_name,
-                        num_requests=args.num_requests,
-                        concurrency=args.concurrency,
-                        batch_interval=args.batch_interval
-                    )
-
-                # optionally, if in parallel mode you do NOT want to wait => do nothing
-                # or if in sequential we have already waited for them. Either way, let's
-                # let the metric collector gather some data:
-                time.sleep(5.0)
-
-                # Stop collector
-                self.metric_stop_event.set()
-                collector_thread.join(timeout=10.0)
-
-                # Summarize from collected samples
-                if len(self.collected_samples) == 0:
-                    print("[WARN] No metric samples collected => zero for everything.")
-                    avg_result = {mn: 0.0 for mn in METRIC_NAMES}
-                else:
-                    sum_vals = {mn: 0.0 for mn in METRIC_NAMES}
-                    for sample in self.collected_samples:
-                        for mn in METRIC_NAMES:
-                            sum_vals[mn] += sample[mn]
-                    n = len(self.collected_samples)
-                    avg_result = {mn: (sum_vals[mn] / n) for mn in METRIC_NAMES}
-
-                # compute avg latency & request-level TPS
-                with self.lock:
-                    if self.all_request_latencies:
-                        avg_latency = sum(self.all_request_latencies) / len(self.all_request_latencies)
-                    else:
-                        avg_latency = 0.0
-
-                    if self.all_request_tps:
-                        avg_request_tps = sum(self.all_request_tps) / len(self.all_request_tps)
-                    else:
-                        avg_request_tps = 0.0
-
-                    local_err_count = self.error_count
-
-                # Write CSV row
-                self.append_csv_row(
-                    preset=preset,
-                    model_name=model_name,
-                    avg_metrics=avg_result,
-                    avg_latency=avg_latency,
-                    error_count=local_err_count,
-                    avg_request_tps=avg_request_tps
-                )
-
-                # Cleanup
-                self.delete_namespace_for_preset(preset)
 
         # Chart generation if CSV is present
         if not os.path.exists(CSV_FILENAME):
@@ -744,12 +781,12 @@ class VLLMBenchmark:
         with open(CSV_FILENAME, "r", encoding="utf-8") as f:
             rd = csv.reader(f)
             hdr = next(rd, None)
-            if not hdr or len(hdr) < 12:
+            if not hdr or len(hdr) < 14:
                 print("[WARN] CSV missing columns, skipping chart generation.")
                 return
 
             for row in rd:
-                if len(row) < 12:
+                if len(row) < 14:
                     continue
                 rows.append(row)
 
@@ -760,36 +797,39 @@ class VLLMBenchmark:
         # parse them
         data_parsed = []
         for row in rows:
-            # row => [preset, model, promptTPS, genTPS, running, swapped, pending,
-            #         gpu_cache_percent, cpu_cache_percent, avg_latency_s, errors, resp_tps, request_tps]
+            # row => [preset, model, max_model_len, max_tokens, promptTPS, genTPS, running, swapped,
+            #         pending, gpu_cache_percent, cpu_cache_percent, avg_latency_s, errors, resp_tps, request_tps]
             p, m = row[0], row[1]
             try:
-                prompt_tps = float(row[2])
-                gen_tps = float(row[3])
-                running = float(row[4])
-                swapped = float(row[5])
-                pending = float(row[6])
-                gpu_cache = float(row[7])
-                cpu_cache = float(row[8])
-                avg_lat = float(row[9])
-                errs = float(row[10])
-                resp_tps = float(row[11])
-                req_tps = float(row[12]) if len(row) >= 13 else 0.0
+                max_len = int(row[2])
+                max_toks = int(row[3])
+                prompt_tps = float(row[4])
+                gen_tps = float(row[5])
+                running = float(row[6])
+                swapped = float(row[7])
+                pending = float(row[8])
+                gpu_cache = float(row[9])
+                cpu_cache = float(row[10])
+                avg_lat = float(row[11])
+                errs = float(row[12])
+                resp_tps = float(row[13])
+                req_tps = float(row[14]) if len(row) >= 15 else 0.0
             except ValueError:
                 continue
-            data_parsed.append((p, m, prompt_tps, gen_tps, running, swapped,
+            data_parsed.append((p, m, max_len, max_toks, prompt_tps, gen_tps, running, swapped,
                                 pending, gpu_cache, cpu_cache, avg_lat, errs, resp_tps, req_tps))
 
         # group by
         seen_presets = []
         seen_models = []
+        # We won't group by max_len/max_toks for simple charts, but we store them anyway.
         for (p, m, *_rest) in data_parsed:
             if p not in seen_presets:
                 seen_presets.append(p)
             if m not in seen_models:
                 seen_models.append(m)
 
-        # separate dict
+        # We'll create dicts keyed by (p, m) just like before (ignoring max_len/toks).
         data_prompt = {}
         data_gen = {}
         data_run = {}
@@ -802,7 +842,10 @@ class VLLMBenchmark:
         data_resp_tps = {}
         data_request_tps = {}
 
-        for (p, m, pr, gn, run_, sw, pend, gpu, cp, lat, errs, resp, rtps) in data_parsed:
+        for (p, m, max_len, max_toks, pr, gn, run_, sw, pend, gpu, cp, lat, errs, resp, rtps) in data_parsed:
+            # For charting we only do simple grouping by (preset, model).
+            # If multiple lines exist for different max_len/toks, it might overwrite, but at least we get
+            # some combined chart. You can adapt if needed.
             data_prompt[(p, m)] = pr
             data_gen[(p, m)] = gn
             data_run[(p, m)] = run_
@@ -870,8 +913,9 @@ class VLLMBenchmark:
 
         print("\n=== Final Results from CSV ===")
         for row in data_parsed:
-            (p, m, pr, gn, run_, sw, pend, gpu, cp, lat, errs, resp, rtps) = row
-            print(f"{p}/{m}: promptTPS={pr:.2f}, genTPS={gn:.2f}, "
+            (p, m, max_len, max_toks, pr, gn, run_, sw, pend, gpu, cp, lat, errs, resp, rtps) = row
+            print(f"{p}/{m}, maxLen={max_len}, maxTokens={max_toks}: "
+                  f"promptTPS={pr:.2f}, genTPS={gn:.2f}, "
                   f"run={run_:.2f}, swap={sw:.2f}, pend={pend:.2f}, "
                   f"GPU={gpu:.2f}%, CPU={cp:.2f}%, avg_latency={lat:.4f}s, errors={errs}, "
                   f"respTPS={resp:.2f}, requestTPS={rtps:.2f}")
