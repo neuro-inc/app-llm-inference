@@ -189,7 +189,7 @@ class VLLMBenchmark:
             "--trust-remote-code",
         ]
         # Override the first one to match our desired max_model_len
-        server_extra_args[0] = f"--max-model-len={max_model_len}"
+        server_extra_args.append(f"--max-model-len={max_model_len}")
 
         server_arg_sets = []
         for i, val in enumerate(server_extra_args):
@@ -199,8 +199,8 @@ class VLLMBenchmark:
             "apolo",
             "run",
             "--pass-config",
-            # "ghcr.io/neuro-inc/app-deployment:latest",
-            "image://novoserve/apolo/taddeus/app-deployment:latest",
+            "ghcr.io/neuro-inc/app-deployment:latest",
+            # "image://novoserve/apolo/taddeus/app-deployment:latest",
             "--",
             "install",
             "https://github.com/neuro-inc/app-llm-inference",
