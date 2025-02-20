@@ -86,10 +86,10 @@ METRIC_NAMES = [
 ################################################################################
 MAX_LENGTH_TOKEN_PAIRS = [
     # Example pairs (you can modify or extend this list as needed):
-    (128000, 2048),
-    (64000, 2048),
-    (8192, 2048),
     (2048, 512),
+    (8192, 2048),
+    (64000, 2048),
+    (128000, 2048),
     # etc.
 ]
 
@@ -608,6 +608,17 @@ class VLLMBenchmark:
                             type=float,
                             default=1.0,
                             help="How often to poll /metrics in seconds.")
+
+        # New CLI arguments for single (max_model_len, max_tokens)
+        parser.add_argument("--max-model-length",
+                            type=int,
+                            default=None,
+                            help="Override the model context length (if set, only runs that one).")
+        parser.add_argument("--max-tokens",
+                            type=int,
+                            default=None,
+                            help="Override the request max_tokens (if set, only runs that one).")
+
         args = parser.parse_args()
 
         if args.preset:
@@ -624,6 +635,12 @@ class VLLMBenchmark:
         else:
             selected_models = TEST_MODELS[:]
 
+        # If user specified a single max_model_length / max_tokens, use that pair only.
+        if args.max_model_length is not None and args.max_tokens is not None:
+            length_token_pairs = [(args.max_model_length, args.max_tokens)]
+        else:
+            length_token_pairs = MAX_LENGTH_TOKEN_PAIRS
+
         existing_combos = set()
         if args.resume and os.path.exists(CSV_FILENAME):
             with open(CSV_FILENAME, "r", encoding="utf-8") as f:
@@ -638,15 +655,17 @@ class VLLMBenchmark:
 
         # Now we iterate over all pairs of (max_model_len, max_request_tokens),
         # then over all presets and models.
-        for (max_model_len, max_req_tokens) in MAX_LENGTH_TOKEN_PAIRS:
+        for (max_model_len, max_req_tokens) in length_token_pairs:
             for preset in selected_presets:
                 ng = PRESET_GPU_COUNT.get(preset, 1)
                 vram = PRESET_VRAM_PER_GPU.get(preset, 0)
                 total_vram = ng * vram
 
                 for model_name in selected_models:
+                    # Skip if found in CSV (resume mode)
                     if (preset, model_name, str(max_model_len), str(max_req_tokens)) in existing_combos:
-                        print(f"[SKIP] Already in CSV => {preset}/{model_name} with max_model_len={max_model_len}, max_tokens={max_req_tokens}")
+                        print(f"[SKIP] Already in CSV => {preset}/{model_name} "
+                              f"with max_model_len={max_model_len}, max_tokens={max_req_tokens}")
                         continue
 
                     req_vram = MODEL_VRAM_REQ.get(model_name, 0)
@@ -654,7 +673,8 @@ class VLLMBenchmark:
                     #     print(f"[SKIP] {preset} has {total_vram}GB, model needs {req_vram}GB")
                     #     continue
 
-                    print(f"\n=== Deploying {model_name} on {preset} (max_model_len={max_model_len}, max_tokens={max_req_tokens}) ===")
+                    print(f"\n=== Deploying {model_name} on {preset} "
+                          f"(max_model_len={max_model_len}, max_tokens={max_req_tokens}) ===")
                     job_id = self.deploy_model_on_preset(preset, model_name, max_model_len)
                     if not job_id:
                         print("[ERROR] Deployment failed => skipping.")
@@ -844,8 +864,6 @@ class VLLMBenchmark:
 
         for (p, m, max_len, max_toks, pr, gn, run_, sw, pend, gpu, cp, lat, errs, resp, rtps) in data_parsed:
             # For charting we only do simple grouping by (preset, model).
-            # If multiple lines exist for different max_len/toks, it might overwrite, but at least we get
-            # some combined chart. You can adapt if needed.
             data_prompt[(p, m)] = pr
             data_gen[(p, m)] = gn
             data_run[(p, m)] = run_
