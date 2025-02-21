@@ -1,5 +1,0 @@
-preset,model,prompt_tps,gen_tps,running,swapped,pending,gpu_cache_percent,cpu_cache_percent,avg_latency_s,errors,resp_tps,request_level_TPS
-mi210x1,meta-llama/Llama-3.1-8B-Instruct,0.79,33.41,0.70,0.00,0.00,0.21,0.00,35.0116,5,33.02,46.98
-mi210x2,meta-llama/Llama-3.1-8B-Instruct,1.09,48.09,0.99,0.00,0.00,0.30,0.00,33.8560,0,48.07,48.02
-H100X1,meta-llama/Llama-3.1-8B-Instruct,1.94,78.93,0.99,0.00,0.00,0.22,0.00,19.0589,0,78.92,78.98
-H100X2,meta-llama/Llama-3.1-8B-Instruct,1.52,61.36,0.76,0.00,0.00,0.17,0.00,18.8373,2,60.46,79.28
