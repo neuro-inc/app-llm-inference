@@ -46,8 +46,12 @@ spec:
             {{- end }}
           env:
           {{- range $k, $v := .Values.env }}
-            - name: {{ $k }}
-              value: {{ $v | quote }}
+          - name: {{ $k }}
+            {{- if kindIs "string" $v }}
+            value: {{ $v | quote }}
+            {{- else }}
+            {{ $v | toYaml | nindent 14 }}
+            {{- end }}
           {{- end }}
           command: ["huggingface-cli"]
           args:
@@ -117,7 +121,11 @@ spec:
           env:
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
+              {{- if kindIs "string" $v }}
               value: {{ $v | quote }}
+              {{- else }}
+              {{ $v | toYaml | nindent 14 }}
+              {{- end }}
             {{- end }}
 
             {{- if eq .Values.gpuProvider "amd" }}
