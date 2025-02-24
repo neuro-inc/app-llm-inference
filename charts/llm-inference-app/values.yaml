@@ -22,12 +22,12 @@ replicaCount: 1
 image:
   repository: vllm/vllm-openai
   pullPolicy: IfNotPresent
-  tag: v0.5.3.post1
+  tag: v0.7.2
   imagePullSecrets: []
 
 resources: {}
 
-healthChecksDelay: 300
+healthChecksDelay: 60
 
 volumesManage: false
 PVCVolumes: []
@@ -92,7 +92,7 @@ gpuProvider: "nvidia"
 ########################################
 amdImage:
   repository: rocm/vllm-ci
-  tag: "7a8987dac5f0ed0c798a73e8b4ec8f5e640bc63a"
+  tag: "1918aa1b8010c00443b71f8bb976d4db4acf3c18"
   pullPolicy: IfNotPresent
 
 envAmd:
@@ -111,7 +111,7 @@ envAmd:
 ########################################
 nvidiaImage:
   repository: vllm/vllm-openai
-  tag: "v0.5.3.post1"
+  tag: "v0.7.2"
   pullPolicy: IfNotPresent
 
 envNvidia:
