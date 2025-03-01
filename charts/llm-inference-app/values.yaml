@@ -29,17 +29,6 @@ resources: {}
 
 healthChecksDelay: 60
 
-volumesManage: false
-PVCVolumes: []
-  # - pvcName: huggingface-cache
-  #   autocreate: false
-  #   accessMode: ReadWriteOnce
-  #   storageClassName: ""
-  #   storage: 300Gi
-  #   mountPath: /root/.cache/huggingface
-  #   mountReadOnly: false
-  #   volumeSubPath: "llm-cache"
-
 cache:
   enabled: true
   sizeLimit: 100Gi
