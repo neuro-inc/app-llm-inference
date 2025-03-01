@@ -48,6 +48,7 @@ env:
   HUGGING_FACE_HUB_TOKEN: ""
 
 podAnnotations: {}
+podExtraLabels: {}
 
 nodeSelector: {}
 
