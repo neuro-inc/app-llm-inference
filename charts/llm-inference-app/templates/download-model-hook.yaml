@@ -48,7 +48,7 @@ spec:
           - download
           - --resume-download
           - --repo-type=model
-          - "{{ .Values.llm.modelHFName }}"
+          - "{{ .Values.model.modelHFName }}"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
