@@ -48,6 +48,9 @@ spec:
           - download
           - --resume-download
           - --repo-type=model
+          {{- if .Values.model.modelRevision }}
+          - --revision={{ .Values.model.modelRevision }}
+          {{- end }}
           - "{{ .Values.model.modelHFName }}"
       {{- with .Values.nodeSelector }}
       nodeSelector:
