@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "app.fullname" . }}-download
+  name: {{ include "app.fullname" . | trunc 63 | trimSuffix "-" }}
   labels:
     {{- include "app.labels" . | nindent 4 }}
   annotations:
@@ -12,7 +12,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: {{ include "app.fullname" . }}-download
+      name: {{ include "app.fullname" . | trunc 63 | trimSuffix "-" }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
