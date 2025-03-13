@@ -180,7 +180,6 @@ spec:
           {{- end }}
           {{- end }}
 
-      {{- if or .Values.volumes .Values.cache.enabled }}
       volumes:
         - name: dshm
           emptyDir:
@@ -195,7 +194,6 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .pvcName }}
         {{- end }}
-      {{- end }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
