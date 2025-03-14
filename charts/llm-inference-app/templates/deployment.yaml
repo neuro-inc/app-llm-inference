@@ -23,9 +23,10 @@ spec:
       labels:
         {{- include "app.labels" . | nindent 8 }}
         {{- include "app.apoloPodLabels" . | nindent 8 }}
-      {{- with .Values.podExtraLabels }}
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- include "app.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podExtraLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:
