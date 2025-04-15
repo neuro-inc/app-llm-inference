@@ -57,7 +57,7 @@ modelDownload:
   initEnabled: true
   image:
     repository: ghcr.io/neuro-inc/hf-downloader
-    tag: latest
+    tag: v25.4.0
     pullPolicy: IfNotPresent
   resources: {}
 
