@@ -69,6 +69,14 @@ service:
 ingress:
   enabled: false
   clusterName: ""
+  forwardAuth:
+    enabled: false
+    # name: forwardauth
+    # address: http://forwardauth:8080
+    # trustForwardHeader: true
+    # authRequestHeaders:
+    #   - "Cookie"
+    #   - "Authorization"
 
 preset_name: ""
 
