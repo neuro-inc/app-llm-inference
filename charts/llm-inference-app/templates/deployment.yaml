@@ -54,7 +54,7 @@ spec:
             {{- if kindIs "string" $v }}
             value: {{ $v | quote }}
             {{- else }}
-            {{ $v | toYaml | nindent 14 }}
+            {{- $v | toYaml | nindent 12 }}
             {{- end }}
           {{- end }}
           command: ["huggingface-cli"]
