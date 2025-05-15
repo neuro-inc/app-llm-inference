@@ -27,7 +27,24 @@ image:
 
 resources: {}
 
-healthChecksDelay: 60
+probe:
+  # One‑off grace period on cold start – pulls weights / builds kernels
+  startup:
+    periodSeconds: 10    # probe every 10 s
+    failureThreshold: 60 # 10 min grace (60×10 s)
+    timeoutSeconds: 2
+
+  # Steady‑state readiness gate (service/ingress)
+  readiness:
+    periodSeconds: 10
+    failureThreshold: 3  # ≈30 s to mark NotReady
+    timeoutSeconds: 2
+
+  # Steady‑state health check (deadlock / OOM detection)
+  liveness:
+    periodSeconds: 30
+    failureThreshold: 3  # ≈90 s to restart
+    timeoutSeconds: 5
 
 cache:
   enabled: true

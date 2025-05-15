@@ -93,17 +93,39 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
 
-          livenessProbe:
-            initialDelaySeconds: {{ .Values.healthChecksDelay }}
+          # ----------------------------------------------------------
+          # Startup probe – generous grace period for cold start
+          # ----------------------------------------------------------
+          startupProbe:
             httpGet:
               path: /health
               port: http
+            periodSeconds: {{ .Values.probe.startup.periodSeconds }}
+            failureThreshold: {{ .Values.probe.startup.failureThreshold }}
+            timeoutSeconds: {{ .Values.probe.startup.timeoutSeconds }}
 
-          readinessProbe:
-            initialDelaySeconds: {{ .Values.healthChecksDelay }}
+          # ----------------------------------------------------------
+          # Liveness probe – **no initial delay** (user request)
+          # ----------------------------------------------------------
+          livenessProbe:
             httpGet:
               path: /health
               port: http
+            periodSeconds: {{ .Values.probe.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.probe.liveness.failureThreshold }}
+            timeoutSeconds: {{ .Values.probe.liveness.timeoutSeconds }}
+
+          # ----------------------------------------------------------
+          # Readiness probe – tight cadence; optional legacy delay when
+          # startup probe is disabled
+          # ----------------------------------------------------------
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: {{ .Values.probe.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.probe.readiness.failureThreshold }}
+            timeoutSeconds: {{ .Values.probe.readiness.timeoutSeconds }}
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
