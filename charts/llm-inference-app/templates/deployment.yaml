@@ -116,8 +116,7 @@ spec:
             timeoutSeconds: {{ .Values.probe.liveness.timeoutSeconds }}
 
           # ----------------------------------------------------------
-          # Readiness probe – tight cadence; optional legacy delay when
-          # startup probe is disabled
+          # Readiness probe – tight cadence
           # ----------------------------------------------------------
           readinessProbe:
             httpGet:
