@@ -178,7 +178,9 @@ spec:
             {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
             - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
             {{- end }}
+            {{- if and .Values.llm.tokenizerHFName (ne .Values.llm.tokenizerHFName "") }}
             - --tokenizer={{ .Values.llm.tokenizerHFName }}
+            {{- end }}
             {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             {{- end }}
@@ -193,7 +195,9 @@ spec:
             {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
             - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
             {{- end }}
+            {{- if and .Values.llm.tokenizerHFName (ne .Values.llm.tokenizerHFName "") }}
             - --tokenizer={{ .Values.llm.tokenizerHFName }}
+            {{- end }}
             {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
             {{- end }}
