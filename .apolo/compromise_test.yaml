@@ -23,7 +23,7 @@ volumes:
 
 images:
   vllm_test_env:
-    ref: "rocm/vllm-ci:16366ee8bbdc30aad9776b74121cfc4d8f8c897d"
+    ref: "rocm/vllm-ci:93cd0c2ba1c7ab80df94f79d557abb2774897d2a"
 
 tasks:
   - strategy:
