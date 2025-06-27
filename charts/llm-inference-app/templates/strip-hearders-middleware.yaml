@@ -3,7 +3,11 @@
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: strip-headers
+  {{- if .Values.ingress.stripHeaders.name }}
+  name: {{ .Values.ingress.stripHeaders.name }}
+  {{- else }}
+  name: {{ include "app.fullname" . }}-headers
+  {{- end }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "app.labels" . | nindent 4 }}
