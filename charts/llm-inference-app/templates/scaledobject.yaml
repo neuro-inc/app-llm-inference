@@ -1,0 +1,18 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: prometheus-scaledobject
+  namespace: "{{ .Release.Namespace }}"
+spec:
+  scaleTargetRef:
+    name: {{ include "app.fullname" . }}
+  maxReplicaCount: 2
+  minReplicaCount: 1
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-prometheus.platform.svc.cluster.local:9090
+      query: sum(rate(traefik_service_requests_total{exported_service="{{ .Release.Namespace }}-{{ include "app.fullname" . }}-http@kubernetes"}[5000m]))
+      threshold: '1'
+      activationThreshold: '1'
+      namespace: platform
