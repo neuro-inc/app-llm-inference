@@ -17,11 +17,11 @@ spec:
         service: {{ include "app.fullname" . }}
         port: {{ .Values.service.port }}
     replicas:
-        min: 0
+        min: 1
         max: 2
     scaledownPeriod: 300
     scalingMetric: # requestRate and concurrency are mutually exclusive
         requestRate:
-            granularity: 1s
+            granularity: 1m
             targetValue: 2
             window: 1m
