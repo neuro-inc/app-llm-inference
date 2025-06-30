@@ -1,18 +1,27 @@
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
+kind: HTTPScaledObject
+apiVersion: http.keda.sh/v1alpha1
 metadata:
-  name: prometheus-scaledobject
+  name: llm-httpscaledobject
   namespace: "{{ .Release.Namespace }}"
+  annotations:
+    httpscaledobject.keda.sh/skip-scaledobject-creation: "false"
 spec:
-  scaleTargetRef:
-    name: {{ include "app.fullname" . }}
-  maxReplicaCount: 2
-  minReplicaCount: 1
-  triggers:
-  - type: prometheus
-    metadata:
-      serverAddress: http://prometheus-prometheus.platform.svc.cluster.local:9090
-      query: sum(rate(traefik_service_requests_total{exported_service="{{ .Release.Namespace }}-{{ include "app.fullname" . }}-http@kubernetes"}[5000m]))
-      threshold: '1'
-      activationThreshold: '1'
-      namespace: platform
+    hosts:
+    {{- range .Values.ingress.hosts }}
+    - {{ .host | quote }}
+    {{- end }}
+    scaleTargetRef:
+        name: {{ include "app.fullname" . }}
+        kind: Deployment
+{{/*        apiVersion: apps/v1*/}}
+        service: {{ include "app.fullname" . }}
+        port: {{ .Values.service.port }}
+    replicas:
+        min: 0
+        max: 2
+    scaledownPeriod: 300
+    scalingMetric: # requestRate and concurrency are mutually exclusive
+        requestRate:
+            granularity: 1s
+            targetValue: 2
+            window: 1m
