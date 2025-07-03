@@ -22,5 +22,5 @@ spec:
     scalingMetric: # requestRate and concurrency are mutually exclusive
         requestRate:
             granularity: 1m
-            targetValue: 0.033
+            targetValue: 1
             window: 1m
