@@ -2,10 +2,11 @@ kind: HTTPScaledObject
 apiVersion: http.keda.sh/v1alpha1
 metadata:
   name: {{ include "app.fullname" . }}-http-so
-  namespace: "{{ .Release.Namespace }}"
   annotations:
     httpscaledobject.keda.sh/skip-scaledobject-creation: "false"
 spec:
+    pathPrefixes:
+      - /
     hosts:
     {{- range .Values.ingress.hosts }}
     - {{ .host | quote }}
