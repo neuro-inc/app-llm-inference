@@ -4,8 +4,3 @@ name: llm-inference-app
 description: A Helm chart for Kubernetes
 version: 0.1.0
 appVersion: "1.16.0"
-dependencies:
-  - name: keda-add-ons-http
-    version: 0.10.0
-    repository: https://kedacore.github.io/charts
-    condition: kedaHttp.enabled
