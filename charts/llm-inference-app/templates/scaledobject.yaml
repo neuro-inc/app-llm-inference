@@ -1,7 +1,7 @@
 kind: HTTPScaledObject
 apiVersion: http.keda.sh/v1alpha1
 metadata:
-  name: {{ include "app.fullname" . }}-http-so
+  name: http-scaledobject # change it to unique one
   namespace: {{ .Release.Namespace }}
   annotations:
     httpscaledobject.keda.sh/skip-scaledobject-creation: "false"
