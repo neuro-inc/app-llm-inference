@@ -130,7 +130,7 @@ envNvidia:
 volumes: []
 
 autoscaling:
-  enabled: true
+  enabled: false
   replicas:
     min: 0
     max: 1
