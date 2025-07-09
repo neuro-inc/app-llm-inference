@@ -128,3 +128,14 @@ envNvidia:
   VLLM_USE_TRITON_FLASH_ATTN: "1"
 
 volumes: []
+
+autoscaling:
+  enabled: true
+  replicas:
+    min: 0
+    max: 1
+  scaledownPeriod: 300
+  requestRate:
+    granularity: 1m
+    targetValue: 2
+    window: 1m

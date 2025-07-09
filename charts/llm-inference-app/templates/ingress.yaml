@@ -24,9 +24,15 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
+                {{- if .Values.autoscaling.enabled -}}
                 name: keda-add-ons-http-interceptor-proxy-app
                 port:
                   number: 8080
+                {{- else }}
+                name: {{ include "app.fullname" $ }}
+                port:
+                  name: http
+                {{- end }}
           {{- end }}
     {{- end }}
   {{- else }}

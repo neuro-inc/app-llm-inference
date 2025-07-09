@@ -1,7 +1,8 @@
+{{- if .Values.autoscaling.enabled -}}
 kind: HTTPScaledObject
 apiVersion: http.keda.sh/v1alpha1
 metadata:
-  name: http-scaledobject # change it to unique one
+  name: {{ printf "%s-so" ((include "app.fullname" .) | trunc 60 | trimSuffix "-") }}
   namespace: {{ .Release.Namespace }}
   annotations:
     httpscaledobject.keda.sh/skip-scaledobject-creation: "false"
@@ -19,11 +20,12 @@ spec:
         service: {{ include "app.fullname" . }}
         port: {{ .Values.service.port }}
     replicas:
-        min: 1
-        max: 2
-    scaledownPeriod: 300
-    scalingMetric: # requestRate and concurrency are mutually exclusive
+        min: {{ .Values.autoscaling.replicas.min }}
+        max: {{ .Values.autoscaling.replicas.min }}
+    scaledownPeriod: {{ .Values.autoscaling.scaledownPeriod }}
+    scalingMetric:
         requestRate:
-            granularity: 1m
-            targetValue: 2
-            window: 1m
+            granularity: {{ .Values.autoscaling.requestRate.granularity }}
+            targetValue: {{ .Values.autoscaling.requestRate.targetValue }}
+            window: {{ .Values.autoscaling.requestRate.window }}
+{{- end }}
