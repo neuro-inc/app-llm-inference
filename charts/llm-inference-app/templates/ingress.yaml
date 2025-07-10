@@ -25,7 +25,7 @@ spec:
             backend:
               service:
               {{- if $.Values.autoscaling.enabled }}
-                name: {{ include "app.proxyFullname" . }}
+                name: {{ include "app.proxyFullname" $ }}
                 port:
                   number: 8080
               {{- else }}
