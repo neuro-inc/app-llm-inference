@@ -8,7 +8,7 @@ metadata:
     httpscaledobject.keda.sh/skip-scaledobject-creation: "false"
 spec:
     pathPrefixes:
-      - /docs
+      - /
     hosts:
     {{- range .Values.ingress.hosts }}
     - {{ .host | quote }}

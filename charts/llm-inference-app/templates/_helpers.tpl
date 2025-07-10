@@ -58,3 +58,9 @@ Pod-specific labels
 platform.apolo.us/preset: {{ .Values.preset_name }}
 platform.apolo.us/component: app
 {{- end }}
+{{/*
+Autoscaling externalName service
+*/}}
+{{- define "app.proxyFullname" -}}
+{{- printf "%s-proxy" ((include "app.fullname" .) | trunc 55 | trimSuffix "-") }}
+{{- end }}

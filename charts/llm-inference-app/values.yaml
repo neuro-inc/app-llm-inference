@@ -1,7 +1,6 @@
 nameOverride: ""
 fullnameOverride: ""
-kedaHttp:
-  enabled: true
+
 # Deployment
 llm:
   modelHFName: ""
