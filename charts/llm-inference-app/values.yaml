@@ -130,6 +130,7 @@ volumes: []
 
 autoscaling:
   enabled: false
+  externalKedaHttpProxyService: keda-add-ons-http-interceptor-proxy.platform.svc.cluster.local
   replicas:
     min: 0
     max: 1
