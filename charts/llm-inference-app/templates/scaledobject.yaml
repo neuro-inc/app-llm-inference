@@ -21,7 +21,7 @@ spec:
         port: {{ .Values.service.port }}
     replicas:
         min: {{ .Values.autoscaling.replicas.min }}
-        max: {{ .Values.autoscaling.replicas.min }}
+        max: {{ .Values.autoscaling.replicas.max }}
     scaledownPeriod: {{ .Values.autoscaling.scaledownPeriod }}
     scalingMetric:
         requestRate:
