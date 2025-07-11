@@ -24,9 +24,15 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
+              {{- if $.Values.autoscaling.enabled }}
+                name: {{ include "app.proxyFullname" $ }}
+                port:
+                  number: 8080
+              {{- else }}
                 name: {{ include "app.fullname" $ }}
                 port:
                   name: http
+              {{- end }}
           {{- end }}
     {{- end }}
   {{- else }}

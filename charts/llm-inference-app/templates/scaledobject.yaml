@@ -1,0 +1,31 @@
+{{- if .Values.autoscaling.enabled -}}
+kind: HTTPScaledObject
+apiVersion: http.keda.sh/v1alpha1
+metadata:
+  name: {{ printf "%s-so" ((include "app.fullname" .) | trunc 60 | trimSuffix "-") }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    httpscaledobject.keda.sh/skip-scaledobject-creation: "false"
+spec:
+    pathPrefixes:
+      - /
+    hosts:
+    {{- range .Values.ingress.hosts }}
+    - {{ .host | quote }}
+    {{- end }}
+    scaleTargetRef:
+        name: {{ include "app.fullname" . }}
+        kind: Deployment
+        apiVersion: apps/v1
+        service: {{ include "app.fullname" . }}
+        port: {{ .Values.service.port }}
+    replicas:
+        min: {{ .Values.autoscaling.replicas.min }}
+        max: {{ .Values.autoscaling.replicas.min }}
+    scaledownPeriod: {{ .Values.autoscaling.scaledownPeriod }}
+    scalingMetric:
+        requestRate:
+            granularity: {{ .Values.autoscaling.requestRate.granularity }}
+            targetValue: {{ .Values.autoscaling.requestRate.targetValue }}
+            window: {{ .Values.autoscaling.requestRate.window }}
+{{- end }}

@@ -1,0 +1,13 @@
+{{- if .Values.autoscaling.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "app.proxyFullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ExternalName
+  externalName: {{ .Values.autoscaling.externalKedaHttpProxyService }}
+  ports:
+    - port: 8080
+      protocol: TCP
+{{- end }}
