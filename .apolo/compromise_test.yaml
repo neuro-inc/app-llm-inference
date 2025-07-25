@@ -6,7 +6,7 @@ defaults:
   max_parallel: 1
   fail_fast: false
   workdir: /app
-  cache: 
+  cache:
     strategy: none
   volumes:
     - storage:${{ flow.project_id }}/vllm-tests:/app/vllm-tests
@@ -48,12 +48,12 @@ tasks:
           # "microsoft/phi-4",
           # "NovaSky-AI/Sky-T1-32B-Preview",
           # "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
-         
+
           "Qwen/QwQ-32B-preview",
           # "AIDC-AI/Marco-o1",
           # "meta-llama/Llama-3.3-70B-Instruct",
           # "Daemontatox/RA_Reasoner",
-         
+
           # "deepseek-ai/DeepSeek-R1",
           # "deepseek-ai/DeepSeek-V3",
           # "MiniMaxAI/MiniMax-Text-01",
@@ -77,7 +77,7 @@ tasks:
         ]
         # model specific
         vllm_use_triton_flash_attn: [ "0" ]
-        
+
         # amd specific
         torch_use_hip_dsa:          [ "1" ]
         hsa_force_fine_grain_pcie:  [ "1" ]
@@ -121,7 +121,7 @@ tasks:
 
     bash: |
       set -euxo pipefail
-      
+
       export VLLM_LOGGING_LEVEL=DEBUG
       export NCCL_DEBUG=TRACE
       export VLLM_TRACE_FUNCTION=1
@@ -136,7 +136,7 @@ tasks:
 
       echo "==============================================="
       echo "Starting AMD optimization test with environment vars:"
-      env | grep -E '^VLLM|^HIP|^TORCH|^HSA|^ROCM|^TARGET_MODEL|^EXPERIMENT_NAME' 
+      env | grep -E '^VLLM|^HIP|^TORCH|^HSA|^ROCM|^TARGET_MODEL|^EXPERIMENT_NAME'
       echo "==============================================="
 
       echo "Running vLLM with model=${TARGET_MODEL}"

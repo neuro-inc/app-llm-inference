@@ -6,7 +6,7 @@ defaults:
   max_parallel: 3
   fail_fast: false
   workdir: /app
-  cache: 
+  cache:
     strategy: none
   volumes:
     - storage:${{ flow.project_id }}/vllm-tests:/app/vllm-tests
@@ -49,12 +49,12 @@ tasks:
           # "NovaSky-AI/Sky-T1-32B-Preview",
           "ibnzterrell/Meta-Llama-3.3-70B-Instruct-AWQ-INT4",
           "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
-         
+
           "Qwen/QwQ-32B-preview",
           # "AIDC-AI/aMarco-o1",
           # "meta-llama/Llama-3.3-70B-Instruct",
           # "Daemontatox/RA_Reasoner",
-         
+
           # "deepseek-ai/DeepSeek-R1",
           # "deepseek-ai/DeepSeek-V3",
           # "MiniMaxAI/MiniMax-Text-01",
@@ -78,7 +78,7 @@ tasks:
         ]
         # model specific
         vllm_use_triton_flash_attn: [ "0" ]  # Use CK flash attention for better SWA support
-        
+
         # amd specific
         torch_use_hip_dsa:          [ "1" ]
         hsa_force_fine_grain_pcie:  [ "1" ]
@@ -118,7 +118,7 @@ tasks:
 
     bash: |
       set -euxo pipefail
-      
+
       export VLLM_LOGGING_LEVEL=DEBUG
       export NCCL_DEBUG=TRACE
       export VLLM_TRACE_FUNCTION=1
@@ -128,14 +128,14 @@ tasks:
 
       apt-get update && apt-get install -y wget
       wget https://raw.githubusercontent.com/vllm-project/vllm/main/collect_env.py
-      
+
       echo "======================Start Collecting Environment========================="
       python collect_env.py
       echo "======================End Collecting Environment========================="
 
       echo "==============================================="
       echo "Starting AMD optimization test with environment vars:"
-      env | grep -E '^VLLM|^HIP|^TORCH|^HSA|^ROCM|^TARGET_MODEL|^EXPERIMENT_NAME|^NCCL|^HIP_VISIBLE_DEVICES|^ROCR_VISIBLE_DEVICES|^VLLM_WORKER_MULTIPROC_METHOD|' 
+      env | grep -E '^VLLM|^HIP|^TORCH|^HSA|^ROCM|^TARGET_MODEL|^EXPERIMENT_NAME|^NCCL|^HIP_VISIBLE_DEVICES|^ROCR_VISIBLE_DEVICES|^VLLM_WORKER_MULTIPROC_METHOD|'
       echo "==============================================="
 
       echo "Running vLLM with model=${TARGET_MODEL}"
