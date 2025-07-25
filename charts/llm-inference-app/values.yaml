@@ -30,20 +30,20 @@ resources: {}
 probe:
   # One‑off grace period on cold start – pulls weights / builds kernels
   startup:
-    periodSeconds: 10    # probe every 10 s
+    periodSeconds: 10 # probe every 10 s
     failureThreshold: 60 # 10 min grace (60×10 s)
     timeoutSeconds: 2
 
   # Steady‑state readiness gate (service/ingress)
   readiness:
     periodSeconds: 10
-    failureThreshold: 3  # ≈30 s to mark NotReady
+    failureThreshold: 3 # ≈30 s to mark NotReady
     timeoutSeconds: 2
 
   # Steady‑state health check (deadlock / OOM detection)
   liveness:
     periodSeconds: 30
-    failureThreshold: 3  # ≈90 s to restart
+    failureThreshold: 3 # ≈90 s to restart
     timeoutSeconds: 5
 
 cache:
@@ -74,8 +74,9 @@ modelDownload:
   initEnabled: true
   image:
     repository: ghcr.io/neuro-inc/hf-downloader
-    tag: v25.4.0
+    tag: v25.7.0
     pullPolicy: IfNotPresent
+  retries: 3
   resources: {}
 
 # Service

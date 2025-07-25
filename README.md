@@ -20,7 +20,7 @@ apolo run --pass-config ghcr.io/neuro-inc/app-deployment -- install https://gith
   --set "ingress.clusterName=scottdc" # optional
 ```
 
-## Helm install 
+## Helm install
 ```
 helm install llm-inference-app . \
   --timeout=10m \

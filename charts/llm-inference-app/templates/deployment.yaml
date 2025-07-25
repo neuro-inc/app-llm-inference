@@ -165,7 +165,7 @@ spec:
               value: {{ $v | quote }}
               {{- end }}
             {{- end }}
-          
+
           {{- if eq .Values.gpuProvider "amd" }}
           command:
             - vllm
@@ -230,7 +230,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
-      # Good tolerations block: 
+      # Good tolerations block:
       # 1) If .Values.tolerations is a list, dump it via toYaml
       # 2) Add GPU item conditionally
       tolerations:
