@@ -37,16 +37,19 @@
       url: https://storage.googleapis.com/development-421920-assets/app-logos/vllm-banner.png
     - type: video
       url: https://www.youtube.com/watch?v=Ju2FrqIrdx0
-  external_urls:
-    - name: Hugging Face Models
+  urls:
+    - name: vLLM installation guide
       type: documentation
+      url: https://docs.apolo.us/index/apolo-console/apps/installable-apps/available-apps/llm-inference
+    - name: Hugging Face Models
+      type: external
       url: https://huggingface.co/models
     - name: Apolo CLI
       type: documentation
       url: https://docs.apolo.us/index/apolo-concepts-cli/installing
     - name: GitHub Repository
       url: https://github.com/neuro-inc/app-llm-inference
-      type: documentation
+      type: external
     - name: Getting Started
       url: https://docs.vllm.ai/en/latest/
       type: documentation
