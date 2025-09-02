@@ -1,0 +1,356 @@
+{
+  "$defs": {
+    "ApoloFilesPath": {
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string",
+          "x-description": "Provide the Apolo Storage path starting with `storage:` to locate your files.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Storage Path"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "ApoloFilesPath",
+      "type": "object",
+      "x-description": "Specify the path within the Apolo Files application to read from or write to.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Apolo Files Path"
+    },
+    "ApoloSecret": {
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "ApoloSecret",
+      "type": "object",
+      "x-description": "Apolo Secret Configuration.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "Secret"
+    },
+    "AutoscalingKedaHTTP": {
+      "properties": {
+        "min_replicas": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Min Replicas",
+          "type": "integer",
+          "x-description": "Set the minimum number of replicas for your deployment.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Minimum Replicas"
+        },
+        "max_replicas": {
+          "default": 5,
+          "exclusiveMinimum": 0,
+          "title": "Max Replicas",
+          "type": "integer",
+          "x-description": "Limit the maximum number of replicas for your deployment.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Maximum Replicas"
+        },
+        "scaledown_period": {
+          "default": 300,
+          "exclusiveMinimum": 0,
+          "title": "Scaledown Period",
+          "type": "integer",
+          "x-description": "Time in seconds to wait before scaling down.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Scaledown Period"
+        },
+        "request_rate": {
+          "$ref": "#/$defs/RequestRateConfig",
+          "default": {
+            "granularity": 1,
+            "target_value": 100,
+            "window_size": 60
+          }
+        }
+      },
+      "title": "AutoscalingKedaHTTP",
+      "type": "object",
+      "x-description": "Autoscaling configuration for Horizontal Pod Autoscaler.",
+      "x-is-advanced-field": true,
+      "x-meta-type": "inline",
+      "x-title": "Autoscaling HPA"
+    },
+    "Env": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "x-description": "Specify the name of the environment variable to inject into the container.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Variable Name"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string",
+              "x-description": "Specify the value of the environment variable.",
+              "x-is-advanced-field": false,
+              "x-meta-type": "inline",
+              "x-title": "String variable Value"
+            },
+            {
+              "$ref": "#/$defs/ApoloSecret"
+            }
+          ],
+          "default": "",
+          "title": "Value",
+          "x-description": "Specify the value of the environment variable.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Variable Value"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Env",
+      "type": "object",
+      "x-description": "K8S container env var.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Env"
+    },
+    "HuggingFaceCache": {
+      "properties": {
+        "files_path": {
+          "$ref": "#/$defs/ApoloFilesPath",
+          "x-description": "The path to the Apolo Files directory where Hugging Face artifacts are cached.",
+          "x-title": "Files Path"
+        }
+      },
+      "required": [
+        "files_path"
+      ],
+      "title": "HuggingFaceCache",
+      "type": "object",
+      "x-description": "Configuration for the Hugging Face cache.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "Hugging Face Cache"
+    },
+    "HuggingFaceModel": {
+      "properties": {
+        "model_hf_name": {
+          "title": "Model Hf Name",
+          "type": "string",
+          "x-description": "The name of the Hugging Face model.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Hugging Face Model Name"
+        },
+        "hf_token": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApoloSecret"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Hugging Face Token"
+        }
+      },
+      "required": [
+        "model_hf_name"
+      ],
+      "title": "HuggingFaceModel",
+      "type": "object",
+      "x-description": "Configure the Hugging Face model. Ensure it is available on the Hugging Face Hub and provide an API token with access rights if the repository is gated.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "Hugging Face Model"
+    },
+    "IngressHttp": {
+      "properties": {
+        "auth": {
+          "default": true,
+          "title": "Auth",
+          "type": "boolean",
+          "x-description": "Require authenticated user credentials with appropriate permissions for all incoming HTTPS requests to the application.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Enable Authentication and Authorization"
+        }
+      },
+      "title": "IngressHttp",
+      "type": "object",
+      "x-description": "Enable access to your application over the internet using HTTPS.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Enable HTTP Ingress"
+    },
+    "Preset": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "x-description": "The name of the preset.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Resource Preset"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Preset",
+      "type": "object",
+      "x-description": "Select the resource preset used per service replica.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "Resource Preset"
+    },
+    "RequestRateConfig": {
+      "properties": {
+        "granularity": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Granularity",
+          "type": "integer",
+          "x-description": "Time in seconds to calculate request rate.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Granularity"
+        },
+        "target_value": {
+          "default": 100,
+          "exclusiveMinimum": 0,
+          "title": "Target Value",
+          "type": "integer",
+          "x-description": "Target request rate per second for autoscaling.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Target Value"
+        },
+        "window_size": {
+          "default": 60,
+          "exclusiveMinimum": 0,
+          "title": "Window Size",
+          "type": "integer",
+          "x-description": "Time in seconds to consider for request rate calculation.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Window Size"
+        }
+      },
+      "title": "RequestRateConfig",
+      "type": "object",
+      "x-description": "Configuration for request rate based autoscaling.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Request Rate Configuration"
+    }
+  },
+  "properties": {
+    "preset": {
+      "$ref": "#/$defs/Preset"
+    },
+    "ingress_http": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IngressHttp"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "x-description": "Enable access to your application over the internet using HTTPS.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Public HTTP Ingress"
+    },
+    "hugging_face_model": {
+      "$ref": "#/$defs/HuggingFaceModel",
+      "x-meta-type": "inline"
+    },
+    "tokenizer_hf_name": {
+      "default": "",
+      "title": "Tokenizer Hf Name",
+      "type": "string",
+      "x-description": "Set the name of the tokenizer associated with the Hugging Face model.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Hugging Face Tokenizer Name"
+    },
+    "server_extra_args": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Server Extra Args",
+      "type": "array",
+      "x-description": "Configure extra arguments to pass to the server (see VLLM doc, e.g. --max-model-len=131072).",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Server Extra Arguments"
+    },
+    "extra_env_vars": {
+      "items": {
+        "$ref": "#/$defs/Env"
+      },
+      "title": "Extra Env Vars",
+      "type": "array",
+      "x-description": "Additional environment variables to inject into the container. These will override any existing environment variables with the same name.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Extra Environment Variables"
+    },
+    "cache_config": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HuggingFaceCache"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "x-description": "Configure Hugging Face cache.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Cache Config"
+    },
+    "http_autoscaling": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AutoscalingKedaHTTP"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "x-description": "Configure autoscaling based on HTTP request rate. If you enable this, please ensure that cache config is enabled as well.",
+      "x-is-advanced-field": true,
+      "x-meta-type": "inline",
+      "x-title": "HTTP Autoscaling"
+    }
+  },
+  "required": [
+    "preset",
+    "hugging_face_model"
+  ],
+  "title": "LLMInputs",
+  "type": "object"
+}
