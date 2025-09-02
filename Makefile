@@ -14,10 +14,10 @@ install setup:
 .PHONY: lint format
 lint format:
 ifdef CI
-	pre-commit run --all-files --show-diff-on-failure
+	poetry run pre-commit run --all-files --show-diff-on-failure
 else
 	# automatically fix the formatting issues and rerun again
-	pre-commit run --all-files || pre-commit run --all-files
+	poetry run pre-commit run --all-files || poetry run pre-commit run --all-files
 endif
 
 .PHONY: test
