@@ -1,0 +1,105 @@
+{
+  "$defs": {
+    "RestAPI": {
+      "properties": {
+        "host": {
+          "title": "Host",
+          "type": "string",
+          "x-description": "The hostname of the HTTP endpoint.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Hostname"
+        },
+        "port": {
+          "default": 80,
+          "exclusiveMinimum": 0,
+          "title": "Port",
+          "type": "integer",
+          "x-description": "The port of the HTTP endpoint.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Port"
+        },
+        "protocol": {
+          "default": "http",
+          "title": "Protocol",
+          "type": "string",
+          "x-description": "The protocol to use, e.g., http or https.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Protocol"
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 30.0,
+          "title": "Timeout",
+          "x-description": "Connection timeout in seconds.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Connection Timeout"
+        },
+        "base_path": {
+          "default": "/",
+          "title": "Base Path",
+          "type": "string"
+        },
+        "api_type": {
+          "const": "rest",
+          "default": "rest",
+          "title": "Api Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host"
+      ],
+      "title": "RestAPI",
+      "type": "object",
+      "x-description": "HTTP API Configuration.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "HTTP API"
+    }
+  },
+  "properties": {
+    "internal_web_app_url": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RestAPI"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "x-description": "Use this endpoint to reach out to your app via internal network within the cluster. Platform authorization is not applied here but only the workloads from the same project can access it.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Web App inter-cluster URL"
+    },
+    "external_web_app_url": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RestAPI"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "x-description": "Use this endpoint to reach out to your app via public network from outside the cluster. Platform authorization is applied here if you enabled it during the deployment.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "External Web App URL"
+    }
+  },
+  "title": "ServiceDeploymentOutputs",
+  "type": "object"
+}

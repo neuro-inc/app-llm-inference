@@ -19,3 +19,9 @@ repos:
     rev: v0.1.30
     hooks:
       - id: helmlint
+  - repo: local
+    hooks:
+      - id: generate-types-schemas
+        name: Generate types schemas
+        entry: make gen-types-schemas
+        language: system

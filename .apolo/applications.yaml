@@ -1,0 +1,52 @@
+- app_type: vllm-inference
+  name: vllm-inference
+  title: vLLM
+  install_type: workflow
+  helm_path: charts/llm-inference-app
+  inputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceInputs.json
+    types_name: VLLMInferenceInputs
+    processor: VLLMInferenceInputsProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  outputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
+    types_name: VLLMInferenceOutputs
+    processor: VLLMInferenceOutputsProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  short_description: Deploy scalable applications
+  description: |
+    vLLM is a fast and easy-to-use library for LLM inference and serving.
+
+    Originally developed in the Sky Computing Lab at UC Berkeley, vLLM has evolved
+    into a community-driven project with contributions from both academia and industry.
+  pub_date: "2025-01-01T00:00:00+00:00"
+  logo: https://storage.googleapis.com/development-421920-assets/app-logos/vllm.svg
+  changelog:
+    file: ./CHANGELOG.md
+  tags:
+    - "LLM"
+    - "Inference"
+    - "MLOps"
+    - "Hugging Face"
+    - "Embeddings"
+    - "vLLM"
+    - "RAG"
+    - "Embeddings"
+  assets:
+    - type: image
+      url: https://storage.googleapis.com/development-421920-assets/app-logos/vllm-banner.png
+    - type: video
+      url: https://www.youtube.com/watch?v=Ju2FrqIrdx0
+  external_urls:
+    - name: Hugging Face Models
+      type: documentation
+      url: https://huggingface.co/models
+    - name: Apolo CLI
+      type: documentation
+      url: https://docs.apolo.us/index/apolo-concepts-cli/installing
+    - name: GitHub Repository
+      url: https://github.com/neuro-inc/app-llm-inference
+      type: documentation
+    - name: Getting Started
+      url: https://docs.vllm.ai/en/latest/
+      type: documentation
