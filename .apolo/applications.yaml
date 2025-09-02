@@ -1,5 +1,5 @@
-- app_type: vllm-inference
-  name: vllm-inference
+- app_type: llm-inference
+  name: llm-inference
   title: vLLM
   install_type: workflow
   helm_path: charts/llm-inference-app
