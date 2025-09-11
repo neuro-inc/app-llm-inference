@@ -42,7 +42,7 @@ jobs:
     name: Release processor image
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master')
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master')
     steps:
       - name: Checkout commit
         uses: actions/checkout@v4
@@ -65,9 +65,9 @@ jobs:
           export IMAGE_TAG=development
           make push-hook-image
       - name: Release prod image
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         run: |
-          export IMAGE_TAG=${GITHUB_REF#refs/tags/v}
+          export IMAGE_TAG=${GITHUB_REF#refs/tags/}
           make push-hook-image
 
   release-processor-image-pr:
@@ -89,18 +89,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/neuro-inc/post-deployment-app-hook
-          tags: |
-            type=ref,event=pr
       - name: Build Docker image
         run: make build-hook-image
       - name: Push release for testing
         if: github.actor != 'dependabot[bot]'
         run: |
-          FULL_IMAGE_NAME=${{ steps.meta.outputs.tags }}
-          export IMAGE_TAG=${FULL_IMAGE_NAME##*:}
+          BRANCH_NAME=${{ github.head_ref }}
+          # Convert to lowercase, replace anything not a-z0-9_.- with '-'
+          export IMAGE_TAG=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_.-]/-/g')
           make push-hook-image
