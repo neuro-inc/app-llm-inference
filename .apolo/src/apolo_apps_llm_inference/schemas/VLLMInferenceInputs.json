@@ -19,7 +19,8 @@
       "x-description": "Specify the path within the Apolo Files application to read from or write to.",
       "x-is-advanced-field": false,
       "x-meta-type": "inline",
-      "x-title": "Apolo Files Path"
+      "x-title": "Apolo Files Path",
+      "x-type": "ApoloFilesFile"
     },
     "ApoloSecret": {
       "properties": {
@@ -35,8 +36,9 @@
       "type": "object",
       "x-description": "Apolo Secret Configuration.",
       "x-is-advanced-field": false,
-      "x-meta-type": "integration",
-      "x-title": "Secret"
+      "x-meta-type": "inline",
+      "x-title": "Secret",
+      "x-type": "ApoloSecret"
     },
     "AutoscalingKedaHTTP": {
       "properties": {
@@ -75,7 +77,8 @@
           "default": {
             "granularity": 1,
             "target_value": 100,
-            "window_size": 60
+            "window_size": 60,
+            "__type__": "RequestRateConfig"
           }
         }
       },
@@ -84,7 +87,8 @@
       "x-description": "Autoscaling configuration for Horizontal Pod Autoscaler.",
       "x-is-advanced-field": true,
       "x-meta-type": "inline",
-      "x-title": "Autoscaling HPA"
+      "x-title": "Autoscaling HPA",
+      "x-type": "AutoscalingKedaHTTP"
     },
     "Env": {
       "properties": {
@@ -125,25 +129,28 @@
       "x-description": "K8S container env var.",
       "x-is-advanced-field": false,
       "x-meta-type": "inline",
-      "x-title": "Env"
+      "x-title": "Env",
+      "x-type": "Env"
     },
     "HuggingFaceCache": {
       "properties": {
         "files_path": {
           "$ref": "#/$defs/ApoloFilesPath",
+          "default": {
+            "path": "storage:.apps/hugging-face-cache",
+            "__type__": "ApoloFilesPath"
+          },
           "x-description": "The path to the Apolo Files directory where Hugging Face artifacts are cached.",
           "x-title": "Files Path"
         }
       },
-      "required": [
-        "files_path"
-      ],
       "title": "HuggingFaceCache",
       "type": "object",
       "x-description": "Configuration for the Hugging Face cache.",
       "x-is-advanced-field": false,
       "x-meta-type": "integration",
-      "x-title": "Hugging Face Cache"
+      "x-title": "Hugging Face Cache",
+      "x-type": "HuggingFaceCache"
     },
     "HuggingFaceModel": {
       "properties": {
@@ -179,7 +186,8 @@
       "x-description": "Configure the Hugging Face model. Ensure it is available on the Hugging Face Hub and provide an API token with access rights if the repository is gated.",
       "x-is-advanced-field": false,
       "x-meta-type": "integration",
-      "x-title": "Hugging Face Model"
+      "x-title": "Hugging Face Model",
+      "x-type": "HuggingFaceModel"
     },
     "IngressHttp": {
       "properties": {
@@ -198,7 +206,8 @@
       "x-description": "Enable access to your application over the internet using HTTPS.",
       "x-is-advanced-field": false,
       "x-meta-type": "inline",
-      "x-title": "Enable HTTP Ingress"
+      "x-title": "Enable HTTP Ingress",
+      "x-type": "IngressHttp"
     },
     "Preset": {
       "properties": {
@@ -218,8 +227,9 @@
       "type": "object",
       "x-description": "Select the resource preset used per service replica.",
       "x-is-advanced-field": false,
-      "x-meta-type": "integration",
-      "x-title": "Resource Preset"
+      "x-meta-type": "inline",
+      "x-title": "Resource Preset",
+      "x-type": "Preset"
     },
     "RequestRateConfig": {
       "properties": {
@@ -259,7 +269,8 @@
       "x-description": "Configuration for request rate based autoscaling.",
       "x-is-advanced-field": false,
       "x-meta-type": "inline",
-      "x-title": "Request Rate Configuration"
+      "x-title": "Request Rate Configuration",
+      "x-type": "RequestRateConfig"
     }
   },
   "properties": {

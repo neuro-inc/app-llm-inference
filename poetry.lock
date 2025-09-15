@@ -233,36 +233,37 @@ trio = ["trio (>=0.26.1)"]
 
 [[package]]
 name = "apolo-app-types"
-version = "25.9.0"
+version = "25.9.12"
 description = "Apolo Platform App Types."
 optional = false
 python-versions = "<4.0,>=3.9.0"
 groups = ["main"]
 files = [
-    {file = "apolo_app_types-25.9.0-py3-none-any.whl", hash = "sha256:5aceaa7474826de05dd73d7cbb5cf6bfe9faeca90abd0c952ffe71e645c6aedc"},
-    {file = "apolo_app_types-25.9.0.tar.gz", hash = "sha256:de577761d7f6b86fd99009131d7c5966572b44af7657bf2b94796076bede8ee3"},
+    {file = "apolo_app_types-25.9.12-py3-none-any.whl", hash = "sha256:3667b7fd3bdbef518bd5d7d6dec0a8ca398613aba4fcad674939653b3efba943"},
+    {file = "apolo_app_types-25.9.12.tar.gz", hash = "sha256:22e0a8c8880cb1cd6e38b74d78f50c6d39130fd542bc4e2e3801c783e764480f"},
 ]
 
 [package.dependencies]
-apolo-sdk = ">=25.8.1,<26.0.0"
+apolo-sdk = ">=25.9.0,<26.0.0"
 click = ">=8.0.3,<9.0.0"
 httpx = ">=0.28.0,<0.29.0"
+jsonref = ">=1.1.0,<2.0.0"
 kubernetes = ">=33.1.0,<34.0.0"
-pydantic = ">=2.11.7,<3.0.0"
+pydantic = ">=2.11.9,<3.0.0"
 pyyaml = ">=6.0.2,<7.0.0"
-types-PyYAML = ">=6.0.12.20250822,<7.0.0.0"
+types-PyYAML = ">=6.0.12.20250915,<7.0.0.0"
 yarl = ">=1.20.1,<2.0.0"
 
 [[package]]
 name = "apolo-sdk"
-version = "25.8.1"
+version = "25.9.0"
 description = "Apolo SDK"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["main"]
 files = [
-    {file = "apolo_sdk-25.8.1-py3-none-any.whl", hash = "sha256:49f8ee70c301333b06f3617c09d25c14654d9eeedd0aefe329cbf8d5d196fb77"},
-    {file = "apolo_sdk-25.8.1.tar.gz", hash = "sha256:f22a7370e95576893a081a78bc624741e478e5b28f6c3ca64a4261ae046cd8bd"},
+    {file = "apolo_sdk-25.9.0-py3-none-any.whl", hash = "sha256:295fe1c9ac89b238d1ddab3329ea58b3b5bfb0e44bc4c6835627aa29e3c8e017"},
+    {file = "apolo_sdk-25.9.0.tar.gz", hash = "sha256:f614e87d33146f10b3d4b0103a1d7ef3e84eb64126c89dcaf906c7882845fc00"},
 ]
 
 [package.dependencies]
@@ -273,7 +274,7 @@ azure-storage-blob = ">=12.8.1,<12.9.0 || >12.9.0"
 certifi = "*"
 google-auth = ">=2.0.2"
 neuro-admin-client = ">=24.12.2"
-neuro-config-client = ">=25.8.3"
+neuro-config-client = "25.8.7"
 packaging = ">=20.4"
 python-dateutil = ">=2.7.0"
 python-jose = ">=3.3.0"
@@ -1068,6 +1069,18 @@ files = [
 ]
 
 [[package]]
+name = "jsonref"
+version = "1.1.0"
+description = "jsonref is a library for automatic dereferencing of JSON Reference objects for Python."
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "jsonref-1.1.0-py3-none-any.whl", hash = "sha256:590dc7773df6c21cbf948b5dac07a72a251db28b0238ceecce0a2abfa8ec30a9"},
+    {file = "jsonref-1.1.0.tar.gz", hash = "sha256:32fe8e1d85af0fdefbebce950af85590b22b60f9e95443176adbde4e1ecea552"},
+]
+
+[[package]]
 name = "kubernetes"
 version = "33.1.0"
 description = "Kubernetes python client"
@@ -1575,14 +1588,14 @@ files = [
 
 [[package]]
 name = "pydantic"
-version = "2.11.7"
+version = "2.11.9"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pydantic-2.11.7-py3-none-any.whl", hash = "sha256:dde5df002701f6de26248661f6835bbe296a47bf73990135c7d07ce741b9623b"},
-    {file = "pydantic-2.11.7.tar.gz", hash = "sha256:d989c3c6cb79469287b1569f7447a17848c998458d49ebe294e975b9baf0f0db"},
+    {file = "pydantic-2.11.9-py3-none-any.whl", hash = "sha256:c42dd626f5cfc1c6950ce6205ea58c93efa406da65f479dcb4029d5934857da2"},
+    {file = "pydantic-2.11.9.tar.gz", hash = "sha256:6b8ffda597a14812a7975c90b82a8a2e777d9257aba3453f973acd3c032a18e2"},
 ]
 
 [package.dependencies]
@@ -1962,14 +1975,14 @@ files = [
 
 [[package]]
 name = "types-pyyaml"
-version = "6.0.12.20250822"
+version = "6.0.12.20250915"
 description = "Typing stubs for PyYAML"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "types_pyyaml-6.0.12.20250822-py3-none-any.whl", hash = "sha256:1fe1a5e146aa315483592d292b72a172b65b946a6d98aa6ddd8e4aa838ab7098"},
-    {file = "types_pyyaml-6.0.12.20250822.tar.gz", hash = "sha256:259f1d93079d335730a9db7cff2bcaf65d7e04b4a56b5927d49a612199b59413"},
+    {file = "types_pyyaml-6.0.12.20250915-py3-none-any.whl", hash = "sha256:e7d4d9e064e89a3b3cae120b4990cd370874d2bf12fa5f46c97018dd5d3c9ab6"},
+    {file = "types_pyyaml-6.0.12.20250915.tar.gz", hash = "sha256:0f8b54a528c303f0e6f7165687dd33fafa81c807fcac23f632b63aa624ced1d3"},
 ]
 
 [[package]]
@@ -2278,4 +2291,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11.0,<4.0"
-content-hash = "36188936f73ff19d2c2259371299f523c7c039482b0252a23c9b707b82aa7ef8"
+content-hash = "439102941be2b3a75d009157d7a152bef37d516cc18bf39df20eacb8c1aa279a"
