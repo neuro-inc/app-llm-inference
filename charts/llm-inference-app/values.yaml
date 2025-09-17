@@ -119,7 +119,7 @@ envAmd:
 ########################################
 nvidiaImage:
   repository: vllm/vllm-openai
-  tag: "v0.9.1"
+  tag: "v0.10.1.1"
   pullPolicy: IfNotPresent
 
 envNvidia:
