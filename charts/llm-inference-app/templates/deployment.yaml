@@ -187,22 +187,35 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end}}
           {{- else }}
+          command:
+            - /bin/sh
+            - -lc
           args:
-            - --host=0.0.0.0
-            - --port={{ .Values.service.port }}
-            - --model={{ or .Values.llm.modelHFName .Values.model.modelHFName }}
-            {{- if or .Values.llm.modelRevision .Values.model.modelRevision }}
-            - --code-revision={{ or .Values.llm.modelRevision .Values.model.modelRevision }}
-            {{- end }}
-            {{- if and .Values.llm.tokenizerHFName (ne .Values.llm.tokenizerHFName "") }}
-            - --tokenizer={{ .Values.llm.tokenizerHFName }}
-            {{- end }}
-            {{- if or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
-            - --tokenizer-revision={{ or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision }}
-            {{- end }}
-          {{- with .Values.serverExtraArgs -}}
-          {{- toYaml . | nindent 12 }}
-          {{- end }}
+            - |
+              set -e
+
+              # Start base command
+              CMD="vllm serve"
+              {{- if .Values.model.modelHFName }}
+              CMD="$CMD {{ .Values.model.modelHFName }}"
+              {{- else }}
+              CMD="$CMD --model={{ or .Values.llm.modelHFName .Values.model.modelHFName }}"
+              {{- end }}
+              CMD="$CMD --host=0.0.0.0 --port={{ .Values.service.port }}"
+              {{- with (or .Values.llm.modelRevision .Values.model.modelRevision) }}
+              CMD="$CMD --code-revision={{ . }}"
+              {{- end }}
+              {{- if and .Values.llm.tokenizerHFName (ne .Values.llm.tokenizerHFName "") }}
+              CMD="$CMD --tokenizer={{ .Values.llm.tokenizerHFName }}"
+              {{- end }}
+              {{- with (or .Values.llm.tokenizerRevision .Values.model.tokenizerRevision) }}
+              CMD="$CMD --tokenizer-revision={{ . }}"
+              {{- end }}
+              {{- with .Values.serverExtraArgs }}
+              CMD="$CMD {{ join " " . }}"
+              {{- end }}
+              echo "Launching: $CMD"
+              $CMD || { rc=$?; echo "vLLM failed with exit code ${rc}. Holding pod for debug..."; tail -f /dev/null; }
           {{- end }}
 
       volumes:
