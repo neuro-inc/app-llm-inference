@@ -53,3 +53,221 @@
     - name: Getting Started
       url: https://docs.vllm.ai/en/latest/
       type: documentation
+- app_type: llama4-inference
+  name: llama4-inference
+  title: LLAMA4
+  install_type: workflow
+  helm_path: charts/llm-inference-app
+  inputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/LLama4Inputs.json
+    types_name: LLama4Inputs
+    processor: Llama4InferenceValueProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  outputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
+    types_name: VLLMInferenceOutputs
+    processor: VLLMInferenceOutputsProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  short_description: Open, powerful, and efficient language models from Meta
+  description: |
+    LLaMA 4 is Meta's latest open-weight large language model series,
+    offering improved reasoning, efficiency, and multilingual capabilities.
+
+    Built with a Mixture of Experts (MoE) architecture, LLaMA 4 balances
+    performance and scalability, and is available in various configurations
+    optimized for both research and production use.
+  pub_date: "2025-07-28T00:00:00+00:00"
+  logo: https://storage.googleapis.com/development-421920-assets/app-logos/llama4.png
+  changelog:
+    file: ./CHANGELOG.md
+  tags:
+    - "LLM"
+    - "Inference"
+    - "MLOps"
+    - "Hugging Face"
+    - "Embeddings"
+    - "vLLM"
+    - "RAG"
+    - "Embeddings"
+    - "Meta"
+    - "LLaMA"
+    - "Bundle"
+  assets:
+    - type: image
+      url: https://storage.googleapis.com/development-421920-assets/app-logos/llama4-banner.svg
+  urls:
+    - name: Hugging Face Meta Models
+      type: external
+      url: https://huggingface.co/meta-llama
+    - name: Apolo CLI
+      type: documentation
+      url: https://docs.apolo.us/index/apolo-concepts-cli/installing
+    - name: GitHub Repository
+      type: external
+      url: https://github.com/neuro-inc/app-llm-inference
+    - name: Getting Started
+      type: documentation
+      url: https://docs.vllm.ai/en/latest/
+- app_type: deepseek-inference
+  name: deepseek-inference
+  title: DeepSeek
+  install_type: workflow
+  helm_path: charts/llm-inference-app
+  inputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/DeepSeekR1Inputs.json
+    types_name: DeepSeekR1Inputs
+    processor: DeepSeekR1InputsProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  outputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
+    types_name: VLLMInferenceOutputs
+    processor: VLLMInferenceOutputsProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  short_description: Open-source, high-performance language models from DeepSeek-AI
+  description: |
+    DeepSeek is a family of powerful open-source language models developed by DeepSeek-AI,
+    focused on high-performance reasoning, comprehension, and text generation.
+
+    The DeepSeek-LLM series delivers competitive performance across a wide range of
+    language understanding and generation tasks, making it suitable for both research
+    and production environments.
+  pub_date: "2025-07-31T00:00:00+00:00"
+  logo: https://storage.googleapis.com/development-421920-assets/app-logos/deepseek-r1.png
+  changelog:
+    file: ./CHANGELOG.md
+  tags:
+    - "LLM"
+    - "Inference"
+    - "MLOps"
+    - "Hugging Face"
+    - "Embeddings"
+    - "vLLM"
+    - "RAG"
+    - "Embeddings"
+    - "DeepSeek"
+    - "Bundle"
+  assets:
+    - type: image
+      url: https://storage.googleapis.com/development-421920-assets/app-logos/deepseek-r1-banner.svg
+  urls:
+    - name: Hugging Face Meta Models
+      type: external
+      url: https://huggingface.co/deepseek-ai
+    - name: Apolo CLI
+      type: documentation
+      url: https://docs.apolo.us/index/apolo-concepts-cli/installing
+    - name: GitHub Repository
+      type: external
+      url: https://github.com/neuro-inc/app-llm-inference
+    - name: Getting Started
+      type: documentation
+      url: https://docs.vllm.ai/en/latest/
+- app_type: mistral-inference
+  name: mistral-inference
+  title: Mistral
+  install_type: workflow
+  helm_path: charts/llm-inference-app
+  inputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/MistralInputs.json
+    types_name: MistralInputs
+    processor: MistralInferenceValueProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  outputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
+    types_name: VLLMInferenceOutputs
+    processor: VLLMInferenceOutputsProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  short_description: Fast, open-weight language models optimized for real-world use
+  description: |
+    Mistral is a suite of open-weight language models designed for efficient and scalable deployment,
+    offering strong performance in reasoning, summarization, and instruction following.
+
+    Developed by Mistral AI, these models include dense and Mixture of Experts (MoE) architectures,
+    making them suitable for both research and production across diverse workloads.
+  pub_date: "2025-07-31T00:00:00+00:00"
+  logo: https://storage.googleapis.com/development-421920-assets/app-logos/mistral.png
+  changelog:
+    file: ./CHANGELOG.md
+  tags:
+    - "LLM"
+    - "Inference"
+    - "MLOps"
+    - "Hugging Face"
+    - "Embeddings"
+    - "vLLM"
+    - "RAG"
+    - "Embeddings"
+    - "Mistral"
+    - "Bundle"
+  assets:
+    - type: image
+      url: https://storage.googleapis.com/development-421920-assets/app-logos/mistral-banner.svg
+  urls:
+    - name: Hugging Face Meta Models
+      type: external
+      url: https://huggingface.co/deepseek-ai
+    - name: Apolo CLI
+      type: documentation
+      url: https://docs.apolo.us/index/apolo-concepts-cli/installing
+    - name: GitHub Repository
+      type: external
+      url: https://github.com/neuro-inc/app-llm-inference
+    - name: Getting Started
+      type: documentation
+      url: https://docs.vllm.ai/en/latest/
+- app_type: gpt-inference
+  name: gpt-inference
+  title: OpenAI GPT OSS
+  install_type: workflow
+  helm_path: charts/llm-inference-app
+  inputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/GptOssInputs.json
+    types_name: GptOssInputs
+    processor: GPTOSSInferenceValueProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  outputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
+    types_name: VLLMInferenceOutputs
+    processor: VLLMInferenceOutputsProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  short_description: High-performance, open-source GPT models for versatile NLP tasks developed by OpenAI
+  description: |
+    GPTOSS is an open-source suite of powerful language models designed for high-performance text generation,
+    reasoning, and natural language understanding. Developed by OpenAI and fine-tuned for general-purpose use,
+    GPTOSS models are optimized for efficient inference and robust output quality.
+
+    This family of models supports a wide range of NLP applications—from chatbots and assistants
+    to code generation and summarization—making GPTOSS a versatile choice for both research and production environments.
+  pub_date: "2025-07-31T00:00:00+00:00"
+  logo: https://storage.googleapis.com/development-421920-assets/app-logos/gpt-oss.png
+  changelog:
+    file: ./CHANGELOG.md
+  tags:
+    - "LLM"
+    - "Inference"
+    - "MLOps"
+    - "Hugging Face"
+    - "Embeddings"
+    - "vLLM"
+    - "RAG"
+    - "Embeddings"
+    - "OpenAI"
+    - "GPT"
+    - "GptOSS"
+    - "Bundle"
+  assets:
+    - type: image
+      url: https://storage.googleapis.com/development-421920-assets/app-logos/gpt-oss-banner.svg
+  urls:
+    - name: Hugging Face OpenAI Models
+      type: external
+      url: https://huggingface.co/openai
+    - name: Apolo CLI
+      type: documentation
+      url: https://docs.apolo.us/index/apolo-concepts-cli/installing
+    - name: GitHub Repository
+      type: external
+      url: https://github.com/neuro-inc/app-llm-inference
+    - name: Getting Started
+      type: documentation
+      url: https://docs.vllm.ai/en/latest/

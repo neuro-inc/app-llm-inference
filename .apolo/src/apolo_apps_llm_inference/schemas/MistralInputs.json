@@ -1,0 +1,64 @@
+{
+  "$defs": {
+    "ApoloSecret": {
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "ApoloSecret",
+      "type": "object",
+      "x-description": "Apolo Secret Configuration.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Secret",
+      "x-type": "ApoloSecret"
+    },
+    "MistralSize": {
+      "enum": [
+        "Mistral-7B-Instruct-v0.2",
+        "Mistral-7B-Instruct-v0.3",
+        "Mistral-Small-3.1-24B-Instruct-2503",
+        "Mistral-Small-3.2-24B-Instruct-2506"
+      ],
+      "title": "MistralSize",
+      "type": "string"
+    }
+  },
+  "description": "Inputs for the Mistral bundle.\nThis class extends LLMBundleInputs to include specific fields for Mistral.",
+  "properties": {
+    "hf_token": {
+      "$ref": "#/$defs/ApoloSecret",
+      "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
+      "x-title": "Hugging Face Token"
+    },
+    "autoscaling_enabled": {
+      "default": false,
+      "title": "Autoscaling Enabled",
+      "type": "boolean",
+      "x-description": "Enable or disable autoscaling for the LLM.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Enable Autoscaling"
+    },
+    "size": {
+      "$ref": "#/$defs/MistralSize"
+    },
+    "llm_class": {
+      "const": "mistral",
+      "default": "mistral",
+      "title": "Llm Class",
+      "type": "string"
+    }
+  },
+  "required": [
+    "hf_token",
+    "size"
+  ],
+  "title": "MistralInputs",
+  "type": "object"
+}
