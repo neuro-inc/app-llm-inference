@@ -1,9 +1,9 @@
 from apolo_apps_llm_inference.inputs_processor import (
     VLLMInferenceInputsProcessor,
     GPTOSSInferenceValueProcessor,
-    MistralInferenceValueProcessor,
     DeepSeekInferenceValueProcessor,
     Llama4InferenceValueProcessor,
+    MistralInferenceValueProcessor,
 )
 from apolo_apps_llm_inference.outputs_processor import (
     VLLMInferenceOutputsProcessor,

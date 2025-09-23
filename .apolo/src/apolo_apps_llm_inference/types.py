@@ -30,7 +30,7 @@ from apolo_app_types.protocols.common import (
 from apolo_app_types.protocols.common.hugging_face import HF_TOKEN_SCHEMA_EXTRA
 
 
-class LLMInputs(AppInputs):
+class VLLMInferenceInputs(AppInputs):
     preset: Preset
     ingress_http: IngressHttp | None = Field(
         default=None,
@@ -101,7 +101,7 @@ class LLMInputs(AppInputs):
         return self
 
 
-class VLLMOutputsV2(AppOutputs):
+class VLLMInferenceOutputs(AppOutputs):
     chat_internal_api: OpenAICompatChatAPI | None = Field(
         default=None,
         json_schema_extra=SchemaExtraMetadata(
