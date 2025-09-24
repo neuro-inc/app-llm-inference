@@ -123,7 +123,6 @@ nvidiaImage:
   pullPolicy: IfNotPresent
 
 envNvidia:
-  NVIDIA_VISIBLE_DEVICES: "all"
   NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
   VLLM_USE_TRITON_FLASH_ATTN: "1"
 
