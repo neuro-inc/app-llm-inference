@@ -362,6 +362,6 @@
     "preset",
     "hugging_face_model"
   ],
-  "title": "LLMInputs",
+  "title": "VLLMInferenceInputs",
   "type": "object"
 }

@@ -482,6 +482,6 @@
   "required": [
     "hugging_face_model"
   ],
-  "title": "VLLMOutputsV2",
+  "title": "VLLMInferenceOutputs",
   "type": "object"
 }
