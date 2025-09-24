@@ -3,6 +3,7 @@
   title: vLLM
   install_type: workflow
   helm_path: charts/llm-inference-app
+  app_package_name: apolo_apps_llm_inference
   inputs:
     schema_path: .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceInputs.json
     types_name: VLLMInferenceInputs
@@ -55,6 +56,7 @@
       type: documentation
 - app_type: llama4-inference
   name: llama4-inference
+  app_package_name: apolo_apps_llm_inference
   title: LLAMA4
   install_type: workflow
   helm_path: charts/llm-inference-app
@@ -111,6 +113,7 @@
 - app_type: deepseek-inference
   name: deepseek-inference
   title: DeepSeek
+  app_package_name: apolo_apps_llm_inference
   install_type: workflow
   helm_path: charts/llm-inference-app
   inputs:
@@ -164,6 +167,7 @@
       url: https://docs.vllm.ai/en/latest/
 - app_type: mistral-inference
   name: mistral-inference
+  app_package_name: apolo_apps_llm_inference
   title: Mistral
   install_type: workflow
   helm_path: charts/llm-inference-app
@@ -219,6 +223,7 @@
   name: gpt-inference
   title: OpenAI GPT OSS
   install_type: workflow
+  app_package_name: apolo_apps_llm_inference
   helm_path: charts/llm-inference-app
   inputs:
     schema_path: .apolo/src/apolo_apps_llm_inference/schemas/GptOssInputs.json
