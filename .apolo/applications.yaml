@@ -119,7 +119,7 @@
   inputs:
     schema_path: .apolo/src/apolo_apps_llm_inference/schemas/DeepSeekR1Inputs.json
     types_name: DeepSeekR1Inputs
-    processor: DeepSeekR1InputsProcessor
+    processor: DeepSeekInferenceValueProcessor
     image: ghcr.io/neuro-inc/app-llm-inference
   outputs:
     schema_path: .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
