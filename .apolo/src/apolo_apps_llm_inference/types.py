@@ -1,33 +1,30 @@
-from apolo_app_types.protocols.common import (
-    AppInputs,
-    AppOutputs,
-    HuggingFaceCache,
-    HuggingFaceModel,
-    IngressHttp,
-    Preset,
-    SchemaExtraMetadata,
-    SchemaMetaType,
-)
-from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
-from apolo_app_types.protocols.common.hugging_face import HF_SCHEMA_EXTRA
-from apolo_app_types.protocols.common.k8s import Env
-from apolo_app_types.protocols.common.openai_compat import (
-    OpenAICompatChatAPI,
-    OpenAICompatEmbeddingsAPI,
-)
-from pydantic import Field, model_validator
 import typing
 from enum import Enum
 from typing import Literal
-
-from pydantic import Field
 
 from apolo_app_types.protocols.common import (
     ApoloSecret,
     AppInputs,
     SchemaExtraMetadata,
 )
+from apolo_app_types.protocols.common import (
+    AppOutputs,
+    HuggingFaceCache,
+    HuggingFaceModel,
+    IngressHttp,
+    Preset,
+    SchemaMetaType,
+)
+from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
+from apolo_app_types.protocols.common.hugging_face import HF_SCHEMA_EXTRA
 from apolo_app_types.protocols.common.hugging_face import HF_TOKEN_SCHEMA_EXTRA
+from apolo_app_types.protocols.common.k8s import Env
+from apolo_app_types.protocols.common.openai_compat import (
+    OpenAICompatChatAPI,
+    OpenAICompatEmbeddingsAPI,
+)
+from pydantic import Field
+from pydantic import model_validator
 
 
 class VLLMInferenceInputs(AppInputs):

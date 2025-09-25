@@ -38,7 +38,7 @@ from apolo_app_types.protocols.common import (
 from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
 from apolo_app_types.protocols.common.secrets_ import serialize_optional_secret
 from apolo_app_types.protocols.common.storage import ApoloMountModes
-from apolo_sdk import Preset
+from apolo_sdk import Preset as SDKPreset
 
 
 class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
@@ -217,7 +217,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
         values.update(self._configure_model_download(input_))
 
         preset_name = input_.preset.name
-        preset: Preset = get_preset(self.client, preset_name)
+        preset: SDKPreset = get_preset(self.client, preset_name)
         nvidia_gpus = preset.nvidia_gpu.count if preset.nvidia_gpu else 0
         amd_gpus = preset.amd_gpu.count if preset.amd_gpu else 0
 
