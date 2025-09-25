@@ -37,13 +37,13 @@ probe:
   # Steady‑state readiness gate (service/ingress)
   readiness:
     periodSeconds: 10
-    failureThreshold: 3 # ≈30 s to mark NotReady
+    failureThreshold: 36 # ≈360 s to mark NotReady
     timeoutSeconds: 2
 
   # Steady‑state health check (deadlock / OOM detection)
   liveness:
     periodSeconds: 30
-    failureThreshold: 3 # ≈90 s to restart
+    failureThreshold: 9 # ≈270 s to restart
     timeoutSeconds: 5
 
 cache:
