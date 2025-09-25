@@ -54,7 +54,7 @@
     - name: Getting Started
       url: https://docs.vllm.ai/en/latest/
       type: documentation
-- app_type: llama4-inference
+- app_type: llama4
   name: llama4-inference
   app_package_name: apolo_apps_llm_inference
   title: LLAMA4
@@ -110,7 +110,7 @@
     - name: Getting Started
       type: documentation
       url: https://docs.vllm.ai/en/latest/
-- app_type: deepseek-inference
+- app_type: deepseek
   name: deepseek-inference
   title: DeepSeek
   app_package_name: apolo_apps_llm_inference
@@ -165,7 +165,7 @@
     - name: Getting Started
       type: documentation
       url: https://docs.vllm.ai/en/latest/
-- app_type: mistral-inference
+- app_type: mistral
   name: mistral-inference
   app_package_name: apolo_apps_llm_inference
   title: Mistral
@@ -219,7 +219,7 @@
     - name: Getting Started
       type: documentation
       url: https://docs.vllm.ai/en/latest/
-- app_type: gpt-inference
+- app_type: gpt-oss
   name: gpt-inference
   title: OpenAI GPT OSS
   install_type: workflow
