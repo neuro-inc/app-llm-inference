@@ -4,7 +4,7 @@ import typing as t
 from apolo_app_types.outputs.base import BaseAppOutputsProcessor
 from apolo_app_types.outputs.llm import get_llm_inference_outputs
 
-from .types import VLLMInferenceOutputs
+from .app_types import VLLMInferenceOutputs
 
 
 logger = logging.getLogger(__name__)

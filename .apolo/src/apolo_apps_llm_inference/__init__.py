@@ -8,7 +8,7 @@ from apolo_apps_llm_inference.inputs_processor import (
 from apolo_apps_llm_inference.outputs_processor import (
     VLLMInferenceOutputsProcessor,
 )
-from apolo_apps_llm_inference.types import (
+from apolo_apps_llm_inference.app_types import (
     VLLMInferenceInputs,
     VLLMInferenceOutputs,
     MistralInputs,
