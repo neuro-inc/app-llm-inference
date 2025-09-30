@@ -32,6 +32,30 @@ jobs:
         run: |
           echo "::add-matcher::.github/actionlint-matcher.json"
           make lint
+  test-unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v4
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: pip
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Setup Python dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-
+      - name: Install dependencies
+        run: make setup
+      - name: Run unit tests
+        run: make test-unit
 
   check:
     name: Check

@@ -21,7 +21,8 @@ apolo-sdk = "^25.7.2"
 pydantic = "^2.9.2"
 pyyaml = "^6.0.2"
 yarl = "^1.18.3"
-apolo-app-types = "^25.9.19"
+apolo-app-types = {version = "25.9.28", extras = ["fixtures"]}
+dirty-equals = "^0.10.0"
 
 [tool.poetry.group.dev]
 optional = true
