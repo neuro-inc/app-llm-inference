@@ -135,8 +135,8 @@ async def test_values_llm_generation_gpu(setup_clients, mock_get_preset_gpu):
         },
         "preset_name": "gpu-small",
         "resources": {
-            "requests": {"cpu": "1000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
-            "limits": {"cpu": "1000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+            "requests": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+            "limits": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
         },
         "tolerations": [
             {
@@ -201,7 +201,6 @@ async def test_values_llm_generation_gpu(setup_clients, mock_get_preset_gpu):
             "platform.apolo.us/component": "app",
             "platform.apolo.us/preset": "gpu-small",
         },
-        "appTypesImage": {"tag": IsStr(regex=r"^v\d+\.\d+\.\d+.*$")},
         "apolo_app_id": APP_ID,
         "envNvidia": {
             "PATH": "/usr/local/cuda/bin:/usr/local/sbin:"
@@ -448,8 +447,8 @@ async def test_values_llm_generation__storage_integrated(
         },
         "preset_name": "gpu-small",
         "resources": {
-            "requests": {"cpu": "1000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
-            "limits": {"cpu": "1000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+            "requests": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+            "limits": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
         },
         "tolerations": [
             {
@@ -519,9 +518,6 @@ async def test_values_llm_generation__storage_integrated(
         "podLabels": {
             "platform.apolo.us/component": "app",
             "platform.apolo.us/preset": "gpu-small",
-        },
-        "appTypesImage": {
-            "tag": IsStr(regex=r"^v\d+\.\d+\.\d+.*$"),
         },
         "apolo_app_id": APP_ID,
         "envNvidia": {
