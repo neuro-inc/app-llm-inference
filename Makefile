@@ -20,8 +20,9 @@ else
 	poetry run pre-commit run --all-files || poetry run pre-commit run --all-files
 endif
 
-.PHONY: test
-test:
+.PHONY: test-unit
+test-unit:
+	poetry run pytest -vvs --cov=.apolo --cov-report xml:.coverage.unit.xml .apolo/tests/unit
 
 .PHONY: clean
 clean:
@@ -40,5 +41,5 @@ push-hook-image:
 
 .PHONY: gen-types-schemas
 gen-types-schemas:
-	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference llm-inference VLLMInferenceInputs .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceInputs.json
-	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference llm-inference VLLMInferenceOutputs .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
+	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference VLLMInferenceInputs .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceInputs.json
+	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference VLLMInferenceOutputs .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
