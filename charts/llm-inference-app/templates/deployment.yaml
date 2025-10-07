@@ -152,14 +152,14 @@ spec:
               {{- end }}
             {{- end }}
 
-            {{- if eq .Values.gpuProvider "amd" }}
+            {{- if .Values.envAmd }}
               {{- range $k, $v := .Values.envAmd }}
             - name: {{ $k }}
               value: {{ $v | quote }}
               {{- end }}
             {{- end }}
 
-            {{- if eq .Values.gpuProvider "nvidia" }}
+            {{- if .Values.envNvidia }}
               {{- range $k, $v := .Values.envNvidia }}
             - name: {{ $k }}
               value: {{ $v | quote }}
