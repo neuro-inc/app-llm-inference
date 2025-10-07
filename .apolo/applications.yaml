@@ -98,7 +98,7 @@
     - type: image
       url: https://storage.googleapis.com/development-421920-assets/app-logos/llama4-banner.svg
   urls:
-    - name: llama4 installation guide
+    - name: Llama4 installation guide
       type: documentation
       url: https://docs.apolo.us/index/apolo-console/apps/installable-apps/available-apps/llama4
     - name: Hugging Face Meta Models
@@ -156,7 +156,7 @@
     - type: image
       url: https://storage.googleapis.com/development-421920-assets/app-logos/deepseek-r1-banner.svg
   urls:
-    - name: deepseek installation guide
+    - name: Deepseek installation guide
       type: documentation
       url: https://docs.apolo.us/index/apolo-console/apps/installable-apps/available-apps/deepseekr1
     - name: Hugging Face Meta Models
@@ -213,7 +213,7 @@
     - type: image
       url: https://storage.googleapis.com/development-421920-assets/app-logos/mistral-banner.svg
   urls:
-    - name: mistral installation guide
+    - name: Mistral installation guide
       type: documentation
       url: https://docs.apolo.us/index/apolo-console/apps/installable-apps/available-apps/mistral
     - name: Hugging Face Meta Models
@@ -273,7 +273,7 @@
     - type: image
       url: https://storage.googleapis.com/development-421920-assets/app-logos/gpt-oss-banner.svg
   urls:
-    - name: gpt-oss installation guide
+    - name: Gpt-oss installation guide
       type: documentation
       url: https://docs.apolo.us/index/apolo-console/apps/installable-apps/available-apps/gpt-oss
     - name: Hugging Face OpenAI Models
