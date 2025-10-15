@@ -3,7 +3,7 @@ import pytest
 from apolo_apps_llm_inference.outputs_processor import VLLMInferenceOutputsProcessor
 
 
-async def test_llm(setup_clients, mock_kubernetes_client, app_instance_id, mock_hf_files):
+async def test_llm(setup_clients, mock_kubernetes_client, app_instance_id):
     res = await VLLMInferenceOutputsProcessor().generate_outputs(
         helm_values={
             "model": {
@@ -32,7 +32,7 @@ async def test_llm(setup_clients, mock_kubernetes_client, app_instance_id, mock_
 
 
 async def test_llm_without_server_args(
-    setup_clients, mock_kubernetes_client, app_instance_id, mock_hf_files
+    setup_clients, mock_kubernetes_client, app_instance_id, mock_fetch_models
 ):
     res = await VLLMInferenceOutputsProcessor().generate_outputs(
         helm_values={
@@ -61,17 +61,12 @@ async def test_llm_without_server_args(
     assert res["embeddings_external_api"]["host"] == "example.com"
     assert res["llm_model_config"] == {
         "context_max_tokens": 131_072,
-        "base_from_config": 131_072,
-        "after_rope_scaling": 1048576,
-        "tokenizer_model_max_length": 131_072,
-        "sliding_window_tokens": None,
-        "raw_config_has_rope_scaling": True,
         "__type__": "LLMModelConfig",
     }
 
 
 async def test_llm_with_model_max_lenth(
-    setup_clients, mock_kubernetes_client, app_instance_id, mock_hf_files
+    setup_clients, mock_kubernetes_client, app_instance_id
 ):
     max_model_len = 132_222
     res = await VLLMInferenceOutputsProcessor().generate_outputs(
@@ -102,16 +97,11 @@ async def test_llm_with_model_max_lenth(
     assert res["embeddings_external_api"]["host"] == "example.com"
     assert res["llm_model_config"] == {
         "context_max_tokens": max_model_len,
-        "base_from_config": max_model_len,
-        "after_rope_scaling": max_model_len,
-        "tokenizer_model_max_length": max_model_len,
-        "sliding_window_tokens": None,
-        "raw_config_has_rope_scaling": False,
         "__type__": "LLMModelConfig",
     }
 
 async def test_llm_without_model(
-    setup_clients, mock_kubernetes_client, app_instance_id, mock_hf_files
+    setup_clients, mock_kubernetes_client, app_instance_id
 ):
     with pytest.raises(KeyError) as exc_info:
         await VLLMInferenceOutputsProcessor().generate_outputs(
