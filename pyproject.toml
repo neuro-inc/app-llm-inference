@@ -23,6 +23,7 @@ pyyaml = "^6.0.2"
 yarl = "^1.18.3"
 apolo-app-types = {version = "25.10.13", extras = ["fixtures"]}
 dirty-equals = "^0.10.0"
+huggingface-hub = "^0.35.3"
 
 [tool.poetry.group.dev]
 optional = true

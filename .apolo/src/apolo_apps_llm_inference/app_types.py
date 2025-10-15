@@ -2,6 +2,7 @@ import typing
 from enum import Enum
 from typing import Literal
 
+from apolo_app_types import LLMModelConfig
 from apolo_app_types.protocols.common import (
     ApoloSecret,
     AppInputs,
@@ -134,6 +135,14 @@ class VLLMInferenceOutputs(AppOutputs):
         ).as_json_schema_extra(),
     )
     hugging_face_model: HuggingFaceModel
+    llm_model_config: LLMModelConfig | None = Field(
+        default=None,
+        json_schema_extra=SchemaExtraMetadata(
+            title="LLM Model Config",
+            description="Configuration details of the deployed LLM model.",
+            meta_type=SchemaMetaType.INTEGRATION,
+        ).as_json_schema_extra(),
+    )
     tokenizer_hf_name: str = Field(  # noqa: N815
         "",
         json_schema_extra=SchemaExtraMetadata(
