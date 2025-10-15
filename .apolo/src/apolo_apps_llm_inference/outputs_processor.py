@@ -5,7 +5,7 @@ from apolo_app_types.outputs.base import BaseAppOutputsProcessor
 from apolo_app_types.outputs.llm import get_llm_inference_outputs
 from apolo_app_types import LLMModelConfig
 
-from apolo_apps_llm_inference.utils import fetch_max_model_len_from_server
+from .utils import fetch_max_model_len_from_server
 from .app_types import VLLMInferenceOutputs
 
 logger = logging.getLogger(__name__)
