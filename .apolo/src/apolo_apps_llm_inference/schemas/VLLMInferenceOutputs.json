@@ -55,6 +55,111 @@
       "x-title": "Hugging Face Model",
       "x-type": "HuggingFaceModel"
     },
+    "LLMModelConfig": {
+      "properties": {
+        "context_max_tokens": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Max Tokens",
+          "x-description": "Maximum total tokens (prompt + output) accepted in one request. If vLLM is started with --max-model-len, that value is used. Otherwise it is derived from the model config (after RoPE scaling) and capped by the tokenizer's model_max_length when present. Used to compute max generated tokens as: context_max_tokens \u2212 prompt_tokens.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Effective Context Size (tokens)"
+        },
+        "base_from_config": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base From Config",
+          "x-description": "Unscaled context length read directly from the model's config.json. Common fields include max_position_embeddings (Llama/Mistral/NeoX/etc.), n_positions (GPT-2/J), or max_seq_len (MPT). This is BEFORE applying RoPE scaling.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Base Context (from config.json)"
+        },
+        "after_rope_scaling": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "After Rope Scaling",
+          "x-description": "Context length after applying rope_scaling.factor when applicable. If the config already bakes scaling into max_position_embeddings (e.g., original_max_position_embeddings \u00d7 factor), the value equals the base and is not multiplied again.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Context After RoPE Scaling"
+        },
+        "tokenizer_model_max_length": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokenizer Model Max Length",
+          "x-description": "Optional upper bound from tokenizer_config.json:model_max_length. Some tokenizers use very large sentinel values (e.g., 1e30) which should be ignored. When present and reasonable, the effective context is min(after_rope_scaling, this value).",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Tokenizer Model Max Length"
+        },
+        "sliding_window_tokens": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sliding Window Tokens",
+          "x-description": "Size of the model's attention look-back window (if defined), e.g., Mistral/DeepSeek. At each generation step the model attends only to the last W tokens. Informational only\u2014does not change context_max_tokens, but impacts long-context recall.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Sliding Attention Window (tokens)"
+        },
+        "raw_config_has_rope_scaling": {
+          "default": false,
+          "title": "Raw Config Has Rope Scaling",
+          "type": "boolean",
+          "x-description": "True if the model's config.json includes a rope_scaling section. Indicates that the context window may be extended via RoPE scaling.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Has RoPE Scaling"
+        }
+      },
+      "title": "LLMModelConfig",
+      "type": "object",
+      "x-description": "Metadata extracted from Hugging Face configs and deployment settings to describe an LLM's context limits.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "LLM Model Configuration",
+      "x-type": "LLMModelConfig"
+    },
     "OpenAICompatChatAPI": {
       "properties": {
         "host": {
@@ -441,6 +546,21 @@
     },
     "hugging_face_model": {
       "$ref": "#/$defs/HuggingFaceModel"
+    },
+    "llm_model_config": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LLMModelConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "x-description": "Configuration details of the deployed LLM model.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "LLM Model Config"
     },
     "tokenizer_hf_name": {
       "default": "",

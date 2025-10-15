@@ -5,7 +5,7 @@ from apolo_app_types.outputs.base import BaseAppOutputsProcessor
 from apolo_app_types.outputs.llm import get_llm_inference_outputs
 from apolo_app_types import LLMModelConfig
 
-from utils import load_hf_json, base_context_from_config, apply_rope_scaling, tokenizer_cap
+from .utils import load_hf_json, base_context_from_config, apply_rope_scaling, tokenizer_cap
 from .app_types import VLLMInferenceOutputs
 
 logger = logging.getLogger(__name__)
