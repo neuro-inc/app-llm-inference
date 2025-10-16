@@ -13,7 +13,7 @@ def mock_fetch_models(monkeypatch):
     Adjust the returned dicts to match your scenarios.
     """
 
-    async def _fake_fetch_max_model_len(host, port, expected_model_id, *, timeout_s=5.0):
+    async def _fake_fetch_max_model_len(*_, **__):
         return 131_072  # simulate vLLM reporting this limit
     from apolo_apps_llm_inference import utils, outputs_processor
     monkeypatch.setattr(
