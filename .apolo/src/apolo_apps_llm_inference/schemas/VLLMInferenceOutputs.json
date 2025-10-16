@@ -55,6 +55,34 @@
       "x-title": "Hugging Face Model",
       "x-type": "HuggingFaceModel"
     },
+    "LLMModelConfig": {
+      "properties": {
+        "context_max_tokens": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Max Tokens",
+          "x-description": "Maximum total tokens (prompt + output) accepted in one request. If vLLM is started with --max-model-len, that value is used. Otherwise it is derived from the model config (after RoPE scaling) and capped by the tokenizer's model_max_length when present. Used to compute max generated tokens as: context_max_tokens \u2212 prompt_tokens.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Effective Context Size (tokens)"
+        }
+      },
+      "title": "LLMModelConfig",
+      "type": "object",
+      "x-description": "Metadata extracted from Hugging Face configs and deployment settings to describe an LLM's context limits.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "LLM Model Configuration",
+      "x-type": "LLMModelConfig"
+    },
     "OpenAICompatChatAPI": {
       "properties": {
         "host": {
@@ -441,6 +469,21 @@
     },
     "hugging_face_model": {
       "$ref": "#/$defs/HuggingFaceModel"
+    },
+    "llm_model_config": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LLMModelConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "x-description": "Configuration details of the deployed LLM model.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "LLM Model Config"
     },
     "tokenizer_hf_name": {
       "default": "",
