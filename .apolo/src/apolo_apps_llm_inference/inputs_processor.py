@@ -3,7 +3,7 @@ import typing as t
 from decimal import Decimal
 from typing import NamedTuple
 
-from apolo_app_types import HuggingFaceModel, LLMInputs
+from apolo_app_types import HuggingFaceModel
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps import LLMChartValueProcessor
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
@@ -40,16 +40,17 @@ from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
 from apolo_app_types.protocols.common.secrets_ import serialize_optional_secret
 from apolo_app_types.protocols.common.storage import ApoloMountModes
 from apolo_sdk import Preset as SDKPreset
+from apolo_apps_llm_inference.app_types import VLLMInferenceInputs
 
 
-class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
+class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs]):
     def __init__(self, *args: t.Any, **kwargs: t.Any):
         super().__init__(*args, **kwargs)
 
     async def gen_extra_helm_args(self, *_: t.Any) -> list[str]:
         return ["--timeout", "30m"]
 
-    def _configure_autoscaling(self, input_: LLMInputs) -> dict[str, t.Any]:
+    def _configure_autoscaling(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
         """
         Configure autoscaling.
         """
@@ -116,14 +117,14 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
 
         return parallel_server_args
 
-    def _configure_model(self, input_: LLMInputs) -> dict[str, str]:
+    def _configure_model(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         return {
             "modelHFName": input_.hugging_face_model.model_hf_name,
             "tokenizerHFName": input_.tokenizer_hf_name,
         }
 
     def _configure_env(
-        self, input_: LLMInputs, app_secrets_name: str
+        self, input_: VLLMInferenceInputs, app_secrets_name: str
     ) -> dict[str, t.Any]:
         # Start with base environment variables
         env_vars = {
@@ -143,7 +144,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
 
         return env_vars
 
-    def _configure_extra_annotations(self, input_: LLMInputs) -> dict[str, str]:
+    def _configure_extra_annotations(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_annotations: dict[str, str] = {}
         if input_.cache_config:
             storage_mount = ApoloFilesMount(
@@ -156,7 +157,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
             )
         return extra_annotations
 
-    def _configure_extra_labels(self, input_: LLMInputs) -> dict[str, str]:
+    def _configure_extra_labels(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_labels: dict[str, str] = {}
         if input_.cache_config:
             extra_labels.update(
@@ -166,7 +167,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
             )
         return extra_labels
 
-    def _configure_model_download(self, input_: LLMInputs) -> dict[str, t.Any]:
+    def _configure_model_download(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
         if input_.cache_config:
             return {
                 "modelDownload": {
@@ -187,9 +188,30 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
             },
         }
 
+    def _configure_image(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
+        if input_.docker_image_config:
+            return {
+                "image": {
+                    "repository": input_.docker_image_config.repository,
+                    "tag": input_.docker_image_config.tag,
+                    "pullPolicy": input_.docker_image_config.pull_policy,
+                },
+                "nvidiaImage": {
+                    "repository": input_.docker_image_config.repository,
+                    "tag": input_.docker_image_config.tag,
+                    "pullPolicy": input_.docker_image_config.pull_policy,
+                },
+                "amdImage": {
+                    "repository": input_.docker_image_config.repository,
+                    "tag": input_.docker_image_config.tag,
+                    "pullPolicy": input_.docker_image_config.pull_policy,
+                },
+            }
+        return {}
+
     async def gen_extra_values(
         self,
-        input_: LLMInputs,
+        input_: VLLMInferenceInputs,
         app_name: str,
         namespace: str,
         app_id: str,
@@ -236,6 +258,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
         parallel_args = self._configure_parallel_args(
             input_.server_extra_args, gpu_count
         )
+        image_config = self._configure_image(input_)
         server_extra_args = [
             *input_.server_extra_args,
             *parallel_args,
@@ -254,6 +277,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[LLMInputs]):
                 gpu_env,
                 values,
                 autoscaling,
+                image_config,
             ]
         )
 
@@ -354,14 +378,14 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
         best_name = min(candidates)[-1]
         return Preset(name=best_name)
 
-    async def _llm_inputs(self, input_: T) -> LLMInputs:
+    async def _llm_inputs(self, input_: T) -> VLLMInferenceInputs:
         hf_model = HuggingFaceModel(
             model_hf_name=self.model_map[input_.size].model_hf_name,
             hf_token=input_.hf_token,
         )
         preset_chosen = await self._get_preset(input_)
         logger.info("Preset chosen: %s", preset_chosen.name)
-        return LLMInputs(
+        return VLLMInferenceInputs(
             hugging_face_model=hf_model,
             tokenizer_hf_name=hf_model.model_hf_name,
             ingress_http=IngressHttp(auth=NoAuth()),

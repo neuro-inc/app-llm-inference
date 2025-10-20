@@ -2,7 +2,7 @@ import typing
 from enum import Enum
 from typing import Literal
 
-from apolo_app_types import LLMModelConfig
+from apolo_app_types import LLMModelConfig, ContainerImage
 from apolo_app_types.protocols.common import (
     ApoloSecret,
     AppInputs,
@@ -26,6 +26,7 @@ from apolo_app_types.protocols.common.openai_compat import (
 )
 from pydantic import Field
 from pydantic import model_validator
+
 
 
 class VLLMInferenceInputs(AppInputs):
@@ -87,6 +88,14 @@ class VLLMInferenceInputs(AppInputs):
             " If you enable this, "
             "please ensure that cache config "
             "is enabled as well.",
+            is_advanced_field=True,
+        ).as_json_schema_extra(),
+    )
+    docker_image_config: ContainerImage | None = Field(
+        default=None,
+        json_schema_extra=SchemaExtraMetadata(
+            title="Docker Image Config",
+            description="Override container image for vLLM.",
             is_advanced_field=True,
         ).as_json_schema_extra(),
     )
