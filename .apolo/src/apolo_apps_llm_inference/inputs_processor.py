@@ -187,6 +187,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                 "enabled": True,
             },
         }
+
     def _configure_image(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
         if input_.docker_image_config:
             return {
@@ -207,6 +208,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                 },
             }
         return {}
+
     async def gen_extra_values(
         self,
         input_: VLLMInferenceInputs,
@@ -275,6 +277,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                 gpu_env,
                 values,
                 autoscaling,
+                image_config,
             ]
         )
 
