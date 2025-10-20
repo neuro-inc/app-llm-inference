@@ -1,6 +1,5 @@
-from dirty_equals import IsStr
-
-from apolo_app_types import HuggingFaceModel, LLMInputs
+from apolo_app_types import HuggingFaceModel
+from apolo_apps_llm_inference import VLLMInferenceInputs
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps.common import (
     APOLO_ORG_LABEL,
@@ -9,7 +8,6 @@ from apolo_app_types.helm.apps.common import (
     _get_match_expressions,
 )
 from apolo_app_types.helm.apps.llm import KEDA_HTTP_PROXY_SERVICE
-from apolo_app_types.inputs.args import app_type_to_vals
 from apolo_app_types.protocols.common import ApoloFilesPath, IngressHttp, Preset, ApoloAuth
 from apolo_app_types.protocols.common.autoscaling import (
     AutoscalingKedaHTTP,
@@ -31,7 +29,7 @@ async def test_values_llm_generation_cpu(setup_clients, mock_get_preset_cpu):
     )
 
     helm_params = await input_processor.gen_extra_values(
-        input_=LLMInputs(
+        input_=VLLMInferenceInputs(
             preset=Preset(
                 name="cpu-large",
             ),
@@ -106,7 +104,7 @@ async def test_values_llm_generation_gpu(setup_clients, mock_get_preset_gpu):
     )
 
     helm_params = await input_processor.gen_extra_values(
-        input_=LLMInputs(
+        input_=VLLMInferenceInputs(
             preset=Preset(
                 name="gpu-small",
             ),
@@ -220,7 +218,7 @@ async def test_values_llm_generation_cpu_apolo_secret(
     )
 
     helm_params = await input_processor.gen_extra_values(
-        input_=LLMInputs(
+        input_=VLLMInferenceInputs(
             preset=Preset(
                 name="cpu-large",
             ),
@@ -298,7 +296,7 @@ async def test_values_llm_generation_gpu_4x(setup_clients, mock_get_preset_gpu):
     )
 
     helm_params = await input_processor.gen_extra_values(
-        input_=LLMInputs(
+        input_=VLLMInferenceInputs(
             preset=Preset(name="gpu-large"),  # triggers nvidia_gpu=4 in conftest
             ingress_http=IngressHttp(auth=ApoloAuth()),
             hugging_face_model=HuggingFaceModel(
@@ -323,7 +321,7 @@ async def test_values_llm_generation_gpu_8x(setup_clients, mock_get_preset_gpu):
     )
 
     helm_params = await input_processor.gen_extra_values(
-        input_=LLMInputs(
+        input_=VLLMInferenceInputs(
             preset=Preset(name="gpu-xlarge"),  # triggers nvidia_gpu=8 in conftest
             ingress_http=IngressHttp(auth=ApoloAuth()),
             hugging_face_model=HuggingFaceModel(
@@ -349,7 +347,7 @@ async def test_values_llm_generation_gpu_8x_pps(setup_clients, mock_get_preset_g
     )
 
     helm_params = await input_processor.gen_extra_values(
-        input_=LLMInputs(
+        input_=VLLMInferenceInputs(
             preset=Preset(name="gpu-xlarge"),  # triggers nvidia_gpu=8 in conftest
             ingress_http=IngressHttp(auth=ApoloAuth()),
             hugging_face_model=HuggingFaceModel(
@@ -376,7 +374,7 @@ async def test_values_llm_generation_gpu_8x_pps_and_tps(
     )
 
     helm_params = await input_processor.gen_extra_values(
-        input_=LLMInputs(
+        input_=VLLMInferenceInputs(
             preset=Preset(name="gpu-xlarge"),  # triggers nvidia_gpu=8 in conftest
             ingress_http=IngressHttp(auth=ApoloAuth()),
             hugging_face_model=HuggingFaceModel(
@@ -412,7 +410,7 @@ async def test_values_llm_generation__storage_integrated(
     )
 
     helm_params = await input_processor.gen_extra_values(
-        input_=LLMInputs(
+        input_=VLLMInferenceInputs(
             preset=Preset(
                 name="gpu-small",
             ),
@@ -537,7 +535,7 @@ async def test_values_llm_generation__autoscaling(setup_clients, mock_get_preset
     )
 
     helm_params = await input_processor.gen_extra_values(
-        input_=LLMInputs(
+        input_=VLLMInferenceInputs(
             preset=Preset(
                 name="gpu-small",
             ),
