@@ -2,7 +2,7 @@ import typing
 from enum import Enum
 from typing import Literal
 
-from apolo_app_types import LLMModelConfig
+from apolo_app_types import LLMModelConfig, ContainerImage
 from apolo_app_types.protocols.common import (
     ApoloSecret,
     AppInputs,
@@ -24,32 +24,9 @@ from apolo_app_types.protocols.common.openai_compat import (
     OpenAICompatChatAPI,
     OpenAICompatEmbeddingsAPI,
 )
-from pydantic import Field, BaseModel, ConfigDict
+from pydantic import Field
 from pydantic import model_validator
 
-
-class vLLMDockerImageConfig(BaseModel):
-    model_config = ConfigDict(
-        protected_namespaces=(),
-        json_schema_extra=SchemaExtraMetadata(
-            title="vLLM Docker Image Configuration",
-            description="Custom Docker image configuration for vLLM inference.",
-        ).as_json_schema_extra(),
-    )
-    image: str = Field(
-        ...,
-        json_schema_extra=SchemaExtraMetadata(
-            title="Docker Image",
-            description="Specify the docker image to use for VLLM inference without tag Ex: vllm/vllm-openai.",
-        ).as_json_schema_extra(),
-    )
-    tag: str = Field(
-        ...,
-        json_schema_extra=SchemaExtraMetadata(
-            title="Docker Image Tag",
-            description="Set the tag of the Docker image to use for VLLM inference Ex: v0.10.1.1.",
-        ).as_json_schema_extra(),
-    )
 
 
 class VLLMInferenceInputs(AppInputs):
@@ -114,7 +91,7 @@ class VLLMInferenceInputs(AppInputs):
             is_advanced_field=True,
         ).as_json_schema_extra(),
     )
-    docker_image_config: vLLMDockerImageConfig | None = Field(
+    docker_image_config: ContainerImage | None = Field(
         default=None,
         json_schema_extra=SchemaExtraMetadata(
             title="Docker Image Config",

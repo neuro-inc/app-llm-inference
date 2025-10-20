@@ -131,6 +131,76 @@
       "x-title": "Autoscaling HPA",
       "x-type": "AutoscalingKedaHTTP"
     },
+    "ContainerImage": {
+      "properties": {
+        "repository": {
+          "title": "Repository",
+          "type": "string",
+          "x-description": "Choose a repository for the container image.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Container Image Repository"
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag",
+          "x-description": "Choose a tag for the container image.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Container Image Tag"
+        },
+        "dockerconfigjson": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DockerConfigModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "x-description": "ImagePullSecrets for DockerHub",
+          "x-is-advanced-field": false,
+          "x-meta-type": "integration",
+          "x-title": "ImagePullSecrets for DockerHub"
+        },
+        "pull_policy": {
+          "$ref": "#/$defs/ContainerImagePullPolicy",
+          "default": "IfNotPresent",
+          "x-description": "Specify the pull policy for the container image.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Container Image Pull Policy"
+        }
+      },
+      "required": [
+        "repository"
+      ],
+      "title": "ContainerImage",
+      "type": "object",
+      "x-description": "Container image to be used in application",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Container Image",
+      "x-type": "ContainerImage"
+    },
+    "ContainerImagePullPolicy": {
+      "enum": [
+        "Always",
+        "Never",
+        "IfNotPresent"
+      ],
+      "title": "ContainerImagePullPolicy",
+      "type": "string"
+    },
     "CustomAuth": {
       "properties": {
         "type": {
@@ -156,6 +226,28 @@
       "x-meta-type": "inline",
       "x-title": "Custom Authentication",
       "x-type": "CustomAuth"
+    },
+    "DockerConfigModel": {
+      "properties": {
+        "filecontents": {
+          "title": "Filecontents",
+          "type": "string",
+          "x-description": "The contents of the Docker config file.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Docker Config File Contents"
+        }
+      },
+      "required": [
+        "filecontents"
+      ],
+      "title": "DockerConfigModel",
+      "type": "object",
+      "x-description": "Docker configuration content.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "Docker Config",
+      "x-type": "DockerConfigModel"
     },
     "Env": {
       "properties": {
@@ -365,36 +457,6 @@
       "x-meta-type": "inline",
       "x-title": "Request Rate Configuration",
       "x-type": "RequestRateConfig"
-    },
-    "vLLMDockerImageConfig": {
-      "properties": {
-        "image": {
-          "title": "Image",
-          "type": "string",
-          "x-description": "Specify the docker image to use for VLLM inference without tag Ex: vllm/vllm-openai.",
-          "x-is-advanced-field": false,
-          "x-meta-type": "inline",
-          "x-title": "Docker Image"
-        },
-        "tag": {
-          "title": "Tag",
-          "type": "string",
-          "x-description": "Set the tag of the Docker image to use for VLLM inference Ex: v0.10.1.1.",
-          "x-is-advanced-field": false,
-          "x-meta-type": "inline",
-          "x-title": "Docker Image Tag"
-        }
-      },
-      "required": [
-        "image",
-        "tag"
-      ],
-      "title": "vLLMDockerImageConfig",
-      "type": "object",
-      "x-description": "Custom Docker image configuration for vLLM inference.",
-      "x-is-advanced-field": false,
-      "x-meta-type": "inline",
-      "x-title": "vLLM Docker Image Configuration"
     }
   },
   "properties": {
@@ -484,7 +546,7 @@
     "docker_image_config": {
       "anyOf": [
         {
-          "$ref": "#/$defs/vLLMDockerImageConfig"
+          "$ref": "#/$defs/ContainerImage"
         },
         {
           "type": "null"
