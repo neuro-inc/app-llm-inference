@@ -365,6 +365,36 @@
       "x-meta-type": "inline",
       "x-title": "Request Rate Configuration",
       "x-type": "RequestRateConfig"
+    },
+    "vLLMDockerImageConfig": {
+      "properties": {
+        "image": {
+          "title": "Image",
+          "type": "string",
+          "x-description": "Specify the docker image to use for VLLM inference without tag Ex: vllm/vllm-openai.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Docker Image"
+        },
+        "tag": {
+          "title": "Tag",
+          "type": "string",
+          "x-description": "Set the tag of the Docker image to use for VLLM inference Ex: v0.10.1.1.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Docker Image Tag"
+        }
+      },
+      "required": [
+        "image",
+        "tag"
+      ],
+      "title": "vLLMDockerImageConfig",
+      "type": "object",
+      "x-description": "Custom Docker image configuration for vLLM inference.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "vLLM Docker Image Configuration"
     }
   },
   "properties": {
@@ -450,6 +480,21 @@
       "x-is-advanced-field": true,
       "x-meta-type": "inline",
       "x-title": "HTTP Autoscaling"
+    },
+    "docker_image_config": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/vLLMDockerImageConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "x-description": "Custom Docker image configuration for VLLM.",
+      "x-is-advanced-field": true,
+      "x-meta-type": "inline",
+      "x-title": "Docker Image Config"
     }
   },
   "required": [
