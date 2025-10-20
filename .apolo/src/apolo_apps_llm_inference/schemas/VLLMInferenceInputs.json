@@ -553,7 +553,7 @@
         }
       ],
       "default": null,
-      "x-description": "Custom Docker image configuration for VLLM.",
+      "x-description": "Override container image for vLLM.",
       "x-is-advanced-field": true,
       "x-meta-type": "inline",
       "x-title": "Docker Image Config"

@@ -95,7 +95,7 @@ class VLLMInferenceInputs(AppInputs):
         default=None,
         json_schema_extra=SchemaExtraMetadata(
             title="Docker Image Config",
-            description="Custom Docker image configuration for VLLM.",
+            description="Override container image for vLLM.",
             is_advanced_field=True,
         ).as_json_schema_extra(),
     )
