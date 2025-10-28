@@ -129,7 +129,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         # Start with base environment variables
         env_vars = {
             "HUGGING_FACE_HUB_TOKEN": serialize_optional_secret(
-                input_.hugging_face_model.hf_token, secret_name=app_secrets_name
+                input_.hugging_face_model.hf_token.token, secret_name=app_secrets_name
             )
         }
 

@@ -1,4 +1,4 @@
-from apolo_app_types import HuggingFaceModel
+from apolo_app_types import HuggingFaceModel, HuggingFaceToken
 from apolo_apps_llm_inference import VLLMInferenceInputs
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps.common import (
@@ -14,7 +14,7 @@ from apolo_app_types.protocols.common.autoscaling import (
     RequestRateConfig,
 )
 from apolo_app_types.protocols.common.secrets_ import ApoloSecret
-from apolo_app_types.protocols.huggingface_cache import (
+from apolo_app_types.protocols.hugging_face import (
     HuggingFaceCache,
 )
 
@@ -35,7 +35,10 @@ async def test_values_llm_generation_cpu(setup_clients, mock_get_preset_cpu):
             ),
             ingress_http=IngressHttp(),
             hugging_face_model=HuggingFaceModel(
-                model_hf_name="test", hf_token=ApoloSecret(key=hf_token)
+                model_hf_name="test", hf_token=HuggingFaceToken(
+                    token_name="token1",
+                    token=ApoloSecret(key=hf_token)
+                )
             ),
             tokenizer_hf_name="test_tokenizer",
             server_extra_args=["--flag1.1 --flag1.2", "--flag2", "--flag3"],
@@ -110,7 +113,10 @@ async def test_values_llm_generation_gpu(setup_clients, mock_get_preset_gpu):
             ),
             ingress_http=IngressHttp(),
             hugging_face_model=HuggingFaceModel(
-                model_hf_name="test", hf_token=ApoloSecret(key=hf_token)
+                model_hf_name="test", hf_token=HuggingFaceToken(
+                    token_name="token1",
+                    token=ApoloSecret(key=hf_token)
+                )
             ),
             tokenizer_hf_name="test_tokenizer",
             server_extra_args=["--flag1.1 --flag1.2", "--flag2", "--flag3"],
@@ -224,10 +230,10 @@ async def test_values_llm_generation_cpu_apolo_secret(
             ),
             ingress_http=IngressHttp(),
             hugging_face_model=HuggingFaceModel(
-                model_hf_name="test",
-                hf_token=ApoloSecret(
-                    key="hf_token",
-                ),
+                model_hf_name="test", hf_token=HuggingFaceToken(
+                    token_name="token1",
+                    token=ApoloSecret(key='hf_token')
+                )
             ),
             tokenizer_hf_name="test_tokenizer",
             server_extra_args=["--flag1.1 --flag1.2", "--flag2", "--flag3"],
@@ -300,7 +306,10 @@ async def test_values_llm_generation_gpu_4x(setup_clients, mock_get_preset_gpu):
             preset=Preset(name="gpu-large"),  # triggers nvidia_gpu=4 in conftest
             ingress_http=IngressHttp(auth=ApoloAuth()),
             hugging_face_model=HuggingFaceModel(
-                model_hf_name="test", hf_token=ApoloSecret(key="xxx")
+                model_hf_name="test", hf_token=HuggingFaceToken(
+                    token_name="token1",
+                    token=ApoloSecret(key='hf_token')
+                )
             ),
             server_extra_args=["--foo"],
         ),
@@ -325,7 +334,10 @@ async def test_values_llm_generation_gpu_8x(setup_clients, mock_get_preset_gpu):
             preset=Preset(name="gpu-xlarge"),  # triggers nvidia_gpu=8 in conftest
             ingress_http=IngressHttp(auth=ApoloAuth()),
             hugging_face_model=HuggingFaceModel(
-                model_hf_name="test2", hf_token=ApoloSecret(key="yyy")
+                model_hf_name="test", hf_token=HuggingFaceToken(
+                    token_name="token1",
+                    token=ApoloSecret(key='hf_token')
+                )
             ),
             server_extra_args=["--bar"],
         ),
@@ -351,7 +363,10 @@ async def test_values_llm_generation_gpu_8x_pps(setup_clients, mock_get_preset_g
             preset=Preset(name="gpu-xlarge"),  # triggers nvidia_gpu=8 in conftest
             ingress_http=IngressHttp(auth=ApoloAuth()),
             hugging_face_model=HuggingFaceModel(
-                model_hf_name="test2", hf_token=ApoloSecret(key="yyy")
+                model_hf_name="test", hf_token=HuggingFaceToken(
+                    token_name="token1",
+                    token=ApoloSecret(key='hf_token')
+                )
             ),
             server_extra_args=["--bar", "--pipeline-parallel-size=8"],
         ),
@@ -378,8 +393,10 @@ async def test_values_llm_generation_gpu_8x_pps_and_tps(
             preset=Preset(name="gpu-xlarge"),  # triggers nvidia_gpu=8 in conftest
             ingress_http=IngressHttp(auth=ApoloAuth()),
             hugging_face_model=HuggingFaceModel(
-                model_hf_name="test2",
-                hf_token=ApoloSecret(key="yyy"),
+                model_hf_name="test", hf_token=HuggingFaceToken(
+                    token_name="token1",
+                    token=ApoloSecret(key='hf_token')
+                )
             ),
             server_extra_args=[
                 "--bar",
@@ -418,13 +435,16 @@ async def test_values_llm_generation__storage_integrated(
                 auth=ApoloAuth(),
             ),
             hugging_face_model=HuggingFaceModel(
-                model_hf_name="test", hf_token=ApoloSecret(key=hf_token)
-            ),
-            cache_config=HuggingFaceCache(
-                files_path=ApoloFilesPath(
-                    path="storage://some-cluster/some-org/some-proj/some-folder"
+                model_hf_name="test", hf_token=HuggingFaceToken(
+                    token_name="token1",
+                    token=ApoloSecret(key=hf_token)
                 ),
-            ),
+                hf_cache=HuggingFaceCache(
+                    files_path=ApoloFilesPath(
+                        path="storage://some-cluster/some-org/some-proj/some-folder"
+                    ),
+                ),
+            )
         ),
         apolo_client=apolo_client,
         app_type=AppType.LLMInference,
@@ -543,11 +563,14 @@ async def test_values_llm_generation__autoscaling(setup_clients, mock_get_preset
                 auth=ApoloAuth(),
             ),
             hugging_face_model=HuggingFaceModel(
-                model_hf_name="test", hf_token=ApoloSecret(key=hf_token)
-            ),
-            cache_config=HuggingFaceCache(
-                files_path=ApoloFilesPath(
-                    path="storage://some-cluster/some-org/some-proj/some-folder"
+                model_hf_name="test", hf_token=HuggingFaceToken(
+                    token_name="token1",
+                    token=ApoloSecret(key=hf_token)
+                ),
+                hf_cache=HuggingFaceCache(
+                    files_path=ApoloFilesPath(
+                        path="storage://some-cluster/some-org/some-proj/some-folder"
+                    ),
                 ),
             ),
             http_autoscaling=AutoscalingKedaHTTP(
