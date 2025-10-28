@@ -1,5 +1,27 @@
 {
   "$defs": {
+    "ApoloFilesPath": {
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string",
+          "x-description": "Provide the Apolo Storage path starting with `storage:` to locate your files.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Storage Path"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "ApoloFilesPath",
+      "type": "object",
+      "x-description": "Specify the path within the Apolo Files application to read from or write to.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "inline",
+      "x-title": "Apolo Files Path",
+      "x-type": "ApoloFilesFile"
+    },
     "ApoloSecret": {
       "properties": {
         "key": {
@@ -18,6 +40,26 @@
       "x-title": "Secret",
       "x-type": "ApoloSecret"
     },
+    "HuggingFaceCache": {
+      "properties": {
+        "files_path": {
+          "$ref": "#/$defs/ApoloFilesPath",
+          "default": {
+            "path": "storage:.apps/hugging-face-cache",
+            "__type__": "ApoloFilesPath"
+          },
+          "x-description": "The path to the Apolo Files directory where Hugging Face artifacts are cached.",
+          "x-title": "Files Path"
+        }
+      },
+      "title": "HuggingFaceCache",
+      "type": "object",
+      "x-description": "Configuration for the Hugging Face cache.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "Hugging Face Cache",
+      "x-type": "HuggingFaceCache"
+    },
     "HuggingFaceModel": {
       "properties": {
         "model_hf_name": {
@@ -31,7 +73,7 @@
         "hf_token": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ApoloSecret"
+              "$ref": "#/$defs/HuggingFaceToken"
             },
             {
               "type": "null"
@@ -40,8 +82,23 @@
           "default": null,
           "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
           "x-is-advanced-field": false,
-          "x-meta-type": "inline",
+          "x-meta-type": "integration",
           "x-title": "Hugging Face Token"
+        },
+        "hf_cache": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HuggingFaceCache"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "x-description": "Enables caching of model files to reduce redundant downloads and speed up load times.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Model Cache"
         }
       },
       "required": [
@@ -54,6 +111,35 @@
       "x-meta-type": "integration",
       "x-title": "Hugging Face Model",
       "x-type": "HuggingFaceModel"
+    },
+    "HuggingFaceToken": {
+      "properties": {
+        "token_name": {
+          "minLength": 0,
+          "title": "Token Name",
+          "type": "string",
+          "x-description": "The name of the Hugging Face token.",
+          "x-is-advanced-field": false,
+          "x-meta-type": "inline",
+          "x-title": "Token Name"
+        },
+        "token": {
+          "$ref": "#/$defs/ApoloSecret",
+          "x-description": "The Hugging Face API token used to access models.",
+          "x-title": "Hugging Face Token"
+        }
+      },
+      "required": [
+        "token_name",
+        "token"
+      ],
+      "title": "HuggingFaceToken",
+      "type": "object",
+      "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
+      "x-is-advanced-field": false,
+      "x-meta-type": "integration",
+      "x-title": "Hugging Face Token",
+      "x-type": "HuggingFaceToken"
     },
     "LLMModelConfig": {
       "properties": {

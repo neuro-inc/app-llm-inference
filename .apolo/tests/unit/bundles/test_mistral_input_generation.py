@@ -1,3 +1,4 @@
+from apolo_app_types import HuggingFaceToken
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps.bundles.llm import MistralValueProcessor
 from apolo_app_types.helm.apps.common import (
@@ -25,7 +26,10 @@ async def test_values_mistral_generation_gpu_default_preset(
     helm_params = await input_processor.gen_extra_values(
         input_=MistralInputs(
             size=model_to_test,
-            hf_token=ApoloSecret(key="FakeSecret"),
+            hf_token=HuggingFaceToken(
+                token_name="FakeToken",
+                token=ApoloSecret(key="FakeSecret"),
+            )
         ),
         apolo_client=apolo_client,
         app_type=AppType.Mistral,

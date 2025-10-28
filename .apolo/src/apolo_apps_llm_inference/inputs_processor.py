@@ -129,7 +129,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         # Start with base environment variables
         env_vars = {
             "HUGGING_FACE_HUB_TOKEN": serialize_optional_secret(
-                input_.hugging_face_model.hf_token, secret_name=app_secrets_name
+                input_.hugging_face_model.hf_token.token, secret_name=app_secrets_name
             )
         }
 
@@ -146,9 +146,9 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_extra_annotations(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_annotations: dict[str, str] = {}
-        if input_.cache_config:
+        if input_.hugging_face_model.hf_cache and input_.hugging_face_model.hf_cache.files_path:
             storage_mount = ApoloFilesMount(
-                storage_uri=input_.cache_config.files_path,
+                storage_uri=input_.hugging_face_model.hf_cache.files_path,
                 mount_path=MountPath(path="/root/.cache/huggingface"),
                 mode=ApoloMountMode(mode=ApoloMountModes.RW),
             )
@@ -159,7 +159,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_extra_labels(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_labels: dict[str, str] = {}
-        if input_.cache_config:
+        if input_.hugging_face_model.hf_cache and input_.hugging_face_model.hf_cache.files_path:
             extra_labels.update(
                 **gen_apolo_storage_integration_labels(
                     client=self.client, inject_storage=True
@@ -168,7 +168,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         return extra_labels
 
     def _configure_model_download(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
-        if input_.cache_config:
+        if input_.hugging_face_model.hf_cache:
             return {
                 "modelDownload": {
                     "hookEnabled": True,
@@ -382,6 +382,9 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
         hf_model = HuggingFaceModel(
             model_hf_name=self.model_map[input_.size].model_hf_name,
             hf_token=input_.hf_token,
+            hf_cache=HuggingFaceCache(
+                files_path=ApoloFilesPath(path=self._get_storage_path())
+            ),
         )
         preset_chosen = await self._get_preset(input_)
         logger.info("Preset chosen: %s", preset_chosen.name)
@@ -390,9 +393,6 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
             tokenizer_hf_name=hf_model.model_hf_name,
             ingress_http=IngressHttp(auth=NoAuth()),
             preset=preset_chosen,
-            cache_config=HuggingFaceCache(
-                files_path=ApoloFilesPath(path=self._get_storage_path())
-            ),
             http_autoscaling=AutoscalingKedaHTTP(scaledown_period=300)
             if input_.autoscaling_enabled
             else None,
