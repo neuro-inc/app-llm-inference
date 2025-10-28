@@ -557,21 +557,6 @@
       "x-meta-type": "inline",
       "x-title": "Extra Environment Variables"
     },
-    "cache_config": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/HuggingFaceCache"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "x-description": "Configure Hugging Face cache.",
-      "x-is-advanced-field": false,
-      "x-meta-type": "inline",
-      "x-title": "Cache Config"
-    },
     "http_autoscaling": {
       "anyOf": [
         {
