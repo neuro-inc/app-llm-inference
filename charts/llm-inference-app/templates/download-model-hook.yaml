@@ -44,7 +44,7 @@ spec:
             {{ $v | toYaml | nindent 12 }}
             {{- end }}
         {{- end }}
-        command: ["huggingface-cli"]
+        command: ["hf"]
         args:
           - download
           - --resume-download
