@@ -3,7 +3,7 @@ import typing as t
 from decimal import Decimal
 from typing import NamedTuple
 
-from apolo_app_types import HuggingFaceModel
+from apolo_app_types import HuggingFaceModel, HuggingFaceToken
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps import LLMChartValueProcessor
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
@@ -41,6 +41,7 @@ from apolo_apps_llm_inference.app_types import (
     Llama4Size,
     MistralInputs,
     MistralSize,
+    GptOssInputs,
 )
 
 
@@ -287,7 +288,7 @@ class ModelSettings(NamedTuple):
     vram_min_required_gb: float
 
 
-T = t.TypeVar("T", LLama4Inputs, DeepSeekR1Inputs, MistralInputs)
+T = t.TypeVar("T", LLama4Inputs, DeepSeekR1Inputs, MistralInputs, GptOssInputs)
 
 
 logger = logging.getLogger(__name__)
@@ -380,13 +381,12 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
         return Preset(name=best_name)
 
     async def _llm_inputs(self, input_: T) -> VLLMInferenceInputs:
-
-        logger.info(
-            "Using input dict for LLM bundle: %s", input_.model_dump()
-        )
         hf_model = HuggingFaceModel(
             model_hf_name=self.model_map[input_.size].model_hf_name,
-            hf_token=input_.hf_token,
+            hf_token=HuggingFaceToken(
+                token_name="llm_bundle_token",
+                token=input_.hf_token
+            ),
             hf_cache=HuggingFaceCache(
                 files_path=ApoloFilesPath(path=self._get_storage_path())
             ),

@@ -1,5 +1,4 @@
 from apolo_app_types import HuggingFaceToken
-from dirty_equals import IsStr
 
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps.bundles.llm import DeepSeekValueProcessor
@@ -8,12 +7,12 @@ from apolo_app_types.helm.apps.common import (
     APOLO_PROJECT_LABEL,
     APOLO_STORAGE_LABEL,
 )
-from apolo_app_types.protocols.bundles.llm import DeepSeekR1Inputs, DeepSeekR1Size
 from apolo_app_types.protocols.common import ApoloSecret
 
 from apolo_app_types_fixtures.constants import APP_ID, APP_SECRETS_NAME, DEFAULT_NAMESPACE
 
 from apolo_apps_llm_inference import DeepSeekInferenceValueProcessor
+from apolo_apps_llm_inference.app_types import DeepSeekR1Inputs, DeepSeekR1Size
 
 
 async def test_values_llm_generation_gpu_default_preset(
@@ -28,10 +27,7 @@ async def test_values_llm_generation_gpu_default_preset(
     helm_params = await input_processor.gen_extra_values(
         input_=DeepSeekR1Inputs(
             size=model_to_test,
-            hf_token=HuggingFaceToken(
-                token_name="FakeToken",
-                token=ApoloSecret(key="FakeSecret"),
-            )
+            hf_token=ApoloSecret(key="FakeSecret"),
         ),
         app_type=AppType.DeepSeek,
         app_name="deepseek",
