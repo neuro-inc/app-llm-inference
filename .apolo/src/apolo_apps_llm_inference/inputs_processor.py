@@ -379,6 +379,10 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
         return Preset(name=best_name)
 
     async def _llm_inputs(self, input_: T) -> VLLMInferenceInputs:
+
+        logger.info(
+            "Using input dict for LLM bundle: %s", input_.model_dump()
+        )
         hf_model = HuggingFaceModel(
             model_hf_name=self.model_map[input_.size].model_hf_name,
             hf_token=input_.hf_token,
