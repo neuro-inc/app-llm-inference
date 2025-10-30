@@ -47,7 +47,6 @@ spec:
         command: ["hf"]
         args:
           - download
-          - --resume-download
           - --repo-type=model
           {{- if .Values.model.modelRevision }}
           - --revision={{ .Values.model.modelRevision }}
