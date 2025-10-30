@@ -3,7 +3,7 @@ import typing as t
 from decimal import Decimal
 from typing import NamedTuple
 
-from apolo_app_types import HuggingFaceModel
+from apolo_app_types import HuggingFaceModel, HuggingFaceToken
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps import LLMChartValueProcessor
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
@@ -15,15 +15,7 @@ from apolo_app_types.helm.apps.common import (
     get_preset,
 )
 from apolo_app_types.helm.utils.deep_merging import merge_list_of_dicts
-from apolo_app_types.protocols.bundles.llm import (
-    DeepSeekR1Inputs,
-    DeepSeekR1Size,
-    GptOssSize,
-    LLama4Inputs,
-    Llama4Size,
-    MistralInputs,
-    MistralSize,
-)
+
 from apolo_app_types.protocols.common import (
     ApoloFilesMount,
     ApoloMountMode,
@@ -40,7 +32,17 @@ from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
 from apolo_app_types.protocols.common.secrets_ import serialize_optional_secret
 from apolo_app_types.protocols.common.storage import ApoloMountModes
 from apolo_sdk import Preset as SDKPreset
-from apolo_apps_llm_inference.app_types import VLLMInferenceInputs
+from apolo_apps_llm_inference.app_types import (
+    VLLMInferenceInputs,
+    DeepSeekR1Inputs,
+    DeepSeekR1Size,
+    GptOssSize,
+    LLama4Inputs,
+    Llama4Size,
+    MistralInputs,
+    MistralSize,
+    GptOssInputs,
+)
 
 
 class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs]):
@@ -286,7 +288,7 @@ class ModelSettings(NamedTuple):
     vram_min_required_gb: float
 
 
-T = t.TypeVar("T", LLama4Inputs, DeepSeekR1Inputs, MistralInputs)
+T = t.TypeVar("T", LLama4Inputs, DeepSeekR1Inputs, MistralInputs, GptOssInputs)
 
 
 logger = logging.getLogger(__name__)
@@ -381,7 +383,10 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
     async def _llm_inputs(self, input_: T) -> VLLMInferenceInputs:
         hf_model = HuggingFaceModel(
             model_hf_name=self.model_map[input_.size].model_hf_name,
-            hf_token=input_.hf_token,
+            hf_token=HuggingFaceToken(
+                token_name="llm_bundle_token",
+                token=input_.hf_token
+            ),
             hf_cache=HuggingFaceCache(
                 files_path=ApoloFilesPath(path=self._get_storage_path())
             ),

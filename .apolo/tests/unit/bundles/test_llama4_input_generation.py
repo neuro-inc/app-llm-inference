@@ -1,7 +1,6 @@
 import pytest
-from dirty_equals import IsStr
 
-from apolo_app_types import LLama4Inputs, HuggingFaceToken
+from apolo_app_types import HuggingFaceToken
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps.bundles.llm import Llama4ValueProcessor
 from apolo_app_types.helm.apps.common import (
@@ -9,13 +8,14 @@ from apolo_app_types.helm.apps.common import (
     APOLO_PROJECT_LABEL,
     APOLO_STORAGE_LABEL,
 )
-from apolo_app_types.inputs.args import app_type_to_vals
-from apolo_app_types.protocols.bundles.llm import Llama4Size
 from apolo_app_types.protocols.common import ApoloSecret
 
-from apolo_app_types_fixtures.constants import APP_ID, APP_SECRETS_NAME, DEFAULT_NAMESPACE, CPU_PRESETS, TEST_PRESETS_WITH_EXTRA_LARGE_GPU
+from apolo_app_types_fixtures.constants import (
+    APP_ID, APP_SECRETS_NAME, DEFAULT_NAMESPACE, CPU_PRESETS, TEST_PRESETS_WITH_EXTRA_LARGE_GPU
+)
 
 from apolo_apps_llm_inference import Llama4InferenceValueProcessor
+from apolo_apps_llm_inference.app_types import LLama4Inputs, Llama4Size
 
 
 @pytest.mark.parametrize("presets_available", [CPU_PRESETS], indirect=True)
@@ -31,10 +31,7 @@ async def test_values_llm_generation_gpu_default_preset(
         helm_params = await input_processor.gen_extra_values(
             input_=LLama4Inputs(
                 size=model_to_test,
-                hf_token=HuggingFaceToken(
-                    token_name="FakeToken",
-                    token=ApoloSecret(key="FakeSecret"),
-                )
+                hf_token=ApoloSecret(key="FakeSecret"),
             ),
             apolo_client=apolo_client,
             app_type=AppType.Llama4,
@@ -60,10 +57,7 @@ async def test_values_llm_generation_gpu_big_model(setup_clients, mock_get_prese
     helm_params = await input_processor.gen_extra_values(
         input_=LLama4Inputs(
             size=model_to_test,
-            hf_token=HuggingFaceToken(
-                token_name="FakeToken",
-                token=ApoloSecret(key="FakeSecret"),
-            )
+            hf_token=ApoloSecret(key="FakeSecret"),
         ),
         apolo_client=apolo_client,
         app_type=AppType.Llama4,

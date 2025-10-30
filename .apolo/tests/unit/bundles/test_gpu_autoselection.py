@@ -4,7 +4,7 @@ import pytest
 from apolo_app_types import HuggingFaceToken
 
 from apolo_app_types.helm.apps.bundles.llm import BaseLLMBundleMixin, ModelSettings
-from apolo_app_types.protocols.bundles.llm import LLMBundleInputs
+from apolo_apps_llm_inference.app_types import LLMBundleInputs
 from apolo_app_types.protocols.common import ApoloSecret
 
 from apolo_app_types_fixtures.constants import TEST_PRESETS_WITH_EXTRA_LARGE_GPU
@@ -65,10 +65,7 @@ async def test_get_preset__ok(
     preset_name = await StubLLMBundleMixin(apolo_client)._get_preset(
         LLMBundleInputs(
             size=model_size,
-            hf_token=HuggingFaceToken(
-                token_name="FakeToken",
-                token=ApoloSecret(key="FakeSecret")
-            ),
+            hf_token=ApoloSecret(key="FakeSecret")
         )
     )
     assert preset_name.name == expected_preset_name
@@ -85,9 +82,6 @@ async def test_get_preset__not_enough_vram(setup_clients, mock_get_preset_gpu):
         await StubLLMBundleMixin(apolo_client)._get_preset(
             LLMBundleInputs(
                 size=LLMSize.size_e,
-                hf_token=HuggingFaceToken(
-                    token_name="FakeToken",
-                    token=ApoloSecret(key="FakeSecret")
-                ),
+                hf_token=ApoloSecret(key="FakeSecret")
             )
         )
