@@ -15,15 +15,7 @@ from apolo_app_types.helm.apps.common import (
     get_preset,
 )
 from apolo_app_types.helm.utils.deep_merging import merge_list_of_dicts
-from apolo_app_types.protocols.bundles.llm import (
-    DeepSeekR1Inputs,
-    DeepSeekR1Size,
-    GptOssSize,
-    LLama4Inputs,
-    Llama4Size,
-    MistralInputs,
-    MistralSize,
-)
+
 from apolo_app_types.protocols.common import (
     ApoloFilesMount,
     ApoloMountMode,
@@ -40,7 +32,16 @@ from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
 from apolo_app_types.protocols.common.secrets_ import serialize_optional_secret
 from apolo_app_types.protocols.common.storage import ApoloMountModes
 from apolo_sdk import Preset as SDKPreset
-from apolo_apps_llm_inference.app_types import VLLMInferenceInputs
+from apolo_apps_llm_inference.app_types import (
+    VLLMInferenceInputs,
+    DeepSeekR1Inputs,
+    DeepSeekR1Size,
+    GptOssSize,
+    LLama4Inputs,
+    Llama4Size,
+    MistralInputs,
+    MistralSize,
+)
 
 
 class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs]):
