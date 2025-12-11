@@ -14,6 +14,7 @@
       "type": "object",
       "x-description": "Use Apolo platform's built-in authentication and authorization. Requires authenticated user credentials with appropriate permissions.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Apolo Platform Authentication",
       "x-type": "ApoloAuth"
@@ -25,7 +26,8 @@
           "type": "string",
           "x-description": "Provide the Apolo Storage path starting with `storage:` to locate your files.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Storage Path"
         }
       },
@@ -36,6 +38,7 @@
       "type": "object",
       "x-description": "Specify the path within the Apolo Files application to read from or write to.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Apolo Files Path",
       "x-type": "ApoloFilesFile"
@@ -54,6 +57,7 @@
       "type": "object",
       "x-description": "Apolo Secret Configuration.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Secret",
       "x-type": "ApoloSecret"
@@ -66,7 +70,8 @@
           "type": "string",
           "x-description": "Name of the authentication middleware (with namespace) to apply to ingress traffic.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Middleware Name"
         }
       },
@@ -77,6 +82,7 @@
       "type": "object",
       "x-description": "Configure authentication middleware for ingress traffic.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Authentication Ingress Middleware",
       "x-type": "AuthIngressMiddleware"
@@ -90,7 +96,8 @@
           "type": "integer",
           "x-description": "Set the minimum number of replicas for your deployment.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Minimum Replicas"
         },
         "max_replicas": {
@@ -100,7 +107,8 @@
           "type": "integer",
           "x-description": "Limit the maximum number of replicas for your deployment.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Maximum Replicas"
         },
         "scaledown_period": {
@@ -110,7 +118,8 @@
           "type": "integer",
           "x-description": "Time in seconds to wait before scaling down.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Scaledown Period"
         },
         "request_rate": {
@@ -127,6 +136,7 @@
       "type": "object",
       "x-description": "Autoscaling configuration for Horizontal Pod Autoscaler.",
       "x-is-advanced-field": true,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Autoscaling HPA",
       "x-type": "AutoscalingKedaHTTP"
@@ -138,7 +148,8 @@
           "type": "string",
           "x-description": "Choose a repository for the container image.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Container Image Repository"
         },
         "tag": {
@@ -154,7 +165,8 @@
           "title": "Tag",
           "x-description": "Choose a tag for the container image.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Container Image Tag"
         },
         "dockerconfigjson": {
@@ -169,7 +181,8 @@
           "default": null,
           "x-description": "ImagePullSecrets for DockerHub",
           "x-is-advanced-field": false,
-              "x-meta-type": "integration",
+          "x-is-configurable": true,
+          "x-meta-type": "integration",
           "x-title": "ImagePullSecrets for DockerHub"
         },
         "pull_policy": {
@@ -177,7 +190,8 @@
           "default": "IfNotPresent",
           "x-description": "Specify the pull policy for the container image.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Container Image Pull Policy"
         }
       },
@@ -188,6 +202,7 @@
       "type": "object",
       "x-description": "Container image to be used in application",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Container Image",
       "x-type": "ContainerImage"
@@ -223,6 +238,7 @@
       "type": "object",
       "x-description": "Use a custom authentication middleware for this ingress. Allows integration with custom authentication providers.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Custom Authentication",
       "x-type": "CustomAuth"
@@ -234,7 +250,8 @@
           "type": "string",
           "x-description": "The contents of the Docker config file.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Docker Config File Contents"
         }
       },
@@ -245,6 +262,7 @@
       "type": "object",
       "x-description": "Docker configuration content.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Docker Config",
       "x-type": "DockerConfigModel"
@@ -256,7 +274,8 @@
           "type": "string",
           "x-description": "Specify the name of the environment variable to inject into the container.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Variable Name"
         },
         "value": {
@@ -265,7 +284,8 @@
               "type": "string",
               "x-description": "Specify the value of the environment variable.",
               "x-is-advanced-field": false,
-                      "x-meta-type": "inline",
+              "x-is-configurable": true,
+              "x-meta-type": "inline",
               "x-title": "String variable Value"
             },
             {
@@ -276,7 +296,8 @@
           "title": "Value",
           "x-description": "Specify the value of the environment variable.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Variable Value"
         }
       },
@@ -287,6 +308,7 @@
       "type": "object",
       "x-description": "K8S container env var.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Env",
       "x-type": "Env"
@@ -307,6 +329,7 @@
       "type": "object",
       "x-description": "Configuration for the Hugging Face cache.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Hugging Face Cache",
       "x-type": "HuggingFaceCache"
@@ -318,7 +341,8 @@
           "type": "string",
           "x-description": "The name of the Hugging Face model.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Hugging Face Model Name"
         },
         "hf_token": {
@@ -333,7 +357,8 @@
           "default": null,
           "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
           "x-is-advanced-field": false,
-              "x-meta-type": "integration",
+          "x-is-configurable": true,
+          "x-meta-type": "integration",
           "x-title": "Hugging Face Token"
         },
         "hf_cache": {
@@ -348,7 +373,8 @@
           "default": null,
           "x-description": "Enables caching of model files to reduce redundant downloads and speed up load times.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Model Cache"
         }
       },
@@ -359,6 +385,7 @@
       "type": "object",
       "x-description": "Configure the Hugging Face model. Ensure it is available on the Hugging Face Hub and provide an API token with access rights if the repository is gated.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Hugging Face Model",
       "x-type": "HuggingFaceModel"
@@ -371,7 +398,8 @@
           "type": "string",
           "x-description": "The name of the Hugging Face token.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Token Name"
         },
         "token": {
@@ -388,6 +416,7 @@
       "type": "object",
       "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Hugging Face Token",
       "x-type": "HuggingFaceToken"
@@ -409,7 +438,8 @@
           "title": "Auth",
           "x-description": "Configure authentication for this ingress. Choose Apolo platform authentication, custom middleware, or no authentication.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Authentication"
         }
       },
@@ -417,6 +447,7 @@
       "type": "object",
       "x-description": "Enable access to your application over the internet using HTTPS.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Enable HTTP Ingress",
       "x-type": "IngressHttp"
@@ -435,6 +466,7 @@
       "type": "object",
       "x-description": "Disable authentication for this ingress. The application will be publicly accessible without any authentication.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "No Authentication",
       "x-type": "NoAuth"
@@ -446,7 +478,8 @@
           "type": "string",
           "x-description": "The name of the preset.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Resource Preset"
         }
       },
@@ -457,6 +490,7 @@
       "type": "object",
       "x-description": "Select the resource preset used per service replica.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Resource Preset",
       "x-type": "Preset"
@@ -470,7 +504,8 @@
           "type": "integer",
           "x-description": "Time in seconds to calculate request rate.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Granularity"
         },
         "target_value": {
@@ -480,7 +515,8 @@
           "type": "integer",
           "x-description": "Target request rate per second for autoscaling.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Target Value"
         },
         "window_size": {
@@ -490,7 +526,8 @@
           "type": "integer",
           "x-description": "Time in seconds to consider for request rate calculation.",
           "x-is-advanced-field": false,
-              "x-meta-type": "inline",
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
           "x-title": "Window Size"
         }
       },
@@ -498,6 +535,7 @@
       "type": "object",
       "x-description": "Configuration for request rate based autoscaling.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Request Rate Configuration",
       "x-type": "RequestRateConfig"
@@ -519,6 +557,7 @@
       "default": null,
       "x-description": "Enable access to your application over the internet using HTTPS.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Public HTTP Ingress"
     },
@@ -532,6 +571,7 @@
       "type": "string",
       "x-description": "Set the name of the tokenizer associated with the Hugging Face model.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Hugging Face Tokenizer Name"
     },
@@ -543,6 +583,7 @@
       "type": "array",
       "x-description": "Configure extra arguments to pass to the server (see VLLM doc, e.g. --max-model-len=131072).",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Server Extra Arguments"
     },
@@ -554,6 +595,7 @@
       "type": "array",
       "x-description": "Additional environment variables to inject into the container. These will override any existing environment variables with the same name.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Extra Environment Variables"
     },
@@ -569,6 +611,7 @@
       "default": null,
       "x-description": "Configure autoscaling based on HTTP request rate. If you enable this, please ensure that cache config is enabled as well.",
       "x-is-advanced-field": true,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "HTTP Autoscaling"
     },
@@ -584,6 +627,7 @@
       "default": null,
       "x-description": "Override container image for vLLM.",
       "x-is-advanced-field": true,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Docker Image Config"
     }
