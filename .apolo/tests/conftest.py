@@ -1,9 +1,47 @@
+from decimal import Decimal
+
 import pytest
+from apolo_sdk import Preset
+from neuro_config_client import NvidiaGPUPreset
 
 pytest_plugins = [
     "apolo_app_types_fixtures.apolo_clients",
     "apolo_app_types_fixtures.constants",
 ]
+
+
+# H100 cluster preset for V3.2 model testing (640GB total VRAM)
+TEST_PRESETS_WITH_H100_CLUSTER = {
+    "cpu-small": Preset(
+        cpu=2.0,
+        memory=8,
+        nvidia_gpu=NvidiaGPUPreset(count=0),
+        credits_per_hour=Decimal("0.05"),
+        available_resource_pool_names=("cpu_pool",),
+    ),
+    "h100-8x": Preset(
+        cpu=64.0,
+        memory=512,
+        nvidia_gpu=NvidiaGPUPreset(count=8, memory=80e9),
+        credits_per_hour=Decimal("32"),
+        available_resource_pool_names=("gpu_pool",),
+    ),
+}
+
+
+@pytest.fixture
+def mock_get_preset_gpu_h100(setup_clients, monkeypatch):
+    """Fixture that provides H100 8x GPU cluster preset for V3.2 model testing."""
+    monkeypatch.setattr(
+        setup_clients._config,
+        "_presets",
+        TEST_PRESETS_WITH_H100_CLUSTER,
+    )
+
+    async def mock_capacity():
+        return {name: 10 for name in TEST_PRESETS_WITH_H100_CLUSTER}
+
+    monkeypatch.setattr(setup_clients.jobs, "get_capacity", mock_capacity)
 
 
 @pytest.fixture

@@ -13,7 +13,7 @@ from apolo_apps_llm_inference.app_types import (
     VLLMInferenceOutputs,
     MistralInputs,
     GptOssInputs,
-    DeepSeekR1Inputs,
+    DeepSeekInputs,
     LLama4Inputs,
 )
 
@@ -33,6 +33,6 @@ __all__ = [
     "Llama4InferenceValueProcessor",
     "MistralInputs",
     "GptOssInputs",
-    "DeepSeekR1Inputs",
+    "DeepSeekInputs",
     "LLama4Inputs",
 ]

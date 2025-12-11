@@ -12,20 +12,21 @@ from apolo_app_types.protocols.common import ApoloSecret
 from apolo_app_types_fixtures.constants import APP_ID, APP_SECRETS_NAME, DEFAULT_NAMESPACE
 
 from apolo_apps_llm_inference import DeepSeekInferenceValueProcessor
-from apolo_apps_llm_inference.app_types import DeepSeekR1Inputs, DeepSeekR1Size
+from apolo_apps_llm_inference.app_types import DeepSeekInputs, DeepSeekSize
+
 
 
 async def test_values_llm_generation_gpu_default_preset(
     setup_clients, mock_get_preset_gpu
 ):
-    model_to_test = DeepSeekR1Size.r1_distill_qwen_1_5_b
+    model_to_test = DeepSeekSize.r1_distill_qwen_1_5_b
     preset_name = "t4-medium"
     apolo_client = setup_clients
     input_processor = DeepSeekInferenceValueProcessor(
         client=apolo_client
     )
     helm_params = await input_processor.gen_extra_values(
-        input_=DeepSeekR1Inputs(
+        input_=DeepSeekInputs(
             size=model_to_test,
             hf_token=ApoloSecret(key="FakeSecret"),
         ),
@@ -137,3 +138,53 @@ async def test_values_llm_generation_gpu_default_preset(
             "/usr/local/nvidia/lib64:$(LD_LIBRARY_PATH)",
         },
     }
+
+
+def test_deepseek_v32_model_map_configuration():
+    """Test V3.2 models are correctly configured in the model map."""
+    from apolo_apps_llm_inference.inputs_processor import (
+        DeepSeekInferenceValueProcessor,
+        ModelSettings,
+    )
+
+    # Verify V3.2 models are in the model map with correct settings
+    model_map = DeepSeekInferenceValueProcessor.model_map
+
+    # V3.2 Exp
+    assert DeepSeekSize.v3_2_exp in model_map
+    v32_exp = model_map[DeepSeekSize.v3_2_exp]
+    assert v32_exp.model_hf_name == "deepseek-ai/DeepSeek-V3.2-Exp"
+    assert v32_exp.vram_min_required_gb == 1370.0
+
+    # V3.2
+    assert DeepSeekSize.v3_2 in model_map
+    v32 = model_map[DeepSeekSize.v3_2]
+    assert v32.model_hf_name == "deepseek-ai/DeepSeek-V3.2"
+    assert v32.vram_min_required_gb == 1370.0
+
+    # V3.2 Exp AWQ
+    assert DeepSeekSize.v3_2_exp_awq in model_map
+    v32_exp_awq = model_map[DeepSeekSize.v3_2_exp_awq]
+    assert v32_exp_awq.model_hf_name == "QuantTrio/DeepSeek-V3.2-Exp-AWQ"
+    assert v32_exp_awq.vram_min_required_gb == 400.0
+
+    # V3.2 AWQ
+    assert DeepSeekSize.v3_2_awq in model_map
+    v32_awq = model_map[DeepSeekSize.v3_2_awq]
+    assert v32_awq.model_hf_name == "QuantTrio/DeepSeek-V3.2-AWQ"
+    assert v32_awq.vram_min_required_gb == 400.0
+
+
+def test_deepseek_size_enum_has_v32_variants():
+    """Test DeepSeekSize enum includes all V3.2 variants."""
+    # Verify V3.2 variants exist in the enum
+    assert hasattr(DeepSeekSize, 'v3_2_exp')
+    assert hasattr(DeepSeekSize, 'v3_2')
+    assert hasattr(DeepSeekSize, 'v3_2_exp_awq')
+    assert hasattr(DeepSeekSize, 'v3_2_awq')
+
+    # Verify enum values
+    assert DeepSeekSize.v3_2_exp.value == "V3.2-Exp"
+    assert DeepSeekSize.v3_2.value == "V3.2"
+    assert DeepSeekSize.v3_2_exp_awq.value == "V3.2-Exp-AWQ"
+    assert DeepSeekSize.v3_2_awq.value == "V3.2-AWQ"

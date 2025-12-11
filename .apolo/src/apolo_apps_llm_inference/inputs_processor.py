@@ -34,8 +34,8 @@ from apolo_app_types.protocols.common.storage import ApoloMountModes
 from apolo_sdk import Preset as SDKPreset
 from apolo_apps_llm_inference.app_types import (
     VLLMInferenceInputs,
-    DeepSeekR1Inputs,
-    DeepSeekR1Size,
+    DeepSeekInputs,
+    DeepSeekSize,
     GptOssSize,
     LLama4Inputs,
     Llama4Size,
@@ -290,7 +290,7 @@ class ModelSettings(NamedTuple):
     vram_min_required_gb: float
 
 
-T = t.TypeVar("T", LLama4Inputs, DeepSeekR1Inputs, MistralInputs, GptOssInputs)
+T = t.TypeVar("T", LLama4Inputs, DeepSeekInputs, MistralInputs, GptOssInputs)
 
 
 logger = logging.getLogger(__name__)
@@ -462,26 +462,36 @@ class Llama4InferenceValueProcessor(BaseLLMBundleMixin[LLama4Inputs]):
     }
 
 
-class DeepSeekInferenceValueProcessor(BaseLLMBundleMixin[DeepSeekR1Inputs]):
+class DeepSeekInferenceValueProcessor(BaseLLMBundleMixin[DeepSeekInputs]):
     app_type = AppType.DeepSeek
     model_map = {
-        DeepSeekR1Size.r1: ModelSettings(
+        # R1 models
+        DeepSeekSize.r1: ModelSettings(
             model_hf_name="deepseek-ai/DeepSeek-R1", vram_min_required_gb=1342.0
         ),
-        DeepSeekR1Size.r1_zero: ModelSettings(
+        DeepSeekSize.r1_zero: ModelSettings(
             model_hf_name="deepseek-ai/DeepSeek-R1-Zero", vram_min_required_gb=1342.0
         ),
-        DeepSeekR1Size.r1_distill_llama_8b: ModelSettings(
+        DeepSeekSize.r1_distill_llama_8b: ModelSettings(
             model_hf_name="deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
             vram_min_required_gb=18.0,
         ),
-        DeepSeekR1Size.r1_distill_llama_70b: ModelSettings(
+        DeepSeekSize.r1_distill_llama_70b: ModelSettings(
             model_hf_name="deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
             vram_min_required_gb=161.0,
         ),
-        DeepSeekR1Size.r1_distill_qwen_1_5_b: ModelSettings(
+        DeepSeekSize.r1_distill_qwen_1_5_b: ModelSettings(
             model_hf_name="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
             vram_min_required_gb=3.9,
+        ),
+        # V3.2 models
+        DeepSeekSize.v3_2_exp: ModelSettings(
+            model_hf_name="deepseek-ai/DeepSeek-V3.2-Exp",
+            vram_min_required_gb=1370.0,
+        ),
+        DeepSeekSize.v3_2: ModelSettings(
+            model_hf_name="deepseek-ai/DeepSeek-V3.2",
+            vram_min_required_gb=1370.0,
         ),
     }
 

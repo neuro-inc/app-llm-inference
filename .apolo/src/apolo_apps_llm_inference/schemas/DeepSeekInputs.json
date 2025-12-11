@@ -18,19 +18,21 @@
       "x-title": "Secret",
       "x-type": "ApoloSecret"
     },
-    "DeepSeekR1Size": {
+    "DeepSeekSize": {
       "enum": [
         "R1",
         "R1-Zero",
         "R1-Distill-Llama-70B",
         "R1-Distill-Llama-8B",
-        "R1-Distill-Qwen-1.5B"
+        "R1-Distill-Qwen-1.5B",
+        "V3.2-Exp",
+        "V3.2"
       ],
-      "title": "DeepSeekR1Size",
+      "title": "DeepSeekSize",
       "type": "string"
     }
   },
-  "description": "Inputs for the DeepSeekR1 bundle.\nThis class extends LLMBundleInputs to include specific fields for DeepSeekR1.",
+  "description": "Inputs for the DeepSeek bundle.\nThis class extends LLMBundleInputs to include specific fields for DeepSeek models.",
   "properties": {
     "hf_token": {
       "$ref": "#/$defs/ApoloSecret",
@@ -47,11 +49,11 @@
       "x-title": "Enable Autoscaling"
     },
     "size": {
-      "$ref": "#/$defs/DeepSeekR1Size"
+      "$ref": "#/$defs/DeepSeekSize"
     },
     "llm_class": {
-      "const": "deepseek_r1",
-      "default": "deepseek_r1",
+      "const": "deepseek",
+      "default": "deepseek",
       "title": "Llm Class",
       "type": "string"
     }
@@ -60,6 +62,6 @@
     "hf_token",
     "size"
   ],
-  "title": "DeepSeekR1Inputs",
+  "title": "DeepSeekInputs",
   "type": "object"
 }

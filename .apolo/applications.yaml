@@ -120,8 +120,8 @@
   install_type: workflow
   helm_path: charts/llm-inference-app
   inputs:
-    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/DeepSeekR1Inputs.json
-    types_name: DeepSeekR1Inputs
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/DeepSeekInputs.json
+    types_name: DeepSeekInputs
     processor: DeepSeekInferenceValueProcessor
     image: ghcr.io/neuro-inc/app-llm-inference
   outputs:
