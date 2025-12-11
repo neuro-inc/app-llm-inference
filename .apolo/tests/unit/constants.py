@@ -88,6 +88,17 @@ TEST_PRESETS_WITH_EXTRA_LARGE_GPU = {
     ),
 }
 
+TEST_PRESETS_WITH_H100_CLUSTER = {
+    **TEST_PRESETS,
+    "h100-8x": Preset(
+        cpu=64.0,
+        memory=512,
+        nvidia_gpu=NvidiaGPUPreset(count=8, memory=80e9),
+        credits_per_hour=Decimal("32"),
+        available_resource_pool_names=("gpu_pool",),
+    ),
+}
+
 
 # OpenWebUI Test Constants
 DEFAULT_AUTH_MIDDLEWARE = "platform-platform-control-plane-ingress-auth"

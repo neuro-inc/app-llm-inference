@@ -180,12 +180,16 @@ class Llama4Size(str, Enum):
     scout_instruct = "Llama-4-Scout-17B-16E-Instruct"
 
 
-class DeepSeekR1Size(str, Enum):
+class DeepSeekSize(str, Enum):
+    # R1 models
     r1 = "R1"
     r1_zero = "R1-Zero"
     r1_distill_llama_70b = "R1-Distill-Llama-70B"
     r1_distill_llama_8b = "R1-Distill-Llama-8B"  # noqa: N815
     r1_distill_qwen_1_5_b = "R1-Distill-Qwen-1.5B"
+    # V3.2 models
+    v3_2_exp = "V3.2-Exp"
+    v3_2 = "V3.2"
 
 
 class MistralSize(str, Enum):
@@ -241,14 +245,14 @@ class GptOssInputs(LLMBundleInputs[GptOssSize]):
     llm_class: Literal["gpt-oss"] = "gpt-oss"
 
 
-class DeepSeekR1Inputs(LLMBundleInputs[DeepSeekR1Size]):
+class DeepSeekInputs(LLMBundleInputs[DeepSeekSize]):
     """
-    Inputs for the DeepSeekR1 bundle.
-    This class extends LLMBundleInputs to include specific fields for DeepSeekR1.
+    Inputs for the DeepSeek bundle.
+    This class extends LLMBundleInputs to include specific fields for DeepSeek models.
     """
 
-    llm_class: Literal["deepseek_r1"] = "deepseek_r1"
-    size: DeepSeekR1Size
+    llm_class: Literal["deepseek"] = "deepseek"
+    size: DeepSeekSize
 
 
 class MistralInputs(LLMBundleInputs[MistralSize]):

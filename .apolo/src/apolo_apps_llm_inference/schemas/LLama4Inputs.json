@@ -14,6 +14,7 @@
       "type": "object",
       "x-description": "Apolo Secret Configuration.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Secret",
       "x-type": "ApoloSecret"
@@ -32,6 +33,7 @@
     "hf_token": {
       "$ref": "#/$defs/ApoloSecret",
       "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
+      "x-meta-type": "integration",
       "x-title": "Hugging Face Token"
     },
     "autoscaling_enabled": {
@@ -40,6 +42,7 @@
       "type": "boolean",
       "x-description": "Enable or disable autoscaling for the LLM.",
       "x-is-advanced-field": false,
+      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Enable Autoscaling"
     },
