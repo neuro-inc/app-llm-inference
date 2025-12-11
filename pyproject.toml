@@ -24,6 +24,8 @@ yarl = "^1.18.3"
 apolo-app-types = {version = "25.12.0", extras = ["fixtures"]}
 dirty-equals = "^0.10.0"
 httpx = "^0.28.1"
+aiodns = "^3.2.0"
+pycares = "^4.4.0"
 
 [tool.poetry.group.dev]
 optional = true
