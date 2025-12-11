@@ -43,3 +43,7 @@ push-hook-image:
 gen-types-schemas:
 	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference VLLMInferenceInputs .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceInputs.json
 	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference VLLMInferenceOutputs .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
+	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference LLama4Inputs .apolo/src/apolo_apps_llm_inference/schemas/LLama4Inputs.json
+	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference DeepSeekInputs .apolo/src/apolo_apps_llm_inference/schemas/DeepSeekInputs.json
+	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference MistralInputs .apolo/src/apolo_apps_llm_inference/schemas/MistralInputs.json
+	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference GptOssInputs .apolo/src/apolo_apps_llm_inference/schemas/GptOssInputs.json
