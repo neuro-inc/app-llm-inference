@@ -10,7 +10,7 @@ pytest_plugins = [
 ]
 
 
-# H100 cluster preset for V3.2 model testing (640GB total VRAM)
+# H100 cluster preset for V3.2 model testing (1440GB total VRAM for 1370GB requirement)
 TEST_PRESETS_WITH_H100_CLUSTER = {
     "cpu-small": Preset(
         cpu=2.0,
@@ -20,28 +20,24 @@ TEST_PRESETS_WITH_H100_CLUSTER = {
         available_resource_pool_names=("cpu_pool",),
     ),
     "h100-8x": Preset(
-        cpu=64.0,
-        memory=512,
-        nvidia_gpu=NvidiaGPUPreset(count=8, memory=80e9),
-        credits_per_hour=Decimal("32"),
+        cpu=128.0,
+        memory=1024,
+        nvidia_gpu=NvidiaGPUPreset(count=18, memory=80e9),
+        credits_per_hour=Decimal("72"),
         available_resource_pool_names=("gpu_pool",),
     ),
 }
 
 
 @pytest.fixture
-def mock_get_preset_gpu_h100(setup_clients, monkeypatch):
+def mock_get_preset_gpu_h100(setup_clients):
     """Fixture that provides H100 8x GPU cluster preset for V3.2 model testing."""
-    monkeypatch.setattr(
-        setup_clients._config,
-        "_presets",
-        TEST_PRESETS_WITH_H100_CLUSTER,
+    from unittest.mock import AsyncMock
+
+    setup_clients.config.presets = TEST_PRESETS_WITH_H100_CLUSTER
+    setup_clients.jobs.get_capacity = AsyncMock(
+        return_value={name: 10 for name in TEST_PRESETS_WITH_H100_CLUSTER}
     )
-
-    async def mock_capacity():
-        return {name: 10 for name in TEST_PRESETS_WITH_H100_CLUSTER}
-
-    monkeypatch.setattr(setup_clients.jobs, "get_capacity", mock_capacity)
 
 
 @pytest.fixture
