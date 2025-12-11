@@ -7,8 +7,7 @@
           "type": "string",
           "x-description": "Provide the Apolo Storage path starting with `storage:` to locate your files.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Storage Path"
         }
       },
@@ -19,7 +18,6 @@
       "type": "object",
       "x-description": "Specify the path within the Apolo Files application to read from or write to.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Apolo Files Path",
       "x-type": "ApoloFilesFile"
@@ -38,7 +36,6 @@
       "type": "object",
       "x-description": "Apolo Secret Configuration.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Secret",
       "x-type": "ApoloSecret"
@@ -59,7 +56,6 @@
       "type": "object",
       "x-description": "Configuration for the Hugging Face cache.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Hugging Face Cache",
       "x-type": "HuggingFaceCache"
@@ -71,8 +67,7 @@
           "type": "string",
           "x-description": "The name of the Hugging Face model.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Hugging Face Model Name"
         },
         "hf_token": {
@@ -87,8 +82,7 @@
           "default": null,
           "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "integration",
+              "x-meta-type": "integration",
           "x-title": "Hugging Face Token"
         },
         "hf_cache": {
@@ -103,8 +97,7 @@
           "default": null,
           "x-description": "Enables caching of model files to reduce redundant downloads and speed up load times.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Model Cache"
         }
       },
@@ -115,7 +108,6 @@
       "type": "object",
       "x-description": "Configure the Hugging Face model. Ensure it is available on the Hugging Face Hub and provide an API token with access rights if the repository is gated.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Hugging Face Model",
       "x-type": "HuggingFaceModel"
@@ -128,8 +120,7 @@
           "type": "string",
           "x-description": "The name of the Hugging Face token.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Token Name"
         },
         "token": {
@@ -146,7 +137,6 @@
       "type": "object",
       "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Hugging Face Token",
       "x-type": "HuggingFaceToken"
@@ -167,8 +157,7 @@
           "title": "Context Max Tokens",
           "x-description": "Maximum total tokens (prompt + output) accepted in one request. If vLLM is started with --max-model-len, that value is used. Otherwise it is derived from the model config (after RoPE scaling) and capped by the tokenizer's model_max_length when present. Used to compute max generated tokens as: context_max_tokens \u2212 prompt_tokens.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Effective Context Size (tokens)"
         }
       },
@@ -176,7 +165,6 @@
       "type": "object",
       "x-description": "Metadata extracted from Hugging Face configs and deployment settings to describe an LLM's context limits.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "LLM Model Configuration",
       "x-type": "LLMModelConfig"
@@ -188,8 +176,7 @@
           "type": "string",
           "x-description": "The hostname of the HTTP endpoint.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Hostname"
         },
         "port": {
@@ -199,8 +186,7 @@
           "type": "integer",
           "x-description": "The port of the HTTP endpoint.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Port"
         },
         "protocol": {
@@ -209,8 +195,7 @@
           "type": "string",
           "x-description": "The protocol to use, e.g., http or https.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Protocol"
         },
         "timeout": {
@@ -226,8 +211,7 @@
           "title": "Timeout",
           "x-description": "Connection timeout in seconds.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Connection Timeout"
         },
         "base_path": {
@@ -270,8 +254,7 @@
           "default": null,
           "x-description": "Configure the Hugging Face model. Ensure it is available on the Hugging Face Hub and provide an API token with access rights if the repository is gated.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "integration",
+              "x-meta-type": "integration",
           "x-title": "Hugging Face Model"
         }
       },
@@ -282,7 +265,6 @@
       "type": "object",
       "x-description": "Configuration for OpenAI compatible chat API.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "OpenAI Compatible Chat API",
       "x-type": "OpenAICompatChatAPI"
@@ -294,8 +276,7 @@
           "type": "string",
           "x-description": "The hostname of the HTTP endpoint.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Hostname"
         },
         "port": {
@@ -305,8 +286,7 @@
           "type": "integer",
           "x-description": "The port of the HTTP endpoint.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Port"
         },
         "protocol": {
@@ -315,8 +295,7 @@
           "type": "string",
           "x-description": "The protocol to use, e.g., http or https.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Protocol"
         },
         "timeout": {
@@ -332,8 +311,7 @@
           "title": "Timeout",
           "x-description": "Connection timeout in seconds.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Connection Timeout"
         },
         "base_path": {
@@ -376,8 +354,7 @@
           "default": null,
           "x-description": "Configure the Hugging Face model. Ensure it is available on the Hugging Face Hub and provide an API token with access rights if the repository is gated.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "integration",
+              "x-meta-type": "integration",
           "x-title": "Hugging Face Model"
         }
       },
@@ -388,7 +365,6 @@
       "type": "object",
       "x-description": "Configuration for OpenAI compatible embeddings API.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "OpenAI Compatible Embeddings API",
       "x-type": "OpenAICompatEmbeddingsAPI"
@@ -407,8 +383,7 @@
           "default": null,
           "x-description": "Internal URL to access the service. This route is not protected by platform authorization and only workloads from the same project can access it.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Internal URL"
         },
         "external_url": {
@@ -423,8 +398,7 @@
           "default": null,
           "x-description": "External URL for accessing the service from outside the cluster. This route might be secured by platform authorization and is accessible from any network with a valid platform authorization token that has appropriate permissions.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "External URL"
         }
       },
@@ -432,7 +406,6 @@
       "type": "object",
       "x-description": "Service APIs URLs.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Service APIs",
       "x-type": "ServiceAPI[GrpcAPI]"
@@ -444,8 +417,7 @@
           "type": "string",
           "x-description": "The hostname of the HTTP endpoint.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Hostname"
         },
         "port": {
@@ -455,8 +427,7 @@
           "type": "integer",
           "x-description": "The port of the HTTP endpoint.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Port"
         },
         "protocol": {
@@ -465,8 +436,7 @@
           "type": "string",
           "x-description": "The protocol to use, e.g., http or https.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Protocol"
         },
         "timeout": {
@@ -482,8 +452,7 @@
           "title": "Timeout",
           "x-description": "Connection timeout in seconds.",
           "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
+              "x-meta-type": "inline",
           "x-title": "Connection Timeout"
         },
         "base_path": {
@@ -505,7 +474,6 @@
       "type": "object",
       "x-description": "HTTP API Configuration.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "HTTP API",
       "x-type": "OpenAICompatibleEmbeddingsRestAPI"
@@ -537,7 +505,6 @@
       "default": null,
       "x-description": "Internal Chat API compatible with OpenAI standard for seamless integration.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Internal Chat API"
     },
@@ -553,7 +520,6 @@
       "default": null,
       "x-description": "External Chat API compatible with OpenAI standard.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "External Chat API"
     },
@@ -569,7 +535,6 @@
       "default": null,
       "x-description": "Internal Embeddings API compatible with OpenAI standard for seamless integration.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "Internal Embeddings API"
     },
@@ -585,7 +550,6 @@
       "default": null,
       "x-description": "External Embeddings API compatible with OpenAI standard.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "External Embeddings API"
     },
@@ -604,7 +568,6 @@
       "default": null,
       "x-description": "Configuration details of the deployed LLM model.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "LLM Model Config"
     },
@@ -614,7 +577,6 @@
       "type": "string",
       "x-description": "Set the name of the tokenizer associated with the Hugging Face model.",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Hugging Face Tokenizer Name"
     },
@@ -626,7 +588,6 @@
       "type": "array",
       "x-description": "Configure extra arguments to pass to the server (see VLLM doc, e.g. --max-model-len=131072).",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Server Extra Arguments"
     },
@@ -643,7 +604,6 @@
       "title": "Llm Api Key",
       "x-description": "LLM Key for the API",
       "x-is-advanced-field": false,
-      "x-is-configurable": true,
       "x-meta-type": "integration",
       "x-title": "LLM Api Key"
     }
