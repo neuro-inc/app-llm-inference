@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import NamedTuple
 
 from apolo_app_types import HuggingFaceModel, HuggingFaceToken
+from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps import LLMChartValueProcessor
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
@@ -45,6 +46,48 @@ from apolo_apps_llm_inference.app_types import (
     Kimi2Inputs,
     Kimi2Size,
 )
+
+
+HFModelType = HuggingFaceModel | HuggingFaceModelDetailDynamic
+
+
+def _get_model_hf_name(hf_model: HFModelType) -> str:
+    """Extract model name from either HuggingFaceModel or HuggingFaceModelDetailDynamic."""
+    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
+        return hf_model.id
+    return hf_model.model_hf_name
+
+
+def _get_hf_token(hf_model: HFModelType) -> HuggingFaceToken | None:
+    """Extract HF token - only available in HuggingFaceModel."""
+    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
+        return None
+    return hf_model.hf_token
+
+
+def _get_cache_files_path(hf_model: HFModelType) -> ApoloFilesPath | None:
+    """Extract cache files path from either type."""
+    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
+        return hf_model.files_path
+    return hf_model.hf_cache.files_path if hf_model.hf_cache else None
+
+
+def _has_cache_configured(hf_model: HFModelType) -> bool:
+    """Check if cache is configured for either type."""
+    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
+        return hf_model.files_path is not None
+    return hf_model.hf_cache is not None
+
+
+def _is_model_already_cached(hf_model: HFModelType) -> bool:
+    """Check if model is already cached and doesn't need download.
+
+    For HuggingFaceModelDetailDynamic, returns True if cached=True and files_path is set.
+    For HuggingFaceModel, always returns False (model needs to be downloaded).
+    """
+    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
+        return hf_model.cached and hf_model.files_path is not None
+    return False
 
 
 class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs]):
@@ -123,7 +166,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_model(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         return {
-            "modelHFName": input_.hugging_face_model.model_hf_name,
+            "modelHFName": _get_model_hf_name(input_.hugging_face_model),
             "tokenizerHFName": input_.tokenizer_hf_name,
         }
 
@@ -131,10 +174,10 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         self, input_: VLLMInferenceInputs, app_secrets_name: str
     ) -> dict[str, t.Any]:
         # Start with base environment variables
+        hf_token = _get_hf_token(input_.hugging_face_model)
         env_vars = {
             "HUGGING_FACE_HUB_TOKEN": serialize_optional_secret(
-                input_.hugging_face_model.hf_token.token \
-                    if input_.hugging_face_model.hf_token else None,
+                hf_token.token if hf_token else None,
                 secret_name=app_secrets_name
             )
         }
@@ -152,9 +195,10 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_extra_annotations(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_annotations: dict[str, str] = {}
-        if input_.hugging_face_model.hf_cache and input_.hugging_face_model.hf_cache.files_path:
+        cache_files_path = _get_cache_files_path(input_.hugging_face_model)
+        if cache_files_path:
             storage_mount = ApoloFilesMount(
-                storage_uri=input_.hugging_face_model.hf_cache.files_path,
+                storage_uri=cache_files_path,
                 mount_path=MountPath(path="/root/.cache/huggingface"),
                 mode=ApoloMountMode(mode=ApoloMountModes.RW),
             )
@@ -165,7 +209,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_extra_labels(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_labels: dict[str, str] = {}
-        if input_.hugging_face_model.hf_cache and input_.hugging_face_model.hf_cache.files_path:
+        if _has_cache_configured(input_.hugging_face_model):
             extra_labels.update(
                 **gen_apolo_storage_integration_labels(
                     client=self.client, inject_storage=True
@@ -174,7 +218,20 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         return extra_labels
 
     def _configure_model_download(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
-        if input_.hugging_face_model.hf_cache:
+        # If model is already cached (HuggingFaceModelDetailDynamic with cached=True),
+        # skip download entirely - model files are already on the storage mount
+        if _is_model_already_cached(input_.hugging_face_model):
+            return {
+                "modelDownload": {
+                    "hookEnabled": False,
+                    "initEnabled": False,
+                },
+                "cache": {
+                    "enabled": False,
+                },
+            }
+        # If cache storage is configured but model not yet cached, use hook to download
+        if _has_cache_configured(input_.hugging_face_model):
             return {
                 "modelDownload": {
                     "hookEnabled": True,
@@ -184,6 +241,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                     "enabled": False,
                 },
             }
+        # No cache configured - use init container with emptyDir cache
         return {
             "modelDownload": {
                 "hookEnabled": False,

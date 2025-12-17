@@ -597,3 +597,146 @@ async def test_values_llm_generation__autoscaling(setup_clients, mock_get_preset
         "scaledownPeriod": 400,
         "externalKedaHttpProxyService": KEDA_HTTP_PROXY_SERVICE,
     }
+
+
+async def test_values_llm_generation_with_dynamic_model(
+    setup_clients, mock_get_preset_gpu
+):
+    """Test values generation with HuggingFaceModelDetailDynamic input."""
+    from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic
+
+    apolo_client = setup_clients
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
+
+    # Create a HuggingFaceModelDetailDynamic instance
+    dynamic_model = HuggingFaceModelDetailDynamic(
+        id="meta-llama/Llama-2-7b-hf",
+        name="Llama 2 7B",
+        visibility="public",
+        files_path=ApoloFilesPath(
+            path="storage://some-cluster/some-org/some-proj/cache"
+        ),
+    )
+
+    helm_params = await input_processor.gen_extra_values(
+        input_=VLLMInferenceInputs(
+            preset=Preset(name="gpu-small"),
+            ingress_http=IngressHttp(),
+            hugging_face_model=dynamic_model,
+            tokenizer_hf_name="meta-llama/Llama-2-7b-hf",
+            server_extra_args=["--max-model-len=4096"],
+        ),
+        app_type=AppType.LLMInference,
+        app_name="llm",
+        namespace=DEFAULT_NAMESPACE,
+        app_secrets_name=APP_SECRETS_NAME,
+        app_id=APP_ID,
+    )
+
+    # Verify model name is extracted from dynamic model's id field
+    assert helm_params["model"]["modelHFName"] == "meta-llama/Llama-2-7b-hf"
+    assert helm_params["llm"]["modelHFName"] == "meta-llama/Llama-2-7b-hf"
+
+    # Verify cache is configured from files_path
+    assert helm_params["modelDownload"]["hookEnabled"] is True
+    assert helm_params["modelDownload"]["initEnabled"] is False
+    assert helm_params["cache"]["enabled"] is False
+
+    # Verify storage integration labels are set
+    assert APOLO_STORAGE_LABEL in helm_params["podExtraLabels"]
+
+    # Verify HF token is empty string (dynamic model doesn't have token)
+    assert helm_params["env"]["HUGGING_FACE_HUB_TOKEN"] == ""
+
+
+async def test_values_llm_generation_with_dynamic_model_no_cache(
+    setup_clients, mock_get_preset_gpu
+):
+    """Test values generation with HuggingFaceModelDetailDynamic without cache."""
+    from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic
+
+    apolo_client = setup_clients
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
+
+    # Create a HuggingFaceModelDetailDynamic without files_path (no cache)
+    dynamic_model = HuggingFaceModelDetailDynamic(
+        id="meta-llama/Llama-2-7b-hf",
+        name="Llama 2 7B",
+        visibility="public",
+    )
+
+    helm_params = await input_processor.gen_extra_values(
+        input_=VLLMInferenceInputs(
+            preset=Preset(name="gpu-small"),
+            ingress_http=IngressHttp(),
+            hugging_face_model=dynamic_model,
+        ),
+        app_type=AppType.LLMInference,
+        app_name="llm",
+        namespace=DEFAULT_NAMESPACE,
+        app_secrets_name=APP_SECRETS_NAME,
+        app_id=APP_ID,
+    )
+
+    # Verify model name is extracted correctly
+    assert helm_params["model"]["modelHFName"] == "meta-llama/Llama-2-7b-hf"
+
+    # Without cache, init container should be used
+    assert helm_params["modelDownload"]["hookEnabled"] is False
+    assert helm_params["modelDownload"]["initEnabled"] is True
+    assert helm_params["cache"]["enabled"] is True
+
+    # No storage integration labels without cache
+    assert helm_params["podExtraLabels"] == {}
+
+
+async def test_values_llm_generation_with_cached_dynamic_model(
+    setup_clients, mock_get_preset_gpu
+):
+    """Test values generation with HuggingFaceModelDetailDynamic when model is already cached.
+
+    When cached=True and files_path is set, no download should happen - the model
+    files are already on the storage mount.
+    """
+    from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic
+
+    apolo_client = setup_clients
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
+
+    # Create a HuggingFaceModelDetailDynamic with cached=True
+    dynamic_model = HuggingFaceModelDetailDynamic(
+        id="meta-llama/Llama-2-7b-hf",
+        name="Llama 2 7B",
+        visibility="public",
+        cached=True,  # Model is already cached
+        files_path=ApoloFilesPath(
+            path="storage://some-cluster/some-org/some-proj/cache"
+        ),
+    )
+
+    helm_params = await input_processor.gen_extra_values(
+        input_=VLLMInferenceInputs(
+            preset=Preset(name="gpu-small"),
+            ingress_http=IngressHttp(),
+            hugging_face_model=dynamic_model,
+            tokenizer_hf_name="meta-llama/Llama-2-7b-hf",
+        ),
+        app_type=AppType.LLMInference,
+        app_name="llm",
+        namespace=DEFAULT_NAMESPACE,
+        app_secrets_name=APP_SECRETS_NAME,
+        app_id=APP_ID,
+    )
+
+    # Verify model name is extracted correctly
+    assert helm_params["model"]["modelHFName"] == "meta-llama/Llama-2-7b-hf"
+    assert helm_params["llm"]["modelHFName"] == "meta-llama/Llama-2-7b-hf"
+
+    # Model is already cached - NO download should happen
+    assert helm_params["modelDownload"]["hookEnabled"] is False
+    assert helm_params["modelDownload"]["initEnabled"] is False
+    assert helm_params["cache"]["enabled"] is False
+
+    # Storage integration should still be configured for mounting the cached model
+    assert APOLO_STORAGE_LABEL in helm_params["podExtraLabels"]
+    assert APOLO_STORAGE_LABEL in helm_params["podAnnotations"]
