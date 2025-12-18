@@ -472,12 +472,7 @@
         "files_path": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ApoloFilesPath",
-              "x-description": "Path to the cached model files in Apolo storage.",
-              "x-is-advanced-field": false,
-              "x-is-configurable": true,
-              "x-meta-type": "inline",
-              "x-title": "Files Path"
+              "$ref": "#/$defs/ApoloFilesPath"
             },
             {
               "type": "null"
