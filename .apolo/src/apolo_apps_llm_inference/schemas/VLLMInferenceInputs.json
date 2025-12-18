@@ -390,6 +390,116 @@
       "x-title": "Hugging Face Model",
       "x-type": "HuggingFaceModel"
     },
+    "HuggingFaceModelDetailDynamic": {
+      "description": "Detailed HuggingFace model information.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "x-description": "The HuggingFace repository identifier.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Repository ID"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "x-description": "The model name.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Model Name"
+        },
+        "visibility": {
+          "title": "Visibility",
+          "type": "string",
+          "x-description": "Repository visibility (public or private).",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Visibility"
+        },
+        "gated": {
+          "default": false,
+          "title": "Gated",
+          "type": "boolean",
+          "x-description": "Whether the model requires access approval.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Gated"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array",
+          "x-description": "Tags associated with the model.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Tags"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean",
+          "x-description": "Whether the model is cached locally.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Cached"
+        },
+        "last_modified": {
+          "anyOf": [
+            {
+              "type": "string",
+              "x-description": "Timestamp when the model was last modified.",
+              "x-is-advanced-field": false,
+              "x-is-configurable": true,
+              "x-meta-type": "inline",
+              "x-title": "Last Modified"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Modified"
+        },
+        "files_path": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApoloFilesPath",
+              "x-description": "Path to the cached model files in Apolo storage.",
+              "x-is-advanced-field": false,
+              "x-is-configurable": true,
+              "x-meta-type": "inline",
+              "x-title": "Files Path"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "visibility"
+      ],
+      "title": "HuggingFaceModelDetailDynamic",
+      "type": "object",
+      "x-description": "Detailed information about a HuggingFace model.",
+      "x-is-advanced-field": false,
+      "x-is-configurable": true,
+      "x-meta-type": "dynamic",
+      "x-title": "HuggingFace Model Detail",
+      "x-type": "HuggingFaceModelDetailDynamic"
+    },
     "HuggingFaceToken": {
       "properties": {
         "token_name": {
@@ -562,8 +672,20 @@
       "x-title": "Public HTTP Ingress"
     },
     "hugging_face_model": {
-      "$ref": "#/$defs/HuggingFaceModel",
-      "x-meta-type": "inline"
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HuggingFaceModel"
+        },
+        {
+          "$ref": "#/$defs/HuggingFaceModelDetailDynamic"
+        }
+      ],
+      "title": "Hugging Face Model",
+      "x-description": "Configure the Hugging Face model. Ensure it is available on the Hugging Face Hub and provide an API token with access rights if the repository is gated.",
+      "x-is-advanced-field": false,
+      "x-is-configurable": true,
+      "x-meta-type": "integration",
+      "x-title": "Hugging Face Model"
     },
     "tokenizer_hf_name": {
       "default": "",
