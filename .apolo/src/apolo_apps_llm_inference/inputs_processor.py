@@ -61,7 +61,7 @@ def _get_model_hf_name(hf_model: HFModelType) -> str:
 def _get_hf_token(hf_model: HFModelType) -> HuggingFaceToken | None:
     """Extract HF token - only available in HuggingFaceModel."""
     if isinstance(hf_model, HuggingFaceModelDetailDynamic):
-        return None
+        return hf_model.hf_token or ""
     return hf_model.hf_token
 
 
