@@ -38,13 +38,8 @@ class VLLMInferenceInputs(AppInputs):
             " over the internet using HTTPS.",
         ).as_json_schema_extra(),
     )
-    hugging_face_model: typing.Annotated[
-        HuggingFaceModel | HuggingFaceModelDetailDynamic,
-        Field(
-            ...,
-            json_schema_extra=HF_SCHEMA_EXTRA.as_json_schema_extra(),
-        ),
-    ]
+    hugging_face_model: HuggingFaceModel | HuggingFaceModelDetailDynamic
+
     tokenizer_hf_name: str = Field(  # noqa: N815
         "",
         json_schema_extra=SchemaExtraMetadata(
