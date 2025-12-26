@@ -538,6 +538,7 @@ class Kimi2InferenceValueProcessor(BaseLLMBundleMixin[Kimi2Inputs]):
     # TODO: Update to AppType.Kimi2 when available in apolo_app_types package
     app_type = AppType.LLMInference
     model_map = {
+        # Full-weight models
         Kimi2Size.k2_base: ModelSettings(
             model_hf_name="moonshotai/Kimi-K2-Base",
             vram_min_required_gb=1000.0,
@@ -553,5 +554,18 @@ class Kimi2InferenceValueProcessor(BaseLLMBundleMixin[Kimi2Inputs]):
         Kimi2Size.k2_thinking: ModelSettings(
             model_hf_name="moonshotai/Kimi-K2-Thinking",
             vram_min_required_gb=1000.0,
+        ),
+        # GGUF quantized models (unsloth)
+        Kimi2Size.k2_instruct_q2_k_xl: ModelSettings(
+            model_hf_name="unsloth/Kimi-K2-Instruct-GGUF",
+            vram_min_required_gb=400.0,
+        ),
+        Kimi2Size.k2_instruct_q4_k_xl: ModelSettings(
+            model_hf_name="unsloth/Kimi-K2-Instruct-GGUF",
+            vram_min_required_gb=600.0,
+        ),
+        Kimi2Size.k2_instruct_q8_0: ModelSettings(
+            model_hf_name="unsloth/Kimi-K2-Instruct-GGUF",
+            vram_min_required_gb=1100.0,
         ),
     }

@@ -192,10 +192,15 @@ class GptOssSize(str, Enum):
 
 
 class Kimi2Size(str, Enum):
+    # Full-weight models
     k2_base = "K2-Base"
     k2_instruct = "K2-Instruct"
     k2_instruct_0905 = "K2-Instruct-0905"
     k2_thinking = "K2-Thinking"
+    # GGUF quantized models (unsloth)
+    k2_instruct_q2_k_xl = "K2-Instruct-Q2_K_XL"
+    k2_instruct_q4_k_xl = "K2-Instruct-Q4_K_XL"
+    k2_instruct_q8_0 = "K2-Instruct-Q8_0"
 
 
 class LLMBundleInputs(AppInputs, typing.Generic[TSize]):

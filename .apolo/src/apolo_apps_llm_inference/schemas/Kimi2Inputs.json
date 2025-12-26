@@ -24,7 +24,10 @@
         "K2-Base",
         "K2-Instruct",
         "K2-Instruct-0905",
-        "K2-Thinking"
+        "K2-Thinking",
+        "K2-Instruct-Q2_K_XL",
+        "K2-Instruct-Q4_K_XL",
+        "K2-Instruct-Q8_0"
       ],
       "title": "Kimi2Size",
       "type": "string"
