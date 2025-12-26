@@ -1,0 +1,67 @@
+{
+  "$defs": {
+    "ApoloSecret": {
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "ApoloSecret",
+      "type": "object",
+      "x-description": "Apolo Secret Configuration.",
+      "x-is-advanced-field": false,
+      "x-is-configurable": true,
+      "x-meta-type": "inline",
+      "x-title": "Secret",
+      "x-type": "ApoloSecret"
+    },
+    "Kimi2Size": {
+      "enum": [
+        "K2-Base",
+        "K2-Instruct",
+        "K2-Instruct-0905",
+        "K2-Thinking"
+      ],
+      "title": "Kimi2Size",
+      "type": "string"
+    }
+  },
+  "description": "Inputs for the Kimi2 bundle.\nThis class extends LLMBundleInputs to include specific fields for Moonshot AI's\nKimi K2 models.",
+  "properties": {
+    "hf_token": {
+      "$ref": "#/$defs/ApoloSecret",
+      "x-description": "Provide a Hugging Face API token linked to an account with access to the model specified above. This token will be used to download model files from the Hugging Face Hub, including gated or private repositories where applicable.",
+      "x-meta-type": "integration",
+      "x-title": "Hugging Face Token"
+    },
+    "autoscaling_enabled": {
+      "default": false,
+      "title": "Autoscaling Enabled",
+      "type": "boolean",
+      "x-description": "Enable or disable autoscaling for the LLM.",
+      "x-is-advanced-field": false,
+      "x-is-configurable": true,
+      "x-meta-type": "inline",
+      "x-title": "Enable Autoscaling"
+    },
+    "size": {
+      "$ref": "#/$defs/Kimi2Size"
+    },
+    "llm_class": {
+      "const": "kimi2",
+      "default": "kimi2",
+      "title": "Llm Class",
+      "type": "string"
+    }
+  },
+  "required": [
+    "hf_token",
+    "size"
+  ],
+  "title": "Kimi2Inputs",
+  "type": "object"
+}

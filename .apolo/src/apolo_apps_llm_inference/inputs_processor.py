@@ -42,6 +42,8 @@ from apolo_apps_llm_inference.app_types import (
     MistralInputs,
     MistralSize,
     GptOssInputs,
+    Kimi2Inputs,
+    Kimi2Size,
 )
 
 
@@ -290,7 +292,7 @@ class ModelSettings(NamedTuple):
     vram_min_required_gb: float
 
 
-T = t.TypeVar("T", LLama4Inputs, DeepSeekInputs, MistralInputs, GptOssInputs)
+T = t.TypeVar("T", LLama4Inputs, DeepSeekInputs, MistralInputs, GptOssInputs, Kimi2Inputs)
 
 
 logger = logging.getLogger(__name__)
@@ -528,5 +530,28 @@ class GPTOSSInferenceValueProcessor(BaseLLMBundleMixin[MistralInputs]):
         GptOssSize.gpt_oss_120b: ModelSettings(
             model_hf_name="openai/gpt-oss-120b",
             vram_min_required_gb=80.0,
+        ),
+    }
+
+
+class Kimi2InferenceValueProcessor(BaseLLMBundleMixin[Kimi2Inputs]):
+    # TODO: Update to AppType.Kimi2 when available in apolo_app_types package
+    app_type = AppType.LLMInference
+    model_map = {
+        Kimi2Size.k2_base: ModelSettings(
+            model_hf_name="moonshotai/Kimi-K2-Base",
+            vram_min_required_gb=1000.0,
+        ),
+        Kimi2Size.k2_instruct: ModelSettings(
+            model_hf_name="moonshotai/Kimi-K2-Instruct",
+            vram_min_required_gb=1000.0,
+        ),
+        Kimi2Size.k2_instruct_0905: ModelSettings(
+            model_hf_name="moonshotai/Kimi-K2-Instruct-0905",
+            vram_min_required_gb=1000.0,
+        ),
+        Kimi2Size.k2_thinking: ModelSettings(
+            model_hf_name="moonshotai/Kimi-K2-Thinking",
+            vram_min_required_gb=1000.0,
         ),
     }

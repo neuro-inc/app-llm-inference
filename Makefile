@@ -47,3 +47,4 @@ gen-types-schemas:
 	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference DeepSeekInputs .apolo/src/apolo_apps_llm_inference/schemas/DeepSeekInputs.json
 	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference MistralInputs .apolo/src/apolo_apps_llm_inference/schemas/MistralInputs.json
 	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference GptOssInputs .apolo/src/apolo_apps_llm_inference/schemas/GptOssInputs.json
+	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference Kimi2Inputs .apolo/src/apolo_apps_llm_inference/schemas/Kimi2Inputs.json

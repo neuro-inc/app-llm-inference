@@ -288,3 +288,60 @@
     - name: Getting Started
       type: documentation
       url: https://docs.vllm.ai/en/latest/
+- app_type: kimi2
+  name: kimi2-inference
+  title: Kimi K2
+  install_type: workflow
+  app_package_name: apolo_apps_llm_inference
+  helm_path: charts/llm-inference-app
+  inputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/Kimi2Inputs.json
+    types_name: Kimi2Inputs
+    processor: Kimi2InferenceValueProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  outputs:
+    schema_path: .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
+    types_name: VLLMInferenceOutputs
+    processor: VLLMInferenceOutputsProcessor
+    image: ghcr.io/neuro-inc/app-llm-inference
+  short_description: State-of-the-art mixture-of-experts language model from Moonshot AI
+  description: |
+    Kimi K2 is a state-of-the-art mixture-of-experts language model from Moonshot AI
+    with 1 trillion total parameters and 32 billion activated parameters per inference.
+
+    Featuring 384 specialized experts with dynamic routing, 61 layers, and 128K token context,
+    Kimi K2 excels at agentic reasoning, code generation, and general-purpose AI tasks.
+  pub_date: "2025-12-26T00:00:00+00:00"
+  logo: "https://storage.googleapis.com/development-421920-assets/app-logos/kimi.png"
+  changelog:
+    file: ./CHANGELOG.md
+  tags:
+    - "LLM"
+    - "Inference"
+    - "MLOps"
+    - "Hugging Face"
+    - "vLLM"
+    - "RAG"
+    - "Moonshot AI"
+    - "Kimi"
+    - "MoE"
+    - "Bundle"
+  assets: 
+    - type: image
+      url: https://storage.googleapis.com/development-421920-assets/app-logos/kimi-banner.png
+  urls:
+    - name: Kimi K2 installation guide
+      type: documentation
+      url: https://docs.apolo.us/index/apolo-console/apps/installable-apps/available-apps/kimi2
+    - name: Hugging Face Moonshot AI Models
+      type: external
+      url: https://huggingface.co/moonshotai
+    - name: Apolo CLI
+      type: documentation
+      url: https://docs.apolo.us/index/apolo-concepts-cli/installing
+    - name: GitHub Repository
+      type: external
+      url: https://github.com/neuro-inc/app-llm-inference
+    - name: Getting Started
+      type: documentation
+      url: https://docs.vllm.ai/en/latest/
