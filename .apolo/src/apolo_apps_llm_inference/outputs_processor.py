@@ -4,9 +4,9 @@ import typing as t
 from apolo_app_types.outputs.base import BaseAppOutputsProcessor
 from apolo_app_types.outputs.llm import get_llm_inference_outputs
 from apolo_app_types import LLMModelConfig
+from .app_types import VLLMInferenceOutputs
 
 from .utils import fetch_max_model_len_from_server, parse_max_model_len
-from .app_types import VLLMInferenceOutputs
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,8 @@ class VLLMInferenceOutputsProcessor(
                     api_key = arg.split("=", 1)[-1]
 
         # priority 2: ask the INTERNAL server /v1/models
-        internal_host, internal_port = (vllm_outputs_dict["chat_internal_api"]["host"],
-                                        vllm_outputs_dict["chat_internal_api"]["port"])
+        internal_host, internal_port = (vllm_outputs_dict["chat_api"]["internal_url"]["host"],
+                                        vllm_outputs_dict["chat_api"]["internal_url"]["port"])
         try:
             server_len = await fetch_max_model_len_from_server(
                 internal_host, int(internal_port), expected_model_id=hf_model_name, api_key=api_key
