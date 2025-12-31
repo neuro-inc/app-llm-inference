@@ -393,6 +393,94 @@
       "x-title": "OpenAI Compatible Embeddings API",
       "x-type": "OpenAICompatEmbeddingsAPI"
     },
+    "ServiceAPI_OpenAICompatChatAPI_": {
+      "properties": {
+        "internal_url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpenAICompatChatAPI"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "x-description": "Internal URL to access the service. This route is not protected by platform authorization and only workloads from the same project can access it.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Internal URL"
+        },
+        "external_url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpenAICompatChatAPI"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "x-description": "External URL for accessing the service from outside the cluster. This route might be secured by platform authorization and is accessible from any network with a valid platform authorization token that has appropriate permissions.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "External URL"
+        }
+      },
+      "title": "ServiceAPI[OpenAICompatChatAPI]",
+      "type": "object",
+      "x-description": "Service APIs URLs.",
+      "x-is-advanced-field": false,
+      "x-is-configurable": true,
+      "x-meta-type": "inline",
+      "x-title": "Service APIs",
+      "x-type": "ServiceAPI[GrpcAPI]"
+    },
+    "ServiceAPI_OpenAICompatEmbeddingsAPI_": {
+      "properties": {
+        "internal_url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpenAICompatEmbeddingsAPI"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "x-description": "Internal URL to access the service. This route is not protected by platform authorization and only workloads from the same project can access it.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Internal URL"
+        },
+        "external_url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpenAICompatEmbeddingsAPI"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "x-description": "External URL for accessing the service from outside the cluster. This route might be secured by platform authorization and is accessible from any network with a valid platform authorization token that has appropriate permissions.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "External URL"
+        }
+      },
+      "title": "ServiceAPI[OpenAICompatEmbeddingsAPI]",
+      "type": "object",
+      "x-description": "Service APIs URLs.",
+      "x-is-advanced-field": false,
+      "x-is-configurable": true,
+      "x-meta-type": "inline",
+      "x-title": "Service APIs",
+      "x-type": "ServiceAPI[GrpcAPI]"
+    },
     "ServiceAPI_WebApp_": {
       "properties": {
         "internal_url": {
@@ -525,69 +613,37 @@
       "description": "The main application URL for accessing the service. This is the primary endpoint users should use to access the application.",
       "title": "Application URL"
     },
-    "chat_internal_api": {
+    "chat_api": {
       "anyOf": [
         {
-          "$ref": "#/$defs/OpenAICompatChatAPI"
+          "$ref": "#/$defs/ServiceAPI_OpenAICompatChatAPI_"
         },
         {
           "type": "null"
         }
       ],
       "default": null,
-      "x-description": "Internal Chat API compatible with OpenAI standard for seamless integration.",
+      "x-description": "Chat API compatible with OpenAI standard for seamless integration.",
       "x-is-advanced-field": false,
       "x-is-configurable": true,
       "x-meta-type": "integration",
-      "x-title": "Internal Chat API"
+      "x-title": "Chat API"
     },
-    "chat_external_api": {
+    "embeddings_api": {
       "anyOf": [
         {
-          "$ref": "#/$defs/OpenAICompatChatAPI"
+          "$ref": "#/$defs/ServiceAPI_OpenAICompatEmbeddingsAPI_"
         },
         {
           "type": "null"
         }
       ],
       "default": null,
-      "x-description": "External Chat API compatible with OpenAI standard.",
+      "x-description": "Embeddings API compatible with OpenAI standard for seamless integration.",
       "x-is-advanced-field": false,
       "x-is-configurable": true,
       "x-meta-type": "integration",
-      "x-title": "External Chat API"
-    },
-    "embeddings_internal_api": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/OpenAICompatEmbeddingsAPI"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "x-description": "Internal Embeddings API compatible with OpenAI standard for seamless integration.",
-      "x-is-advanced-field": false,
-      "x-is-configurable": true,
-      "x-meta-type": "integration",
-      "x-title": "Internal Embeddings API"
-    },
-    "embeddings_external_api": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/OpenAICompatEmbeddingsAPI"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "x-description": "External Embeddings API compatible with OpenAI standard.",
-      "x-is-advanced-field": false,
-      "x-is-configurable": true,
-      "x-meta-type": "integration",
-      "x-title": "External Embeddings API"
+      "x-title": "Embeddings API"
     },
     "hugging_face_model": {
       "$ref": "#/$defs/HuggingFaceModel"
