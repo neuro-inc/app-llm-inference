@@ -191,6 +191,18 @@ class GptOssSize(str, Enum):
     gpt_oss_20b = "gpt-oss-20b"
 
 
+class Kimi2Size(str, Enum):
+    # Full-weight models
+    k2_base = "K2-Base"
+    k2_instruct = "K2-Instruct"
+    k2_instruct_0905 = "K2-Instruct-0905"
+    k2_thinking = "K2-Thinking"
+    # GGUF quantized models (unsloth)
+    k2_instruct_q2_k_xl = "K2-Instruct-Q2_K_XL"
+    k2_instruct_q4_k_xl = "K2-Instruct-Q4_K_XL"
+    k2_instruct_q8_0 = "K2-Instruct-Q8_0"
+
+
 class LLMBundleInputs(AppInputs, typing.Generic[TSize]):
     """
     Base class for LLM bundle inputs.
@@ -250,3 +262,14 @@ class MistralInputs(LLMBundleInputs[MistralSize]):
 
     llm_class: Literal["mistral"] = "mistral"
     size: MistralSize
+
+
+class Kimi2Inputs(LLMBundleInputs[Kimi2Size]):
+    """
+    Inputs for the Kimi2 bundle.
+    This class extends LLMBundleInputs to include specific fields for Moonshot AI's
+    Kimi K2 models.
+    """
+
+    llm_class: Literal["kimi2"] = "kimi2"
+    size: Kimi2Size

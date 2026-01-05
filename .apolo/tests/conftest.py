@@ -29,6 +29,39 @@ TEST_PRESETS_WITH_H100_CLUSTER = {
 }
 
 
+# Preset for GGUF quantized models with varying VRAM requirements
+TEST_PRESETS_WITH_GGUF_SUPPORT = {
+    "cpu-small": Preset(
+        cpu=2.0,
+        memory=8,
+        nvidia_gpu=NvidiaGPUPreset(count=0),
+        credits_per_hour=Decimal("0.05"),
+        available_resource_pool_names=("cpu_pool",),
+    ),
+    "h100-6x": Preset(
+        cpu=96.0,
+        memory=768,
+        nvidia_gpu=NvidiaGPUPreset(count=6, memory=80e9),  # 480GB total
+        credits_per_hour=Decimal("48"),
+        available_resource_pool_names=("gpu_pool",),
+    ),
+    "h100-8x": Preset(
+        cpu=128.0,
+        memory=1024,
+        nvidia_gpu=NvidiaGPUPreset(count=8, memory=80e9),  # 640GB total
+        credits_per_hour=Decimal("64"),
+        available_resource_pool_names=("gpu_pool",),
+    ),
+    "h100-14x": Preset(
+        cpu=224.0,
+        memory=1792,
+        nvidia_gpu=NvidiaGPUPreset(count=14, memory=80e9),  # 1120GB total
+        credits_per_hour=Decimal("112"),
+        available_resource_pool_names=("gpu_pool",),
+    ),
+}
+
+
 @pytest.fixture
 def mock_get_preset_gpu_h100(setup_clients):
     """Fixture that provides H100 8x GPU cluster preset for V3.2 model testing."""
@@ -37,6 +70,17 @@ def mock_get_preset_gpu_h100(setup_clients):
     setup_clients.config.presets = TEST_PRESETS_WITH_H100_CLUSTER
     setup_clients.jobs.get_capacity = AsyncMock(
         return_value={name: 10 for name in TEST_PRESETS_WITH_H100_CLUSTER}
+    )
+
+
+@pytest.fixture
+def mock_get_preset_gpu_gguf(setup_clients):
+    """Fixture that provides presets for GGUF quantized models with varying VRAM."""
+    from unittest.mock import AsyncMock
+
+    setup_clients.config.presets = TEST_PRESETS_WITH_GGUF_SUPPORT
+    setup_clients.jobs.get_capacity = AsyncMock(
+        return_value={name: 10 for name in TEST_PRESETS_WITH_GGUF_SUPPORT}
     )
 
 
