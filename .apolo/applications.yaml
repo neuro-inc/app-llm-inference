@@ -326,7 +326,7 @@
     - "Kimi"
     - "MoE"
     - "Bundle"
-  assets: 
+  assets:
     - type: image
       url: https://storage.googleapis.com/development-421920-assets/app-logos/kimi-banner.png
   urls:
