@@ -6,7 +6,7 @@ metadata:
     {{- include "app.labels" . | nindent 4 }}
 spec:
   # build progressDeadlineSeconds value 3x the startup timeout
-  {{- $failure := default 60 .Values.probe.startup.failureThreshold | int }}
+  {{- $failure := default 120 .Values.probe.startup.failureThreshold | int }}
   {{- $period := default 10 .Values.probe.startup.periodSeconds | int }}
   progressDeadlineSeconds: {{ mul (mul $failure $period) 3 }}
   replicas: {{ .Values.replicaCount }}
