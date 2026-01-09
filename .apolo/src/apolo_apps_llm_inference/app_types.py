@@ -17,7 +17,7 @@ from apolo_app_types.protocols.common import (
     SchemaMetaType,
 )
 from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
-from apolo_app_types.protocols.common.hugging_face import HF_SCHEMA_EXTRA, HF_TOKEN_SCHEMA_EXTRA, HuggingFaceModelDetailDynamic
+from apolo_app_types.protocols.common.hugging_face import HF_TOKEN_SCHEMA_EXTRA, HuggingFaceModelDetailDynamic
 from apolo_app_types.protocols.common.k8s import Env
 from apolo_app_types.protocols.common.openai_compat import (
     OpenAICompatChatAPI,
@@ -38,7 +38,7 @@ class VLLMInferenceInputs(AppInputs):
             " over the internet using HTTPS.",
         ).as_json_schema_extra(),
     )
-    hugging_face_model: HuggingFaceModel | HuggingFaceModelDetailDynamic
+    hugging_face_model: HuggingFaceModelDetailDynamic
 
     tokenizer_hf_name: str = Field(  # noqa: N815
         "",
@@ -90,13 +90,7 @@ class VLLMInferenceInputs(AppInputs):
     @model_validator(mode="after")
     def check_autoscaling_requires_cache(self) -> "VLLMInferenceInputs":
         if self.http_autoscaling:
-            # Check cache based on model type
-            has_cache = False
-            if isinstance(self.hugging_face_model, HuggingFaceModelDetailDynamic):
-                has_cache = self.hugging_face_model.files_path is not None
-            else:
-                has_cache = self.hugging_face_model.hf_cache is not None
-            if not has_cache:
+            if self.hugging_face_model.files_path is None:
                 msg = "If HTTP autoscaling is enabled, cache_config must also be set."
                 raise ValueError(msg)
         return self

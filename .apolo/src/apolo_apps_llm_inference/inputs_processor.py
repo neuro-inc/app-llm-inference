@@ -3,10 +3,9 @@ import typing as t
 from decimal import Decimal
 from typing import NamedTuple
 
-from apolo_app_types import HuggingFaceModel, HuggingFaceToken
+from apolo_app_types import HuggingFaceToken
 from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic
 from apolo_app_types.app_types import AppType
-from apolo_app_types.helm.apps import LLMChartValueProcessor
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
 from apolo_app_types.helm.apps.common import (
     KEDA_HTTP_PROXY_SERVICE,
@@ -24,7 +23,6 @@ from apolo_app_types.protocols.common import (
 )
 from apolo_app_types.protocols.common import (
     ApoloFilesPath,
-    HuggingFaceCache,
     IngressHttp,
     NoAuth,
     Preset,
@@ -48,46 +46,29 @@ from apolo_apps_llm_inference.app_types import (
 )
 
 
-HFModelType = HuggingFaceModel | HuggingFaceModelDetailDynamic
+def _get_model_hf_name(hf_model: HuggingFaceModelDetailDynamic) -> str:
+    """Extract model name from HuggingFaceModelDetailDynamic."""
+    return hf_model.id
 
 
-def _get_model_hf_name(hf_model: HFModelType) -> str:
-    """Extract model name from either HuggingFaceModel or HuggingFaceModelDetailDynamic."""
-    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
-        return hf_model.id
-    return hf_model.model_hf_name
-
-
-def _get_hf_token(hf_model: HFModelType) -> HuggingFaceToken | None:
-    """Extract HF token - only available in HuggingFaceModel."""
-    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
-        return hf_model.hf_token
+def _get_hf_token(hf_model: HuggingFaceModelDetailDynamic) -> HuggingFaceToken | None:
+    """Extract HF token."""
     return hf_model.hf_token
 
 
-def _get_cache_files_path(hf_model: HFModelType) -> ApoloFilesPath | None:
-    """Extract cache files path from either type."""
-    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
-        return hf_model.files_path
-    return hf_model.hf_cache.files_path if hf_model.hf_cache else None
+def _get_cache_files_path(hf_model: HuggingFaceModelDetailDynamic) -> ApoloFilesPath | None:
+    """Extract cache files path."""
+    return hf_model.files_path
 
 
-def _has_cache_configured(hf_model: HFModelType) -> bool:
-    """Check if cache is configured for either type."""
-    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
-        return hf_model.files_path is not None
-    return hf_model.hf_cache is not None
+def _has_cache_configured(hf_model: HuggingFaceModelDetailDynamic) -> bool:
+    """Check if cache is configured."""
+    return hf_model.files_path is not None
 
 
-def _is_model_already_cached(hf_model: HFModelType) -> bool:
-    """Check if model is already cached and doesn't need download.
-
-    For HuggingFaceModelDetailDynamic, returns True if cached=True and files_path is set.
-    For HuggingFaceModel, always returns False (model needs to be downloaded).
-    """
-    if isinstance(hf_model, HuggingFaceModelDetailDynamic):
-        return hf_model.cached and hf_model.files_path is not None
-    return False
+def _is_model_already_cached(hf_model: HuggingFaceModelDetailDynamic) -> bool:
+    """Check if model is already cached and doesn't need download."""
+    return hf_model.cached and hf_model.files_path is not None
 
 
 class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs]):
@@ -364,7 +345,7 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
     """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any):
-        self.llm_val_processor = LLMChartValueProcessor(*args, **kwargs)
+        self.llm_val_processor = VLLMInferenceInputsProcessor(*args, **kwargs)
         super().__init__(*args, **kwargs)
 
     cache_prefix: str = "llm_bundles"
@@ -443,21 +424,22 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
         return Preset(name=best_name)
 
     async def _llm_inputs(self, input_: T) -> VLLMInferenceInputs:
-        hf_model = HuggingFaceModel(
-            model_hf_name=self.model_map[input_.size].model_hf_name,
+        model_settings = self.model_map[input_.size]
+        hf_model = HuggingFaceModelDetailDynamic(
+            id=model_settings.model_hf_name,
+            visibility="public",
             hf_token=HuggingFaceToken(
                 token_name="llm_bundle_token",
                 token=input_.hf_token
             ),
-            hf_cache=HuggingFaceCache(
-                files_path=ApoloFilesPath(path=self._get_storage_path())
-            ),
+            files_path=ApoloFilesPath(path=self._get_storage_path()),
+            cached=False,
         )
         preset_chosen = await self._get_preset(input_)
         logger.info("Preset chosen: %s", preset_chosen.name)
         return VLLMInferenceInputs(
             hugging_face_model=hf_model,
-            tokenizer_hf_name=hf_model.model_hf_name,
+            tokenizer_hf_name=hf_model.id,
             ingress_http=IngressHttp(auth=NoAuth()),
             preset=preset_chosen,
             http_autoscaling=AutoscalingKedaHTTP(scaledown_period=300)
