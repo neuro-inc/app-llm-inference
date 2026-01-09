@@ -54,6 +54,7 @@ class VLLMInferenceOutputsProcessor(
     ) -> VLLMInferenceOutputs:
 
         outputs = await get_llm_inference_outputs(helm_values, app_instance_id)
+
         model_config = await self._get_model_config(helm_values, outputs)
         msg = f"Got outputs: {outputs}"
         logger.info(msg)
