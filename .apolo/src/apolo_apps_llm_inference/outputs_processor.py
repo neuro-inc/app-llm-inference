@@ -11,6 +11,27 @@ from .utils import fetch_max_model_len_from_server, parse_max_model_len
 logger = logging.getLogger(__name__)
 
 
+def _transform_to_service_api(outputs: dict[str, t.Any]) -> dict[str, t.Any]:
+    """Transform old format (chat_internal_api, chat_external_api) to new ServiceAPI format."""
+    result = dict(outputs)
+
+    # Transform chat APIs to ServiceAPI format
+    if "chat_internal_api" in result or "chat_external_api" in result:
+        result["chat_api"] = {
+            "internal_url": result.pop("chat_internal_api", None),
+            "external_url": result.pop("chat_external_api", None),
+        }
+
+    # Transform embeddings APIs to ServiceAPI format
+    if "embeddings_internal_api" in result or "embeddings_external_api" in result:
+        result["embeddings_api"] = {
+            "internal_url": result.pop("embeddings_internal_api", None),
+            "external_url": result.pop("embeddings_external_api", None),
+        }
+
+    return result
+
+
 class VLLMInferenceOutputsProcessor(
     BaseAppOutputsProcessor[VLLMInferenceOutputs]
 ):
@@ -54,6 +75,8 @@ class VLLMInferenceOutputsProcessor(
     ) -> VLLMInferenceOutputs:
 
         outputs = await get_llm_inference_outputs(helm_values, app_instance_id)
+        # Transform to new ServiceAPI format
+        outputs = _transform_to_service_api(outputs)
         model_config = await self._get_model_config(helm_values, outputs)
         msg = f"Got outputs: {outputs}"
         logger.info(msg)
