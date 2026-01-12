@@ -319,22 +319,14 @@
         "id": {
           "title": "Id",
           "type": "string",
-          "x-description": "The HuggingFace repository identifier.",
+          "x-description": "The HuggingFace repository identifier. E.g., 'username/repo_name'.",
           "x-is-advanced-field": false,
           "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Repository ID"
         },
-        "name": {
-          "title": "Name",
-          "type": "string",
-          "x-description": "The model name.",
-          "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
-          "x-title": "Model Name"
-        },
         "visibility": {
+          "default": "private",
           "title": "Visibility",
           "type": "string",
           "x-description": "Repository visibility (public or private).",
@@ -344,7 +336,7 @@
           "x-title": "Visibility"
         },
         "gated": {
-          "default": false,
+          "default": true,
           "title": "Gated",
           "type": "boolean",
           "x-description": "Whether the model requires access approval.",
@@ -421,9 +413,7 @@
         }
       },
       "required": [
-        "id",
-        "name",
-        "visibility"
+        "id"
       ],
       "title": "HuggingFaceModelDetailDynamic",
       "type": "object",
@@ -431,7 +421,7 @@
       "x-is-advanced-field": false,
       "x-is-configurable": true,
       "x-meta-type": "dynamic",
-      "x-title": "HuggingFace Model Detail",
+      "x-title": "HuggingFace Model",
       "x-type": "HuggingFaceModelDetailDynamic"
     },
     "HuggingFaceToken": {
