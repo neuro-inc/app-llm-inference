@@ -435,7 +435,7 @@
       "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Service APIs",
-      "x-type": "ServiceAPI[GrpcAPI]"
+      "x-type": "ServiceAPI[OpenAICompatEmbeddingsAPI]"
     },
     "ServiceAPI_OpenAICompatEmbeddingsAPI_": {
       "properties": {
@@ -479,7 +479,7 @@
       "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Service APIs",
-      "x-type": "ServiceAPI[GrpcAPI]"
+      "x-type": "ServiceAPI[OpenAICompatEmbeddingsAPI]"
     },
     "ServiceAPI_WebApp_": {
       "properties": {
@@ -523,7 +523,7 @@
       "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Service APIs",
-      "x-type": "ServiceAPI[GrpcAPI]"
+      "x-type": "ServiceAPI[OpenAICompatEmbeddingsAPI]"
     },
     "WebApp": {
       "properties": {
