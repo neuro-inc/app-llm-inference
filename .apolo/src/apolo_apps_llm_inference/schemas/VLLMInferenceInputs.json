@@ -319,14 +319,22 @@
         "id": {
           "title": "Id",
           "type": "string",
-          "x-description": "The HuggingFace repository identifier. Example: 'username/repo_name'",
+          "x-description": "The HuggingFace repository identifier.",
           "x-is-advanced-field": false,
           "x-is-configurable": true,
           "x-meta-type": "inline",
           "x-title": "Repository ID"
         },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "x-description": "The model name.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Model Name"
+        },
         "visibility": {
-          "default": "private",
           "title": "Visibility",
           "type": "string",
           "x-description": "Repository visibility (public or private).",
@@ -336,7 +344,7 @@
           "x-title": "Visibility"
         },
         "gated": {
-          "default": true,
+          "default": false,
           "title": "Gated",
           "type": "boolean",
           "x-description": "Whether the model requires access approval.",
@@ -370,19 +378,19 @@
         "last_modified": {
           "anyOf": [
             {
-              "type": "string"
+              "type": "string",
+              "x-description": "Timestamp when the model was last modified.",
+              "x-is-advanced-field": false,
+              "x-is-configurable": true,
+              "x-meta-type": "inline",
+              "x-title": "Last Modified"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "title": "Last Modified",
-          "x-description": "Timestamp when the model was last modified.",
-          "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
-          "x-title": "Last Modified"
+          "title": "Last Modified"
         },
         "files_path": {
           "anyOf": [
@@ -413,7 +421,9 @@
         }
       },
       "required": [
-        "id"
+        "id",
+        "name",
+        "visibility"
       ],
       "title": "HuggingFaceModelDetailDynamic",
       "type": "object",
