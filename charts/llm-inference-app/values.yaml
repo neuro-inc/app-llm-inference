@@ -22,7 +22,7 @@ replicaCount: 1
 image:
   repository: vllm/vllm-openai
   pullPolicy: IfNotPresent
-  tag: v0.11.0
+  tag: v0.13.0
   imagePullSecrets: []
 
 resources: {}
