@@ -313,37 +313,87 @@
       "x-title": "Env",
       "x-type": "Env"
     },
-    "HuggingFaceCache": {
+    "HuggingFaceModelDetailDynamic": {
+      "description": "Detailed HuggingFace model information.",
       "properties": {
-        "files_path": {
-          "$ref": "#/$defs/ApoloFilesPath",
-          "default": {
-            "path": "storage:.apps/hugging-face-cache",
-            "__type__": "ApoloFilesPath"
-          },
-          "x-description": "The path to the Apolo Files directory where Hugging Face artifacts are cached.",
-          "x-title": "Files Path"
-        }
-      },
-      "title": "HuggingFaceCache",
-      "type": "object",
-      "x-description": "Configuration for the Hugging Face cache.",
-      "x-is-advanced-field": false,
-      "x-is-configurable": true,
-      "x-meta-type": "integration",
-      "x-title": "Hugging Face Cache",
-      "x-type": "HuggingFaceCache"
-    },
-    "HuggingFaceModel": {
-      "properties": {
-        "model_hf_name": {
-          "title": "Model Hf Name",
+        "id": {
+          "title": "Id",
           "type": "string",
-          "x-description": "The name of the Hugging Face model.",
+          "x-description": "The HuggingFace repository identifier. E.g., 'username/repo_name'.",
           "x-is-advanced-field": false,
           "x-is-configurable": true,
           "x-meta-type": "inline",
-          "x-title": "Hugging Face Model Name"
+          "x-title": "Repository ID"
+        },
+        "visibility": {
+          "default": "private",
+          "title": "Visibility",
+          "type": "string",
+          "x-description": "Repository visibility (public or private).",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Visibility"
+        },
+        "gated": {
+          "default": true,
+          "title": "Gated",
+          "type": "boolean",
+          "x-description": "Whether the model requires access approval.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Gated"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array",
+          "x-description": "Tags associated with the model.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Tags"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean",
+          "x-description": "Whether the model is cached locally.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Cached"
+        },
+        "last_modified": {
+          "anyOf": [
+            {
+              "type": "string",
+              "x-description": "Timestamp when the model was last modified.",
+              "x-is-advanced-field": false,
+              "x-is-configurable": true,
+              "x-meta-type": "inline",
+              "x-title": "Last Modified"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Modified"
+        },
+        "files_path": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApoloFilesPath"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "hf_token": {
           "anyOf": [
@@ -360,35 +410,19 @@
           "x-is-configurable": true,
           "x-meta-type": "integration",
           "x-title": "Hugging Face Token"
-        },
-        "hf_cache": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/HuggingFaceCache"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "x-description": "Enables caching of model files to reduce redundant downloads and speed up load times.",
-          "x-is-advanced-field": false,
-          "x-is-configurable": true,
-          "x-meta-type": "inline",
-          "x-title": "Model Cache"
         }
       },
       "required": [
-        "model_hf_name"
+        "id"
       ],
-      "title": "HuggingFaceModel",
+      "title": "HuggingFaceModelDetailDynamic",
       "type": "object",
-      "x-description": "Configure the Hugging Face model. Ensure it is available on the Hugging Face Hub and provide an API token with access rights if the repository is gated.",
+      "x-description": "Detailed information about a HuggingFace model.",
       "x-is-advanced-field": false,
       "x-is-configurable": true,
-      "x-meta-type": "integration",
-      "x-title": "Hugging Face Model",
-      "x-type": "HuggingFaceModel"
+      "x-meta-type": "dynamic",
+      "x-title": "HuggingFace Model",
+      "x-type": "HuggingFaceModelDetailDynamic"
     },
     "HuggingFaceToken": {
       "properties": {
@@ -562,8 +596,7 @@
       "x-title": "Public HTTP Ingress"
     },
     "hugging_face_model": {
-      "$ref": "#/$defs/HuggingFaceModel",
-      "x-meta-type": "inline"
+      "$ref": "#/$defs/HuggingFaceModelDetailDynamic"
     },
     "tokenizer_hf_name": {
       "default": "",

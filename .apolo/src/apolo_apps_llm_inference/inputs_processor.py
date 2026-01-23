@@ -3,9 +3,9 @@ import typing as t
 from decimal import Decimal
 from typing import NamedTuple
 
-from apolo_app_types import HuggingFaceModel, HuggingFaceToken
+from apolo_app_types import HuggingFaceToken
+from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic
 from apolo_app_types.app_types import AppType
-from apolo_app_types.helm.apps import LLMChartValueProcessor
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
 from apolo_app_types.helm.apps.common import (
     KEDA_HTTP_PROXY_SERVICE,
@@ -23,7 +23,6 @@ from apolo_app_types.protocols.common import (
 )
 from apolo_app_types.protocols.common import (
     ApoloFilesPath,
-    HuggingFaceCache,
     IngressHttp,
     NoAuth,
     Preset,
@@ -123,7 +122,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_model(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         return {
-            "modelHFName": input_.hugging_face_model.model_hf_name,
+            "modelHFName": input_.hugging_face_model.id,
             "tokenizerHFName": input_.tokenizer_hf_name,
         }
 
@@ -131,10 +130,10 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         self, input_: VLLMInferenceInputs, app_secrets_name: str
     ) -> dict[str, t.Any]:
         # Start with base environment variables
+        hf_token = input_.hugging_face_model.hf_token
         env_vars = {
             "HUGGING_FACE_HUB_TOKEN": serialize_optional_secret(
-                input_.hugging_face_model.hf_token.token \
-                    if input_.hugging_face_model.hf_token else None,
+                hf_token.token if hf_token else None,
                 secret_name=app_secrets_name
             )
         }
@@ -152,9 +151,10 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_extra_annotations(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_annotations: dict[str, str] = {}
-        if input_.hugging_face_model.hf_cache and input_.hugging_face_model.hf_cache.files_path:
+        cache_files_path = input_.hugging_face_model.files_path
+        if cache_files_path:
             storage_mount = ApoloFilesMount(
-                storage_uri=input_.hugging_face_model.hf_cache.files_path,
+                storage_uri=cache_files_path,
                 mount_path=MountPath(path="/root/.cache/huggingface"),
                 mode=ApoloMountMode(mode=ApoloMountModes.RW),
             )
@@ -165,7 +165,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_extra_labels(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_labels: dict[str, str] = {}
-        if input_.hugging_face_model.hf_cache and input_.hugging_face_model.hf_cache.files_path:
+        if input_.hugging_face_model.files_path is not None:
             extra_labels.update(
                 **gen_apolo_storage_integration_labels(
                     client=self.client, inject_storage=True
@@ -174,7 +174,21 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         return extra_labels
 
     def _configure_model_download(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
-        if input_.hugging_face_model.hf_cache:
+        hf_model = input_.hugging_face_model
+        # If model is already cached (cached=True and files_path set),
+        # skip download entirely - model files are already on the storage mount
+        if hf_model.cached and hf_model.files_path is not None:
+            return {
+                "modelDownload": {
+                    "hookEnabled": False,
+                    "initEnabled": False,
+                },
+                "cache": {
+                    "enabled": False,
+                },
+            }
+        # If cache storage is configured but model not yet cached, use hook to download
+        if hf_model.files_path is not None:
             return {
                 "modelDownload": {
                     "hookEnabled": True,
@@ -184,6 +198,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                     "enabled": False,
                 },
             }
+        # No cache configured - use init container with emptyDir cache
         return {
             "modelDownload": {
                 "hookEnabled": False,
@@ -306,7 +321,7 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
     """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any):
-        self.llm_val_processor = LLMChartValueProcessor(*args, **kwargs)
+        self.llm_val_processor = VLLMInferenceInputsProcessor(*args, **kwargs)
         super().__init__(*args, **kwargs)
 
     cache_prefix: str = "llm_bundles"
@@ -385,21 +400,22 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
         return Preset(name=best_name)
 
     async def _llm_inputs(self, input_: T) -> VLLMInferenceInputs:
-        hf_model = HuggingFaceModel(
-            model_hf_name=self.model_map[input_.size].model_hf_name,
+        model_settings = self.model_map[input_.size]
+        hf_model = HuggingFaceModelDetailDynamic(
+            id=model_settings.model_hf_name,
+            visibility="public",
             hf_token=HuggingFaceToken(
                 token_name="llm_bundle_token",
                 token=input_.hf_token
             ),
-            hf_cache=HuggingFaceCache(
-                files_path=ApoloFilesPath(path=self._get_storage_path())
-            ),
+            files_path=ApoloFilesPath(path=self._get_storage_path()),
+            cached=False,
         )
         preset_chosen = await self._get_preset(input_)
         logger.info("Preset chosen: %s", preset_chosen.name)
         return VLLMInferenceInputs(
             hugging_face_model=hf_model,
-            tokenizer_hf_name=hf_model.model_hf_name,
+            tokenizer_hf_name=hf_model.id,
             ingress_http=IngressHttp(auth=NoAuth()),
             preset=preset_chosen,
             http_autoscaling=AutoscalingKedaHTTP(scaledown_period=300)
