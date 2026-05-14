@@ -38,7 +38,7 @@ class VLLMInferenceInputs(AppInputs):
             " over the internet using HTTPS.",
         ).as_json_schema_extra(),
     )
-    hugging_face_model: HuggingFaceModelDetailDynamic
+    hugging_face_model: HuggingFaceModel | HuggingFaceModelDetailDynamic
 
     tokenizer_hf_name: str = Field(  # noqa: N815
         "",
@@ -90,7 +90,12 @@ class VLLMInferenceInputs(AppInputs):
     @model_validator(mode="after")
     def check_autoscaling_requires_cache(self) -> "VLLMInferenceInputs":
         if self.http_autoscaling:
-            if self.hugging_face_model.files_path is None:
+            model = self.hugging_face_model
+            if isinstance(model, HuggingFaceModelDetailDynamic):
+                files_path = model.files_path
+            else:
+                files_path = model.hf_cache.files_path if model.hf_cache else None
+            if files_path is None:
                 msg = "If HTTP autoscaling is enabled, cache_config must also be set."
                 raise ValueError(msg)
         return self

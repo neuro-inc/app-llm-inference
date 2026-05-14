@@ -110,6 +110,7 @@ class VLLMInferenceOutputsProcessor(
         except Exception as err:
             # swallow and try next priority
             pass
+        return None
 
     async def _generate_outputs(
         self,

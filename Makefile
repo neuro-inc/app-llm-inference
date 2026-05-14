@@ -11,14 +11,18 @@ install setup:
 	poetry install --with dev
 	poetry run pre-commit install;
 
-.PHONY: lint format
-lint format:
+.PHONY: format
+format:
 ifdef CI
 	poetry run pre-commit run --all-files --show-diff-on-failure
 else
 	# automatically fix the formatting issues and rerun again
 	poetry run pre-commit run --all-files || poetry run pre-commit run --all-files
 endif
+
+.PHONY:
+lint: format
+	cd .apolo/src && poetry run mypy --explicit-package-bases apolo_apps_llm_inference
 
 .PHONY: test-unit
 test-unit:

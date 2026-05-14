@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import NamedTuple
 
 from apolo_app_types import HuggingFaceToken
-from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic
+from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic, HuggingFaceModel
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
 from apolo_app_types.helm.apps.common import (
@@ -121,8 +121,13 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         return parallel_server_args
 
     def _configure_model(self, input_: VLLMInferenceInputs) -> dict[str, str]:
+        model = input_.hugging_face_model
+        if isinstance(model, HuggingFaceModelDetailDynamic):
+            model_hf_name = model.id
+        else:
+            model_hf_name = model.model_hf_name
         return {
-            "modelHFName": input_.hugging_face_model.id,
+            "modelHFName": model_hf_name,
             "tokenizerHFName": input_.tokenizer_hf_name,
         }
 
@@ -151,7 +156,11 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_extra_annotations(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_annotations: dict[str, str] = {}
-        cache_files_path = input_.hugging_face_model.files_path
+        model = input_.hugging_face_model
+        if isinstance(model, HuggingFaceModelDetailDynamic):
+           cache_files_path = model.files_path
+        else:
+            cache_files_path = model.hf_cache.files_path if model.hf_cache else None
         if cache_files_path:
             storage_mount = ApoloFilesMount(
                 storage_uri=cache_files_path,
@@ -165,7 +174,13 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_extra_labels(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_labels: dict[str, str] = {}
-        if input_.hugging_face_model.files_path is not None:
+        model = input_.hugging_face_model
+        if isinstance(model, HuggingFaceModelDetailDynamic):
+           cache_files_path = model.files_path
+        else:
+            cache_files_path = model.hf_cache.files_path if model.hf_cache else None
+
+        if cache_files_path is not None:
             extra_labels.update(
                 **gen_apolo_storage_integration_labels(
                     client=self.client, inject_storage=True
@@ -177,6 +192,17 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         hf_model = input_.hugging_face_model
         # If model is already cached (cached=True and files_path set),
         # skip download entirely - model files are already on the storage mount
+        download_via_init_values = {
+            "modelDownload": {
+                "hookEnabled": False,
+                "initEnabled": True,
+            },
+            "cache": {
+                "enabled": True,
+            },
+        }
+        if not isinstance(hf_model, HuggingFaceModelDetailDynamic):
+            return download_via_init_values
         if hf_model.cached and hf_model.files_path is not None:
             return {
                 "modelDownload": {
@@ -199,15 +225,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                 },
             }
         # No cache configured - use init container with emptyDir cache
-        return {
-            "modelDownload": {
-                "hookEnabled": False,
-                "initEnabled": True,
-            },
-            "cache": {
-                "enabled": True,
-            },
-        }
+        return download_via_init_values
 
     def _configure_image(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
         if input_.docker_image_config:

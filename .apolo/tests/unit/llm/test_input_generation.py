@@ -13,7 +13,7 @@ from apolo_app_types.protocols.common.autoscaling import (
     AutoscalingKedaHTTP,
     RequestRateConfig,
 )
-from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic
+from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic, HuggingFaceModel
 from apolo_app_types.protocols.common.secrets_ import ApoloSecret
 
 from apolo_app_types_fixtures.constants import APP_ID, APP_SECRETS_NAME, CPU_POOL, DEFAULT_NAMESPACE
@@ -755,3 +755,73 @@ async def test_values_llm_generation_with_cached_dynamic_model(
     # Storage integration should still be configured for mounting the cached model
     assert APOLO_STORAGE_LABEL in helm_params["podExtraLabels"]
     assert APOLO_STORAGE_LABEL in helm_params["podAnnotations"]
+
+
+async def test_values_llm_generation_with_hf_model_no_cache_no_token(
+    setup_clients, mock_get_preset_gpu
+):
+    apolo_client = setup_clients
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
+
+    helm_params = await input_processor.gen_extra_values(
+        input_=VLLMInferenceInputs(
+            preset=Preset(name="gpu-small"),
+            ingress_http=IngressHttp(),
+            hugging_face_model=HuggingFaceModel(
+                model_hf_name="meta-llama/Llama-2-7b-hf",
+            ),
+        ),
+        app_type=AppType.LLMInference,
+        app_name="llm",
+        namespace=DEFAULT_NAMESPACE,
+        app_secrets_name=APP_SECRETS_NAME,
+        app_id=APP_ID,
+    )
+
+    assert helm_params["model"]["modelHFName"] == "meta-llama/Llama-2-7b-hf"
+    assert helm_params["modelDownload"]["hookEnabled"] is False
+    assert helm_params["modelDownload"]["initEnabled"] is True
+    assert helm_params["cache"]["enabled"] is True
+
+    # No storage integration labels without cache
+    assert helm_params["podExtraLabels"] == {}
+
+async def test_values_llm_generation_with_hf_model_no_cache_token(
+    setup_clients, mock_get_preset_gpu
+):
+    apolo_client = setup_clients
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
+
+    dynamic_model = HuggingFaceModel(
+        model_hf_name="meta-llama/Llama-2-7b-hf",
+        hf_token=HuggingFaceToken(
+            token_name="mytoken",
+            token=ApoloSecret(
+                key="sec",
+            )
+        ),
+    )
+
+    helm_params = await input_processor.gen_extra_values(
+        input_=VLLMInferenceInputs(
+            preset=Preset(name="gpu-small"),
+            ingress_http=IngressHttp(),
+            hugging_face_model=dynamic_model,
+        ),
+        app_type=AppType.LLMInference,
+        app_name="llm",
+        namespace=DEFAULT_NAMESPACE,
+        app_secrets_name=APP_SECRETS_NAME,
+        app_id=APP_ID,
+    )
+
+    # Verify model name is extracted correctly
+    assert helm_params["model"]["modelHFName"] == "meta-llama/Llama-2-7b-hf"
+
+    # Without cache, init container should be used
+    assert helm_params["modelDownload"]["hookEnabled"] is False
+    assert helm_params["modelDownload"]["initEnabled"] is True
+    assert helm_params["cache"]["enabled"] is True
+
+    # No storage integration labels without cache
+    assert helm_params["podExtraLabels"] == {}

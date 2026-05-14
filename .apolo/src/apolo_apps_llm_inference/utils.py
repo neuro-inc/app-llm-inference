@@ -1,5 +1,6 @@
-import httpx
+import typing as t
 
+import httpx
 
 async def fetch_max_model_len_from_server(
     host: str,
@@ -22,7 +23,7 @@ async def fetch_max_model_len_from_server(
         r.raise_for_status()
         payload = r.json()
 
-    models: list[dict] = payload.get("data", [])
+    models: list[dict[str, t.Any]] = payload.get("data", [])
     # Prefer exact id match, then root match, else first model
     candidates = (
         [m for m in models if m.get("id") == expected_model_id]
@@ -38,7 +39,7 @@ async def fetch_max_model_len_from_server(
     return int(val) if isinstance(val, int) else None
 
 
-def parse_max_model_len(raw) -> int:
+def parse_max_model_len(raw: t.Any) -> int:
     """
     Parse values like:
       131072      -> 131072
