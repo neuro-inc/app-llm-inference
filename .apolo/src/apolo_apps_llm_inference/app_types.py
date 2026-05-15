@@ -2,27 +2,25 @@ import typing
 from enum import Enum
 from typing import Literal
 
-from apolo_app_types import LLMModelConfig, ContainerImage
+from apolo_app_types import LLMModelConfig
 from apolo_app_types.protocols.common import (
     ApoloSecret,
     AppInputs,
-    SchemaExtraMetadata,
-    ServiceAPI
-)
-from apolo_app_types.protocols.common import (
     AppOutputs,
-    HuggingFaceModel,
-    IngressHttp,
+    SchemaExtraMetadata,
+    ServiceAPI,
     Preset,
     SchemaMetaType,
-)
-from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
-from apolo_app_types.protocols.common.hugging_face import HF_TOKEN_SCHEMA_EXTRA, HuggingFaceModelDetailDynamic
-from apolo_app_types.protocols.common.k8s import Env
-from apolo_app_types.protocols.common.openai_compat import (
+    IngressHttp,
+    Env,
+    ContainerImage,
     OpenAICompatChatAPI,
     OpenAICompatEmbeddingsAPI,
+
 )
+from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
+from apolo_app_types.protocols.common.containers import ContainerImagePullPolicy
+from apolo_app_types.protocols.common.hugging_face import HF_TOKEN_SCHEMA_EXTRA, HuggingFaceModelDetailDynamic, HuggingFaceModel
 from pydantic import Field
 from pydantic import model_validator
 
@@ -78,10 +76,14 @@ class VLLMInferenceInputs(AppInputs):
             is_advanced_field=True,
         ).as_json_schema_extra(),
     )
-    docker_image_config: ContainerImage | None = Field(
-        default=None,
+    docker_image_config: ContainerImage = Field(
+        default=ContainerImage(
+            repository="vllm/vllm-openai",
+            tag="v0.21.0",
+            pullPolicy=ContainerImagePullPolicy.IF_NOT_PRESENT,
+        ),
         json_schema_extra=SchemaExtraMetadata(
-            title="Docker Image Config",
+            title="vLLM Server Image",
             description="Override container image for vLLM.",
             is_advanced_field=True,
         ).as_json_schema_extra(),

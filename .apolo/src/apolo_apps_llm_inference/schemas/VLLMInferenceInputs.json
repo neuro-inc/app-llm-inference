@@ -734,20 +734,17 @@
       "x-title": "HTTP Autoscaling"
     },
     "docker_image_config": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/ContainerImage"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
+      "$ref": "#/$defs/ContainerImage",
+      "default": {
+        "repository": "vllm/vllm-openai",
+        "tag": "v0.21.0",
+        "dockerconfigjson": null,
+        "pull_policy": "IfNotPresent",
+        "__type__": "ContainerImage"
+      },
       "x-description": "Override container image for vLLM.",
       "x-is-advanced-field": true,
-      "x-is-configurable": true,
-      "x-meta-type": "inline",
-      "x-title": "Docker Image Config"
+      "x-title": "vLLM Server Image"
     }
   },
   "required": [
