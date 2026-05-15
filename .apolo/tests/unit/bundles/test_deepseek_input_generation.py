@@ -124,6 +124,11 @@ async def test_values_llm_generation_gpu_default_preset(
         "modelDownload": {"hookEnabled": True, "initEnabled": False},
         "cache": {"enabled": False},
         "gpuProvider": "nvidia",
+        "nvidiaImage": {
+            "pullPolicy": "IfNotPresent",
+            "repository": "vllm/vllm-openai",
+            "tag": "v0.21.0"
+        },
         "podLabels": {
             "platform.apolo.us/component": "app",
             "platform.apolo.us/preset": preset_name,

@@ -227,26 +227,36 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         # No cache configured - use init container with emptyDir cache
         return download_via_init_values
 
-    def _configure_image(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
-        if input_.docker_image_config:
-            return {
-                "image": {
-                    "repository": input_.docker_image_config.repository,
-                    "tag": input_.docker_image_config.tag,
-                    "pullPolicy": input_.docker_image_config.pull_policy,
-                },
-                "nvidiaImage": {
-                    "repository": input_.docker_image_config.repository,
-                    "tag": input_.docker_image_config.tag,
-                    "pullPolicy": input_.docker_image_config.pull_policy,
-                },
-                "amdImage": {
-                    "repository": input_.docker_image_config.repository,
-                    "tag": input_.docker_image_config.tag,
-                    "pullPolicy": input_.docker_image_config.pull_policy,
-                },
-            }
-        return {}
+    def _configure_image(
+        self,
+        input_: VLLMInferenceInputs,
+        gpu_provider: str,
+    ) -> dict[str, t.Any]:
+        match gpu_provider:
+            case "amd":
+                return {
+                    "amdImage": {
+                        "repository": input_.docker_image_config.repository,
+                        "tag": input_.docker_image_config.tag,
+                        "pullPolicy": input_.docker_image_config.pull_policy.value,
+                    },
+                }
+            case "nvidia":
+                return {
+                    "nvidiaImage": {
+                        "repository": input_.docker_image_config.repository,
+                        "tag": input_.docker_image_config.tag,
+                        "pullPolicy": input_.docker_image_config.pull_policy.value,
+                    },
+                }
+            case _:
+                return {
+                    "image": {
+                        "repository": input_.docker_image_config.repository,
+                        "tag": input_.docker_image_config.tag,
+                        "pullPolicy": input_.docker_image_config.pull_policy.value,
+                    },
+                }
 
     async def gen_extra_values(
         self,
@@ -285,7 +295,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
         gpu_count = nvidia_gpus + amd_gpus
         if amd_gpus > 0:
-            gpu_provider = "amd"
+            gpu_provider: str = "amd"
         elif nvidia_gpus > 0:
             gpu_provider = "nvidia"
         else:
@@ -297,7 +307,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         parallel_args = self._configure_parallel_args(
             input_.server_extra_args, gpu_count
         )
-        image_config = self._configure_image(input_)
+        image_config = self._configure_image(input_, gpu_provider)
         server_extra_args = [
             *input_.server_extra_args,
             *parallel_args,
