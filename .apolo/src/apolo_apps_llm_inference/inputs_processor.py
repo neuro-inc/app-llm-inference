@@ -198,7 +198,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                 "initEnabled": True,
             },
             "cache": {
-                "enabled": True,
+                "enabled": False,
             },
         }
         if not isinstance(hf_model, HuggingFaceModelDetailDynamic):
