@@ -22,7 +22,7 @@ endif
 
 .PHONY:
 lint: format
-	cd .apolo/src && poetry run mypy --explicit-package-bases apolo_apps_llm_inference
+	poetry run mypy .apolo
 
 .PHONY: test-unit
 test-unit:
