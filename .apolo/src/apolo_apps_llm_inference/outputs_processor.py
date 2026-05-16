@@ -1,21 +1,22 @@
 import logging
 import typing as t
 
+from apolo_app_types import HuggingFaceModel, LLMModelConfig
 from apolo_app_types.outputs.base import BaseAppOutputsProcessor
-from apolo_app_types import LLMModelConfig, HuggingFaceModel
 from apolo_app_types.outputs.common import (
-    get_service_host_port,
-    get_ingress_host_port,
     INSTANCE_LABEL,
+    get_ingress_host_port,
+    get_service_host_port,
 )
 from apolo_app_types.outputs.llm import parse_cli_args
 from apolo_app_types.protocols.common.openai_compat import (
     OpenAICompatChatAPI,
     OpenAICompatEmbeddingsAPI,
 )
-from .app_types import VLLMInferenceOutputs
 
+from .app_types import VLLMInferenceOutputs
 from .utils import fetch_max_model_len_from_server, parse_max_model_len
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +52,16 @@ async def get_llm_inference_outputs(
     embeddings_external = None
     if ingress_host_port:
         chat_external = OpenAICompatChatAPI(
-            host=ingress_host_port[0], port=int(ingress_host_port[1]),
-            protocol="https", hf_model=hf_model
+            host=ingress_host_port[0],
+            port=int(ingress_host_port[1]),
+            protocol="https",
+            hf_model=hf_model,
         )
         embeddings_external = OpenAICompatEmbeddingsAPI(
-            host=ingress_host_port[0], port=int(ingress_host_port[1]),
-            protocol="https", hf_model=hf_model
+            host=ingress_host_port[0],
+            port=int(ingress_host_port[1]),
+            protocol="https",
+            hf_model=hf_model,
         )
 
     return {
@@ -66,7 +71,9 @@ async def get_llm_inference_outputs(
         },
         "embeddings_api": {
             "internal_url": embeddings_internal.model_dump(),
-            "external_url": embeddings_external.model_dump() if embeddings_external else None,
+            "external_url": embeddings_external.model_dump()
+            if embeddings_external
+            else None,
         },
         "hugging_face_model": hf_model.model_dump(),
         "tokenizer_hf_name": tokenizer_name,
@@ -75,11 +82,10 @@ async def get_llm_inference_outputs(
     }
 
 
-class VLLMInferenceOutputsProcessor(
-    BaseAppOutputsProcessor[VLLMInferenceOutputs]
-):
-    async def _get_model_config(self, helm_values: dict[str, t.Any],
-                                vllm_outputs_dict: dict[str, t.Any]) -> LLMModelConfig | None:
+class VLLMInferenceOutputsProcessor(BaseAppOutputsProcessor[VLLMInferenceOutputs]):
+    async def _get_model_config(
+        self, helm_values: dict[str, t.Any], vllm_outputs_dict: dict[str, t.Any]
+    ) -> LLMModelConfig | None:
         # priority 1: --max-model-len from server args
         hf_model_name = helm_values["model"]["modelHFName"]
         api_key = None
@@ -97,17 +103,22 @@ class VLLMInferenceOutputsProcessor(
                     api_key = arg.split("=", 1)[-1]
 
         # priority 2: ask the INTERNAL server /v1/models
-        internal_host, internal_port = (vllm_outputs_dict["chat_api"]["internal_url"]["host"],
-                                        vllm_outputs_dict["chat_api"]["internal_url"]["port"])
+        internal_host, internal_port = (
+            vllm_outputs_dict["chat_api"]["internal_url"]["host"],
+            vllm_outputs_dict["chat_api"]["internal_url"]["port"],
+        )
         try:
             server_len = await fetch_max_model_len_from_server(
-                internal_host, int(internal_port), expected_model_id=hf_model_name, api_key=api_key
+                internal_host,
+                int(internal_port),
+                expected_model_id=hf_model_name,
+                api_key=api_key,
             )
             if server_len:
                 return LLMModelConfig(
                     context_max_tokens=server_len,
                 )
-        except Exception as err:
+        except Exception:
             # swallow and try next priority
             pass
         return None
@@ -117,12 +128,10 @@ class VLLMInferenceOutputsProcessor(
         helm_values: dict[str, t.Any],
         app_instance_id: str,
     ) -> VLLMInferenceOutputs:
-
         outputs = await get_llm_inference_outputs(helm_values, app_instance_id)
         model_config = await self._get_model_config(helm_values, outputs)
         msg = f"Got outputs: {outputs}"
         logger.info(msg)
-        return VLLMInferenceOutputs.model_validate({
-            **outputs,
-            "llm_model_config": model_config
-        })
+        return VLLMInferenceOutputs.model_validate(
+            {**outputs, "llm_model_config": model_config}
+        )

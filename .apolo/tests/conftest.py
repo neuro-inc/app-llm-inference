@@ -4,6 +4,7 @@ import pytest
 from apolo_sdk import Preset
 from neuro_config_client import NvidiaGPUPreset
 
+
 pytest_plugins = [
     "apolo_app_types_fixtures.apolo_clients",
     "apolo_app_types_fixtures.constants",
@@ -63,7 +64,7 @@ TEST_PRESETS_WITH_GGUF_SUPPORT = {
 
 
 @pytest.fixture
-def mock_get_preset_gpu_h100(setup_clients):
+def _mock_get_preset_gpu_h100(setup_clients):
     """Fixture that provides H100 8x GPU cluster preset for V3.2 model testing."""
     from unittest.mock import AsyncMock
 
@@ -74,7 +75,7 @@ def mock_get_preset_gpu_h100(setup_clients):
 
 
 @pytest.fixture
-def mock_get_preset_gpu_gguf(setup_clients):
+def _mock_get_preset_gpu_gguf(setup_clients):
     """Fixture that provides presets for GGUF quantized models with varying VRAM."""
     from unittest.mock import AsyncMock
 
@@ -85,7 +86,7 @@ def mock_get_preset_gpu_gguf(setup_clients):
 
 
 @pytest.fixture
-def mock_fetch_models(monkeypatch):
+def _mock_fetch_models(monkeypatch):
     """
     Monkeypatch load_hf_json(model, filename) to return canned dicts.
     Adjust the returned dicts to match your scenarios.
@@ -93,7 +94,7 @@ def mock_fetch_models(monkeypatch):
 
     async def _fake_fetch_max_model_len(*_, **__):
         return 131_072  # simulate vLLM reporting this limit
-    from apolo_apps_llm_inference import utils, outputs_processor
+
     monkeypatch.setattr(
         "apolo_apps_llm_inference.outputs_processor.fetch_max_model_len_from_server",
         _fake_fetch_max_model_len,

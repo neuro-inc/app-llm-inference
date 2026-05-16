@@ -1,5 +1,13 @@
-from apolo_app_types import HuggingFaceToken
+from apolo_app_types_fixtures.constants import (
+    APP_ID,
+    APP_SECRETS_NAME,
+    CPU_POOL,
+    DEFAULT_NAMESPACE,
+)
 from apolo_apps_llm_inference import VLLMInferenceInputs
+from apolo_apps_llm_inference.inputs_processor import VLLMInferenceInputsProcessor
+
+from apolo_app_types import HuggingFaceToken
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps.common import (
     APOLO_ORG_LABEL,
@@ -8,23 +16,28 @@ from apolo_app_types.helm.apps.common import (
     _get_match_expressions,
 )
 from apolo_app_types.helm.apps.llm import KEDA_HTTP_PROXY_SERVICE
-from apolo_app_types.protocols.common import ApoloFilesPath, IngressHttp, Preset, ApoloAuth
+from apolo_app_types.protocols.common import (
+    ApoloAuth,
+    ApoloFilesPath,
+    IngressHttp,
+    Preset,
+)
 from apolo_app_types.protocols.common.autoscaling import (
     AutoscalingKedaHTTP,
     RequestRateConfig,
 )
-from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic, HuggingFaceModel
+from apolo_app_types.protocols.common.hugging_face import (
+    HuggingFaceCache,
+    HuggingFaceModel,
+    HuggingFaceModelDetailDynamic,
+)
 from apolo_app_types.protocols.common.secrets_ import ApoloSecret
 
-from apolo_app_types_fixtures.constants import APP_ID, APP_SECRETS_NAME, CPU_POOL, DEFAULT_NAMESPACE
-from apolo_apps_llm_inference.inputs_processor import VLLMInferenceInputsProcessor
 
 async def test_values_llm_generation_cpu(setup_clients, mock_get_preset_cpu):
     hf_token = "test3"
     apolo_client = setup_clients
-    input_processor = VLLMInferenceInputsProcessor(
-        client=apolo_client
-    )
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
 
     helm_params = await input_processor.gen_extra_values(
         input_=VLLMInferenceInputs(
@@ -37,8 +50,7 @@ async def test_values_llm_generation_cpu(setup_clients, mock_get_preset_cpu):
                 name="test",
                 visibility="public",
                 hf_token=HuggingFaceToken(
-                    token_name="token1",
-                    token=ApoloSecret(key=hf_token)
+                    token_name="token1", token=ApoloSecret(key=hf_token)
                 ),
             ),
             tokenizer_hf_name="test_tokenizer",
@@ -103,9 +115,7 @@ async def test_values_llm_generation_cpu(setup_clients, mock_get_preset_cpu):
 async def test_values_llm_generation_gpu(setup_clients, mock_get_preset_gpu):
     hf_token = "test3"
     apolo_client = setup_clients
-    input_processor = VLLMInferenceInputsProcessor(
-        client=apolo_client
-    )
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
 
     helm_params = await input_processor.gen_extra_values(
         input_=VLLMInferenceInputs(
@@ -118,8 +128,7 @@ async def test_values_llm_generation_gpu(setup_clients, mock_get_preset_gpu):
                 name="test",
                 visibility="public",
                 hf_token=HuggingFaceToken(
-                    token_name="token1",
-                    token=ApoloSecret(key=hf_token)
+                    token_name="token1", token=ApoloSecret(key=hf_token)
                 ),
             ),
             tokenizer_hf_name="test_tokenizer",
@@ -208,7 +217,7 @@ async def test_values_llm_generation_gpu(setup_clients, mock_get_preset_gpu):
         "nvidiaImage": {
             "pullPolicy": "IfNotPresent",
             "repository": "vllm/vllm-openai",
-            "tag": "v0.21.0"
+            "tag": "v0.21.0",
         },
         "podLabels": {
             "platform.apolo.us/component": "app",
@@ -228,9 +237,7 @@ async def test_values_llm_generation_cpu_apolo_secret(
     setup_clients, mock_get_preset_cpu
 ):
     apolo_client = setup_clients
-    input_processor = VLLMInferenceInputsProcessor(
-        client=apolo_client
-    )
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
 
     helm_params = await input_processor.gen_extra_values(
         input_=VLLMInferenceInputs(
@@ -243,8 +250,7 @@ async def test_values_llm_generation_cpu_apolo_secret(
                 name="test",
                 visibility="public",
                 hf_token=HuggingFaceToken(
-                    token_name="token1",
-                    token=ApoloSecret(key='hf_token')
+                    token_name="token1", token=ApoloSecret(key="hf_token")
                 ),
             ),
             tokenizer_hf_name="test_tokenizer",
@@ -309,9 +315,7 @@ async def test_values_llm_generation_cpu_apolo_secret(
 
 async def test_values_llm_generation_gpu_4x(setup_clients, mock_get_preset_gpu):
     apolo_client = setup_clients
-    input_processor = VLLMInferenceInputsProcessor(
-        client=apolo_client
-    )
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
 
     helm_params = await input_processor.gen_extra_values(
         input_=VLLMInferenceInputs(
@@ -322,8 +326,7 @@ async def test_values_llm_generation_gpu_4x(setup_clients, mock_get_preset_gpu):
                 name="test",
                 visibility="public",
                 hf_token=HuggingFaceToken(
-                    token_name="token1",
-                    token=ApoloSecret(key='hf_token')
+                    token_name="token1", token=ApoloSecret(key="hf_token")
                 ),
             ),
             server_extra_args=["--foo"],
@@ -340,9 +343,7 @@ async def test_values_llm_generation_gpu_4x(setup_clients, mock_get_preset_gpu):
 
 async def test_values_llm_generation_gpu_8x(setup_clients, mock_get_preset_gpu):
     apolo_client = setup_clients
-    input_processor = VLLMInferenceInputsProcessor(
-        client=apolo_client
-    )
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
 
     helm_params = await input_processor.gen_extra_values(
         input_=VLLMInferenceInputs(
@@ -353,8 +354,7 @@ async def test_values_llm_generation_gpu_8x(setup_clients, mock_get_preset_gpu):
                 name="test",
                 visibility="public",
                 hf_token=HuggingFaceToken(
-                    token_name="token1",
-                    token=ApoloSecret(key='hf_token')
+                    token_name="token1", token=ApoloSecret(key="hf_token")
                 ),
             ),
             server_extra_args=["--bar"],
@@ -372,9 +372,7 @@ async def test_values_llm_generation_gpu_8x(setup_clients, mock_get_preset_gpu):
 
 async def test_values_llm_generation_gpu_8x_pps(setup_clients, mock_get_preset_gpu):
     apolo_client = setup_clients
-    input_processor = VLLMInferenceInputsProcessor(
-        client=apolo_client
-    )
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
 
     helm_params = await input_processor.gen_extra_values(
         input_=VLLMInferenceInputs(
@@ -385,8 +383,7 @@ async def test_values_llm_generation_gpu_8x_pps(setup_clients, mock_get_preset_g
                 name="test",
                 visibility="public",
                 hf_token=HuggingFaceToken(
-                    token_name="token1",
-                    token=ApoloSecret(key='hf_token')
+                    token_name="token1", token=ApoloSecret(key="hf_token")
                 ),
             ),
             server_extra_args=["--bar", "--pipeline-parallel-size=8"],
@@ -405,9 +402,7 @@ async def test_values_llm_generation_gpu_8x_pps_and_tps(
     mock_get_preset_gpu,
 ):
     apolo_client = setup_clients
-    input_processor = VLLMInferenceInputsProcessor(
-        client=apolo_client
-    )
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
 
     helm_params = await input_processor.gen_extra_values(
         input_=VLLMInferenceInputs(
@@ -418,8 +413,7 @@ async def test_values_llm_generation_gpu_8x_pps_and_tps(
                 name="test",
                 visibility="public",
                 hf_token=HuggingFaceToken(
-                    token_name="token1",
-                    token=ApoloSecret(key='hf_token')
+                    token_name="token1", token=ApoloSecret(key="hf_token")
                 ),
             ),
             server_extra_args=[
@@ -446,9 +440,7 @@ async def test_values_llm_generation__storage_integrated(
 ):
     hf_token = "test3"
     apolo_client = setup_clients
-    input_processor = VLLMInferenceInputsProcessor(
-        client=apolo_client
-    )
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
 
     helm_params = await input_processor.gen_extra_values(
         input_=VLLMInferenceInputs(
@@ -463,13 +455,12 @@ async def test_values_llm_generation__storage_integrated(
                 name="test",
                 visibility="public",
                 hf_token=HuggingFaceToken(
-                    token_name="token1",
-                    token=ApoloSecret(key=hf_token)
+                    token_name="token1", token=ApoloSecret(key=hf_token)
                 ),
                 files_path=ApoloFilesPath(
                     path="storage://some-cluster/some-org/some-proj/some-folder"
                 ),
-            )
+            ),
         ),
         apolo_client=apolo_client,
         app_type=AppType.LLMInference,
@@ -479,110 +470,115 @@ async def test_values_llm_generation__storage_integrated(
         app_id=APP_ID,
     )
 
-    assert helm_params == {
-        "serverExtraArgs": [],
-        "model": {"modelHFName": "test", "tokenizerHFName": ""},
-        "llm": {"modelHFName": "test", "tokenizerHFName": ""},
-        "env": {
-            "HUGGING_FACE_HUB_TOKEN": {
-                "valueFrom": {"secretKeyRef": {"name": "apps-secrets", "key": hf_token}}
-            }
-        },
-        "preset_name": "gpu-small",
-        "resources": {
-            "requests": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
-            "limits": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
-        },
-        "tolerations": [
-            {
-                "effect": "NoSchedule",
-                "key": "platform.neuromation.io/job",
-                "operator": "Exists",
-            },
-            {
-                "effect": "NoExecute",
-                "key": "node.kubernetes.io/not-ready",
-                "operator": "Exists",
-                "tolerationSeconds": 300,
-            },
-            {
-                "effect": "NoExecute",
-                "key": "node.kubernetes.io/unreachable",
-                "operator": "Exists",
-                "tolerationSeconds": 300,
-            },
-            {"effect": "NoSchedule", "key": "nvidia.com/gpu", "operator": "Exists"},
-        ],
-        "affinity": {
-            "nodeAffinity": {
-                "requiredDuringSchedulingIgnoredDuringExecution": {
-                    "nodeSelectorTerms": [
-                        {
-                            "matchExpressions": [
-                                {
-                                    "key": "platform.neuromation.io/nodepool",
-                                    "operator": "In",
-                                    "values": ["gpu_pool"],
-                                }
-                            ]
-                        }
-                    ]
+    assert (
+        helm_params
+        == {
+            "serverExtraArgs": [],
+            "model": {"modelHFName": "test", "tokenizerHFName": ""},
+            "llm": {"modelHFName": "test", "tokenizerHFName": ""},
+            "env": {
+                "HUGGING_FACE_HUB_TOKEN": {
+                    "valueFrom": {
+                        "secretKeyRef": {"name": "apps-secrets", "key": hf_token}
+                    }
                 }
-            }
-        },
-        "ingress": {
-            "enabled": True,
-            "grpc": {"enabled": False},
-            "annotations": {
-                "traefik.ingress.kubernetes.io/router.middlewares": (
-                    "platform-platform-control-plane-ingress-auth@kubernetescrd"
-                )
             },
-            "className": "traefik",
-            "hosts": [
+            "preset_name": "gpu-small",
+            "resources": {
+                "requests": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+                "limits": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+            },
+            "tolerations": [
                 {
-                    "host": f"{AppType.LLMInference.value}--"
-                    f"{APP_ID}.apps.some.org.neu.ro",
-                    "paths": [{"path": "/", "pathType": "Prefix", "portName": "http"}],
-                }
+                    "effect": "NoSchedule",
+                    "key": "platform.neuromation.io/job",
+                    "operator": "Exists",
+                },
+                {
+                    "effect": "NoExecute",
+                    "key": "node.kubernetes.io/not-ready",
+                    "operator": "Exists",
+                    "tolerationSeconds": 300,
+                },
+                {
+                    "effect": "NoExecute",
+                    "key": "node.kubernetes.io/unreachable",
+                    "operator": "Exists",
+                    "tolerationSeconds": 300,
+                },
+                {"effect": "NoSchedule", "key": "nvidia.com/gpu", "operator": "Exists"},
             ],
-        },
-        "podAnnotations": {
-            APOLO_STORAGE_LABEL: '[{"storage_uri": "storage://some-cluster/some-org/some-proj/some-folder", "mount_path": "/root/.cache/huggingface", "mount_mode": "rw"}]'  # noqa: E501
-        },
-        "podExtraLabels": {
-            APOLO_STORAGE_LABEL: "true",
-            APOLO_ORG_LABEL: "test-org",
-            APOLO_PROJECT_LABEL: "test-project",
-        },
-        "modelDownload": {"hookEnabled": True, "initEnabled": False},
-        "cache": {"enabled": False},
-        "nvidiaImage": {
-            "pullPolicy": "IfNotPresent",
-            "repository": "vllm/vllm-openai",
-            "tag": "v0.21.0"
-        },
-        "gpuProvider": "nvidia",
-        "podLabels": {
-            "platform.apolo.us/component": "app",
-            "platform.apolo.us/preset": "gpu-small",
-        },
-        "apolo_app_id": APP_ID,
-        "envNvidia": {
-            "PATH": "/usr/local/cuda/bin:/usr/local/sbin:"
-            "/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$(PATH)",
-            "LD_LIBRARY_PATH": "/usr/local/cuda/lib64:"
-            "/usr/local/nvidia/lib64:$(LD_LIBRARY_PATH)",
-        },
-    }
+            "affinity": {
+                "nodeAffinity": {
+                    "requiredDuringSchedulingIgnoredDuringExecution": {
+                        "nodeSelectorTerms": [
+                            {
+                                "matchExpressions": [
+                                    {
+                                        "key": "platform.neuromation.io/nodepool",
+                                        "operator": "In",
+                                        "values": ["gpu_pool"],
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            "ingress": {
+                "enabled": True,
+                "grpc": {"enabled": False},
+                "annotations": {
+                    "traefik.ingress.kubernetes.io/router.middlewares": (
+                        "platform-platform-control-plane-ingress-auth@kubernetescrd"
+                    )
+                },
+                "className": "traefik",
+                "hosts": [
+                    {
+                        "host": f"{AppType.LLMInference.value}--"
+                        f"{APP_ID}.apps.some.org.neu.ro",
+                        "paths": [
+                            {"path": "/", "pathType": "Prefix", "portName": "http"}
+                        ],
+                    }
+                ],
+            },
+            "podAnnotations": {
+                APOLO_STORAGE_LABEL: '[{"storage_uri": "storage://some-cluster/some-org/some-proj/some-folder", "mount_path": "/root/.cache/huggingface", "mount_mode": "rw"}]'  # noqa: E501
+            },
+            "podExtraLabels": {
+                APOLO_STORAGE_LABEL: "true",
+                APOLO_ORG_LABEL: "test-org",
+                APOLO_PROJECT_LABEL: "test-project",
+            },
+            "modelDownload": {"hookEnabled": True, "initEnabled": False},
+            "cache": {"enabled": False},
+            "nvidiaImage": {
+                "pullPolicy": "IfNotPresent",
+                "repository": "vllm/vllm-openai",
+                "tag": "v0.21.0",
+            },
+            "gpuProvider": "nvidia",
+            "podLabels": {
+                "platform.apolo.us/component": "app",
+                "platform.apolo.us/preset": "gpu-small",
+            },
+            "apolo_app_id": APP_ID,
+            "envNvidia": {
+                "PATH": "/usr/local/cuda/bin:/usr/local/sbin:"
+                "/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$(PATH)",
+                "LD_LIBRARY_PATH": "/usr/local/cuda/lib64:"
+                "/usr/local/nvidia/lib64:$(LD_LIBRARY_PATH)",
+            },
+        }
+    )
 
 
 async def test_values_llm_generation__autoscaling(setup_clients, mock_get_preset_gpu):
     hf_token = "test3"
     apolo_client = setup_clients
-    input_processor = VLLMInferenceInputsProcessor(
-        client=apolo_client
-    )
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
 
     helm_params = await input_processor.gen_extra_values(
         input_=VLLMInferenceInputs(
@@ -597,8 +593,7 @@ async def test_values_llm_generation__autoscaling(setup_clients, mock_get_preset
                 name="test",
                 visibility="public",
                 hf_token=HuggingFaceToken(
-                    token_name="token1",
-                    token=ApoloSecret(key=hf_token)
+                    token_name="token1", token=ApoloSecret(key=hf_token)
                 ),
                 files_path=ApoloFilesPath(
                     path="storage://some-cluster/some-org/some-proj/some-folder"
@@ -720,7 +715,8 @@ async def test_values_llm_generation_with_dynamic_model_no_cache(
 async def test_values_llm_generation_with_cached_dynamic_model(
     setup_clients, mock_get_preset_gpu
 ):
-    """Test values generation with HuggingFaceModelDetailDynamic when model is already cached.
+    """Test values generation with HuggingFaceModelDetailDynamic
+    when model is already cached.
 
     When cached=True and files_path is set, no download should happen - the model
     files are already on the storage mount.
@@ -796,6 +792,7 @@ async def test_values_llm_generation_with_hf_model_no_cache_no_token(
     # No storage integration labels without cache
     assert helm_params["podExtraLabels"] == {}
 
+
 async def test_values_llm_generation_with_hf_model_no_cache_token(
     setup_clients, mock_get_preset_gpu
 ):
@@ -808,7 +805,7 @@ async def test_values_llm_generation_with_hf_model_no_cache_token(
             token_name="mytoken",
             token=ApoloSecret(
                 key="sec",
-            )
+            ),
         ),
     )
 
@@ -835,3 +832,130 @@ async def test_values_llm_generation_with_hf_model_no_cache_token(
 
     # No storage integration labels without cache
     assert helm_params["podExtraLabels"] == {}
+
+
+async def test_values_llm_generation_with_hf_model_cache_token(
+    setup_clients, mock_get_preset_gpu
+):
+    apolo_client = setup_clients
+    input_processor = VLLMInferenceInputsProcessor(client=apolo_client)
+
+    model = HuggingFaceModel(
+        model_hf_name="meta-llama/Llama-2-7b-hf",
+        hf_token=HuggingFaceToken(
+            token_name="mytoken",
+            token=ApoloSecret(
+                key="sec",
+            ),
+        ),
+        hf_cache=HuggingFaceCache(
+            files_path=ApoloFilesPath(
+                path="storage://some-cluster/some-org/some-proj/tmp",
+            ),
+        ),
+    )
+
+    helm_params = await input_processor.gen_extra_values(
+        input_=VLLMInferenceInputs(
+            preset=Preset(name="gpu-small"),
+            ingress_http=IngressHttp(),
+            hugging_face_model=model,
+        ),
+        app_type=AppType.LLMInference,
+        app_name="llm",
+        namespace=DEFAULT_NAMESPACE,
+        app_secrets_name=APP_SECRETS_NAME,
+        app_id=APP_ID,
+    )
+
+    assert helm_params == {
+        "serverExtraArgs": [],
+        "model": {"modelHFName": "meta-llama/Llama-2-7b-hf", "tokenizerHFName": ""},
+        "llm": {"modelHFName": "meta-llama/Llama-2-7b-hf", "tokenizerHFName": ""},
+        "env": {
+            "HUGGING_FACE_HUB_TOKEN": {
+                "valueFrom": {"secretKeyRef": {"name": "apps-secrets", "key": "sec"}}
+            }
+        },
+        "envNvidia": {
+            "PATH": "/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$(PATH)",  # noqa: E501
+            "LD_LIBRARY_PATH": "/usr/local/cuda/lib64:/usr/local/nvidia/lib64:$(LD_LIBRARY_PATH)",  # noqa: E501
+        },
+        "preset_name": "gpu-small",
+        "resources": {
+            "requests": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+            "limits": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+        },
+        "tolerations": [
+            {
+                "effect": "NoSchedule",
+                "key": "platform.neuromation.io/job",
+                "operator": "Exists",
+            },
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/not-ready",
+                "operator": "Exists",
+                "tolerationSeconds": 300,
+            },
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/unreachable",
+                "operator": "Exists",
+                "tolerationSeconds": 300,
+            },
+            {"effect": "NoSchedule", "key": "nvidia.com/gpu", "operator": "Exists"},
+        ],
+        "affinity": {
+            "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                    "nodeSelectorTerms": [
+                        {
+                            "matchExpressions": [
+                                {
+                                    "key": "platform.neuromation.io/nodepool",
+                                    "operator": "In",
+                                    "values": ["gpu_pool"],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "podLabels": {
+            "platform.apolo.us/component": "app",
+            "platform.apolo.us/preset": "gpu-small",
+        },
+        "ingress": {
+            "enabled": True,
+            "className": "traefik",
+            "hosts": [
+                {
+                    "host": "llm-inference--b1aeaf654526474ba22480d00e5b0109.apps.some.org.neu.ro",  # noqa: E501
+                    "paths": [{"path": "/", "pathType": "Prefix", "portName": "http"}],
+                }
+            ],
+            "annotations": {
+                "traefik.ingress.kubernetes.io/router.middlewares": "platform-platform-control-plane-ingress-auth@kubernetescrd"  # noqa: E501
+            },
+            "grpc": {"enabled": False},
+        },
+        "apolo_app_id": "b1aeaf654526474ba22480d00e5b0109",
+        "podAnnotations": {
+            "platform.apolo.us/inject-storage": '[{"storage_uri": "storage://some-cluster/some-org/some-proj/tmp", "mount_path": "/root/.cache/huggingface", "mount_mode": "rw"}]'  # noqa: E501
+        },
+        "podExtraLabels": {
+            "platform.apolo.us/inject-storage": "true",
+            "platform.apolo.us/org": "test-org",
+            "platform.apolo.us/project": "test-project",
+        },
+        "modelDownload": {"hookEnabled": False, "initEnabled": True},
+        "cache": {"enabled": False},
+        "gpuProvider": "nvidia",
+        "nvidiaImage": {
+            "repository": "vllm/vllm-openai",
+            "tag": "v0.21.0",
+            "pullPolicy": "IfNotPresent",
+        },
+    }

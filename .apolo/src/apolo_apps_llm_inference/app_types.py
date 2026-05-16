@@ -2,28 +2,30 @@ import typing
 from enum import Enum
 from typing import Literal
 
+from pydantic import Field, model_validator
+
 from apolo_app_types import LLMModelConfig
 from apolo_app_types.protocols.common import (
     ApoloSecret,
     AppInputs,
     AppOutputs,
-    SchemaExtraMetadata,
-    ServiceAPI,
-    Preset,
-    SchemaMetaType,
-    IngressHttp,
-    Env,
     ContainerImage,
+    Env,
+    IngressHttp,
     OpenAICompatChatAPI,
     OpenAICompatEmbeddingsAPI,
-
+    Preset,
+    SchemaExtraMetadata,
+    SchemaMetaType,
+    ServiceAPI,
 )
 from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
 from apolo_app_types.protocols.common.containers import ContainerImagePullPolicy
-from apolo_app_types.protocols.common.hugging_face import HF_TOKEN_SCHEMA_EXTRA, HuggingFaceModelDetailDynamic, HuggingFaceModel
-from pydantic import Field
-from pydantic import model_validator
-
+from apolo_app_types.protocols.common.hugging_face import (
+    HF_TOKEN_SCHEMA_EXTRA,
+    HuggingFaceModel,
+    HuggingFaceModelDetailDynamic,
+)
 
 
 class VLLMInferenceInputs(AppInputs):

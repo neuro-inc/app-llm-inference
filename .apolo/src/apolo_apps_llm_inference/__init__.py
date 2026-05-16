@@ -1,22 +1,22 @@
+from apolo_apps_llm_inference.app_types import (
+    DeepSeekInputs,
+    GptOssInputs,
+    Kimi2Inputs,
+    LLama4Inputs,
+    MistralInputs,
+    VLLMInferenceInputs,
+    VLLMInferenceOutputs,
+)
 from apolo_apps_llm_inference.inputs_processor import (
-    VLLMInferenceInputsProcessor,
-    GPTOSSInferenceValueProcessor,
     DeepSeekInferenceValueProcessor,
+    GPTOSSInferenceValueProcessor,
+    Kimi2InferenceValueProcessor,
     Llama4InferenceValueProcessor,
     MistralInferenceValueProcessor,
-    Kimi2InferenceValueProcessor,
+    VLLMInferenceInputsProcessor,
 )
 from apolo_apps_llm_inference.outputs_processor import (
     VLLMInferenceOutputsProcessor,
-)
-from apolo_apps_llm_inference.app_types import (
-    VLLMInferenceInputs,
-    VLLMInferenceOutputs,
-    MistralInputs,
-    GptOssInputs,
-    DeepSeekInputs,
-    LLama4Inputs,
-    Kimi2Inputs,
 )
 
 
