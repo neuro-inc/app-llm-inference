@@ -232,12 +232,13 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         input_: VLLMInferenceInputs,
         gpu_provider: str,
     ) -> dict[str, t.Any]:
+        fallback_tag = VLLMInferenceInputs.model_fields["docker_image_config"].default.tag
         match gpu_provider:
             case "amd":
                 return {
                     "amdImage": {
                         "repository": input_.docker_image_config.repository,
-                        "tag": input_.docker_image_config.tag,
+                        "tag": input_.docker_image_config.tag or fallback_tag,
                         "pullPolicy": input_.docker_image_config.pull_policy.value,
                     },
                 }
@@ -245,7 +246,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                 return {
                     "nvidiaImage": {
                         "repository": input_.docker_image_config.repository,
-                        "tag": input_.docker_image_config.tag,
+                        "tag": input_.docker_image_config.tag or fallback_tag,
                         "pullPolicy": input_.docker_image_config.pull_policy.value,
                     },
                 }
@@ -253,7 +254,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                 return {
                     "image": {
                         "repository": input_.docker_image_config.repository,
-                        "tag": input_.docker_image_config.tag,
+                        "tag": input_.docker_image_config.tag or fallback_tag,
                         "pullPolicy": input_.docker_image_config.pull_policy.value,
                     },
                 }
