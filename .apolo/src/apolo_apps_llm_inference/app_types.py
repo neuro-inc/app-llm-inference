@@ -2,30 +2,30 @@ import typing
 from enum import Enum
 from typing import Literal
 
-from apolo_app_types import LLMModelConfig, ContainerImage
+from pydantic import Field, model_validator
+
+from apolo_app_types import LLMModelConfig
 from apolo_app_types.protocols.common import (
     ApoloSecret,
     AppInputs,
-    SchemaExtraMetadata,
-    ServiceAPI
-)
-from apolo_app_types.protocols.common import (
     AppOutputs,
-    HuggingFaceModel,
+    ContainerImage,
+    Env,
     IngressHttp,
-    Preset,
-    SchemaMetaType,
-)
-from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
-from apolo_app_types.protocols.common.hugging_face import HF_TOKEN_SCHEMA_EXTRA, HuggingFaceModelDetailDynamic
-from apolo_app_types.protocols.common.k8s import Env
-from apolo_app_types.protocols.common.openai_compat import (
     OpenAICompatChatAPI,
     OpenAICompatEmbeddingsAPI,
+    Preset,
+    SchemaExtraMetadata,
+    SchemaMetaType,
+    ServiceAPI,
 )
-from pydantic import Field
-from pydantic import model_validator
-
+from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
+from apolo_app_types.protocols.common.containers import ContainerImagePullPolicy
+from apolo_app_types.protocols.common.hugging_face import (
+    HF_TOKEN_SCHEMA_EXTRA,
+    HuggingFaceModel,
+    HuggingFaceModelDetailDynamic,
+)
 
 
 class VLLMInferenceInputs(AppInputs):
@@ -38,7 +38,7 @@ class VLLMInferenceInputs(AppInputs):
             " over the internet using HTTPS.",
         ).as_json_schema_extra(),
     )
-    hugging_face_model: HuggingFaceModelDetailDynamic
+    hugging_face_model: HuggingFaceModel | HuggingFaceModelDetailDynamic
 
     tokenizer_hf_name: str = Field(  # noqa: N815
         "",
@@ -78,10 +78,14 @@ class VLLMInferenceInputs(AppInputs):
             is_advanced_field=True,
         ).as_json_schema_extra(),
     )
-    docker_image_config: ContainerImage | None = Field(
-        default=None,
+    docker_image_config: ContainerImage = Field(
+        default=ContainerImage(
+            repository="vllm/vllm-openai",
+            tag="v0.21.0",
+            pullPolicy=ContainerImagePullPolicy.IF_NOT_PRESENT,
+        ),
         json_schema_extra=SchemaExtraMetadata(
-            title="Docker Image Config",
+            title="vLLM Server Image",
             description="Override container image for vLLM.",
             is_advanced_field=True,
         ).as_json_schema_extra(),
@@ -90,7 +94,12 @@ class VLLMInferenceInputs(AppInputs):
     @model_validator(mode="after")
     def check_autoscaling_requires_cache(self) -> "VLLMInferenceInputs":
         if self.http_autoscaling:
-            if self.hugging_face_model.files_path is None:
+            model = self.hugging_face_model
+            if isinstance(model, HuggingFaceModelDetailDynamic):
+                files_path = model.files_path
+            else:
+                files_path = model.hf_cache.files_path if model.hf_cache else None
+            if files_path is None:
                 msg = "If HTTP autoscaling is enabled, cache_config must also be set."
                 raise ValueError(msg)
         return self

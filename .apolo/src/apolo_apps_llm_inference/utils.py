@@ -1,3 +1,5 @@
+import typing as t
+
 import httpx
 
 
@@ -10,7 +12,8 @@ async def fetch_max_model_len_from_server(
     timeout_s: float = 5.0,
 ) -> int | None:
     """
-    Query the internal vLLM server /v1/models and return max_model_len for the expected model.
+    Query the internal vLLM server /v1/models and
+    return max_model_len for the expected model.
     Tries to match by id, then by root field.
     """
     url = f"http://{host}:{port}/v1/models"
@@ -22,7 +25,7 @@ async def fetch_max_model_len_from_server(
         r.raise_for_status()
         payload = r.json()
 
-    models: list[dict] = payload.get("data", [])
+    models: list[dict[str, t.Any]] = payload.get("data", [])
     # Prefer exact id match, then root match, else first model
     candidates = (
         [m for m in models if m.get("id") == expected_model_id]
@@ -38,7 +41,7 @@ async def fetch_max_model_len_from_server(
     return int(val) if isinstance(val, int) else None
 
 
-def parse_max_model_len(raw) -> int:
+def parse_max_model_len(raw: t.Any) -> int:  # noqa: C901
     """
     Parse values like:
       131072      -> 131072
@@ -50,29 +53,38 @@ def parse_max_model_len(raw) -> int:
       "2G"        -> 2147483648
     Only the last character is checked for unit: k/m/g (decimal) or K/M/G (binary).
     """
-    if isinstance(raw, (int, float)):
+    if isinstance(raw, int | float):
         return int(raw)
 
     s = str(raw).strip()
     if not s:
-        raise ValueError("empty max model len")
+        e = "empty max model len"
+        raise ValueError(e)
 
     last = s[-1]
-    if last.isdigit():                   # no unit, pure number
+    if last.isdigit():  # no unit, pure number
         return int(float(s))
 
     num_str = s[:-1].strip()
     if not num_str:
-        raise ValueError(f"invalid number: {raw!r}")
+        e = f"invalid number: {raw!r}"
+        raise ValueError(e)
     num = float(num_str)
 
-    if last == "k": mult = 10**3
-    elif last == "m": mult = 10**6
-    elif last == "g": mult = 10**9
-    elif last == "K": mult = 1 << 10
-    elif last == "M": mult = 1 << 20
-    elif last == "G": mult = 1 << 30
+    if last == "k":
+        mult = 10**3
+    elif last == "m":
+        mult = 10**6
+    elif last == "g":
+        mult = 10**9
+    elif last == "K":
+        mult = 1 << 10
+    elif last == "M":
+        mult = 1 << 20
+    elif last == "G":
+        mult = 1 << 30
     else:
-        raise ValueError(f"unknown unit: {last!r}")
+        e = f"invalid unit: {last!r}"
+        raise ValueError(e)
 
     return int(num * mult)

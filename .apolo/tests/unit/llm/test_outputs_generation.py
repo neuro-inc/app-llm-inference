@@ -1,5 +1,4 @@
 import pytest
-
 from apolo_apps_llm_inference.outputs_processor import VLLMInferenceOutputsProcessor
 
 
@@ -32,8 +31,9 @@ async def test_llm(setup_clients, mock_kubernetes_client, app_instance_id):
     assert res["embeddings_api"]["external_url"]["host"] == "example.com"
 
 
+@pytest.mark.usefixtures("_mock_fetch_models")
 async def test_llm_without_server_args(
-    setup_clients, mock_kubernetes_client, app_instance_id, mock_fetch_models
+    setup_clients, mock_kubernetes_client, app_instance_id
 ):
     res = await VLLMInferenceOutputsProcessor().generate_outputs(
         helm_values={
@@ -86,7 +86,7 @@ async def test_llm_with_model_max_lenth(
     assert res["hugging_face_model"] == {
         "model_hf_name": "meta-llama/Llama-3.1-8B-Instruct",
         "hf_token": None,
-        'hf_cache': None,
+        "hf_cache": None,
         "__type__": "HuggingFaceModel",
     }
     assert res["tokenizer_hf_name"] == "meta-llama/Llama-3.1-8B-Instruct"
@@ -101,6 +101,7 @@ async def test_llm_with_model_max_lenth(
         "context_max_tokens": max_model_len,
         "__type__": "LLMModelConfig",
     }
+
 
 async def test_llm_without_model(
     setup_clients, mock_kubernetes_client, app_instance_id

@@ -3,8 +3,9 @@ import typing as t
 from decimal import Decimal
 from typing import NamedTuple
 
+from apolo_sdk import Preset as SDKPreset
+
 from apolo_app_types import HuggingFaceToken
-from apolo_app_types.protocols.common.hugging_face import HuggingFaceModelDetailDynamic
 from apolo_app_types.app_types import AppType
 from apolo_app_types.helm.apps.base import BaseChartValueProcessor
 from apolo_app_types.helm.apps.common import (
@@ -15,34 +16,33 @@ from apolo_app_types.helm.apps.common import (
     get_preset,
 )
 from apolo_app_types.helm.utils.deep_merging import merge_list_of_dicts
-
 from apolo_app_types.protocols.common import (
     ApoloFilesMount,
-    ApoloMountMode,
-    MountPath,
-)
-from apolo_app_types.protocols.common import (
     ApoloFilesPath,
+    ApoloMountMode,
     IngressHttp,
+    MountPath,
     NoAuth,
     Preset,
 )
 from apolo_app_types.protocols.common.autoscaling import AutoscalingKedaHTTP
+from apolo_app_types.protocols.common.hugging_face import (
+    HuggingFaceModelDetailDynamic,
+)
 from apolo_app_types.protocols.common.secrets_ import serialize_optional_secret
 from apolo_app_types.protocols.common.storage import ApoloMountModes
-from apolo_sdk import Preset as SDKPreset
 from apolo_apps_llm_inference.app_types import (
-    VLLMInferenceInputs,
     DeepSeekInputs,
     DeepSeekSize,
+    GptOssInputs,
     GptOssSize,
+    Kimi2Inputs,
+    Kimi2Size,
     LLama4Inputs,
     Llama4Size,
     MistralInputs,
     MistralSize,
-    GptOssInputs,
-    Kimi2Inputs,
-    Kimi2Size,
+    VLLMInferenceInputs,
 )
 
 
@@ -121,8 +121,13 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         return parallel_server_args
 
     def _configure_model(self, input_: VLLMInferenceInputs) -> dict[str, str]:
+        model = input_.hugging_face_model
+        if isinstance(model, HuggingFaceModelDetailDynamic):
+            model_hf_name = model.id
+        else:
+            model_hf_name = model.model_hf_name
         return {
-            "modelHFName": input_.hugging_face_model.id,
+            "modelHFName": model_hf_name,
             "tokenizerHFName": input_.tokenizer_hf_name,
         }
 
@@ -133,8 +138,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         hf_token = input_.hugging_face_model.hf_token
         env_vars = {
             "HUGGING_FACE_HUB_TOKEN": serialize_optional_secret(
-                hf_token.token if hf_token else None,
-                secret_name=app_secrets_name
+                hf_token.token if hf_token else None, secret_name=app_secrets_name
             )
         }
 
@@ -149,9 +153,15 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
         return env_vars
 
-    def _configure_extra_annotations(self, input_: VLLMInferenceInputs) -> dict[str, str]:
+    def _configure_extra_annotations(
+        self, input_: VLLMInferenceInputs
+    ) -> dict[str, str]:
         extra_annotations: dict[str, str] = {}
-        cache_files_path = input_.hugging_face_model.files_path
+        model = input_.hugging_face_model
+        if isinstance(model, HuggingFaceModelDetailDynamic):
+            cache_files_path = model.files_path
+        else:
+            cache_files_path = model.hf_cache.files_path if model.hf_cache else None
         if cache_files_path:
             storage_mount = ApoloFilesMount(
                 storage_uri=cache_files_path,
@@ -165,7 +175,13 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
     def _configure_extra_labels(self, input_: VLLMInferenceInputs) -> dict[str, str]:
         extra_labels: dict[str, str] = {}
-        if input_.hugging_face_model.files_path is not None:
+        model = input_.hugging_face_model
+        if isinstance(model, HuggingFaceModelDetailDynamic):
+            cache_files_path = model.files_path
+        else:
+            cache_files_path = model.hf_cache.files_path if model.hf_cache else None
+
+        if cache_files_path is not None:
             extra_labels.update(
                 **gen_apolo_storage_integration_labels(
                     client=self.client, inject_storage=True
@@ -173,10 +189,26 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
             )
         return extra_labels
 
-    def _configure_model_download(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
+    def _configure_model_download(
+        self, input_: VLLMInferenceInputs
+    ) -> dict[str, t.Any]:
         hf_model = input_.hugging_face_model
         # If model is already cached (cached=True and files_path set),
         # skip download entirely - model files are already on the storage mount
+        download_via_init_values = {
+            "modelDownload": {
+                "hookEnabled": False,
+                "initEnabled": True,
+            },
+            "cache": {
+                "enabled": True,
+            },
+        }
+        if not isinstance(hf_model, HuggingFaceModelDetailDynamic):
+            if hf_model.hf_cache and hf_model.hf_cache.files_path is not None:
+                download_via_init_values["cache"]["enabled"] = False
+                return download_via_init_values
+            return download_via_init_values
         if hf_model.cached and hf_model.files_path is not None:
             return {
                 "modelDownload": {
@@ -199,36 +231,41 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
                 },
             }
         # No cache configured - use init container with emptyDir cache
-        return {
-            "modelDownload": {
-                "hookEnabled": False,
-                "initEnabled": True,
-            },
-            "cache": {
-                "enabled": True,
-            },
-        }
+        return download_via_init_values
 
-    def _configure_image(self, input_: VLLMInferenceInputs) -> dict[str, t.Any]:
-        if input_.docker_image_config:
-            return {
-                "image": {
-                    "repository": input_.docker_image_config.repository,
-                    "tag": input_.docker_image_config.tag,
-                    "pullPolicy": input_.docker_image_config.pull_policy,
-                },
-                "nvidiaImage": {
-                    "repository": input_.docker_image_config.repository,
-                    "tag": input_.docker_image_config.tag,
-                    "pullPolicy": input_.docker_image_config.pull_policy,
-                },
-                "amdImage": {
-                    "repository": input_.docker_image_config.repository,
-                    "tag": input_.docker_image_config.tag,
-                    "pullPolicy": input_.docker_image_config.pull_policy,
-                },
-            }
-        return {}
+    def _configure_image(
+        self,
+        input_: VLLMInferenceInputs,
+        gpu_provider: str,
+    ) -> dict[str, t.Any]:
+        fallback_tag = VLLMInferenceInputs.model_fields[
+            "docker_image_config"
+        ].default.tag
+        match gpu_provider:
+            case "amd":
+                return {
+                    "amdImage": {
+                        "repository": input_.docker_image_config.repository,
+                        "tag": input_.docker_image_config.tag or fallback_tag,
+                        "pullPolicy": input_.docker_image_config.pull_policy.value,
+                    },
+                }
+            case "nvidia":
+                return {
+                    "nvidiaImage": {
+                        "repository": input_.docker_image_config.repository,
+                        "tag": input_.docker_image_config.tag or fallback_tag,
+                        "pullPolicy": input_.docker_image_config.pull_policy.value,
+                    },
+                }
+            case _:
+                return {
+                    "image": {
+                        "repository": input_.docker_image_config.repository,
+                        "tag": input_.docker_image_config.tag or fallback_tag,
+                        "pullPolicy": input_.docker_image_config.pull_policy.value,
+                    },
+                }
 
     async def gen_extra_values(
         self,
@@ -267,7 +304,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
 
         gpu_count = nvidia_gpus + amd_gpus
         if amd_gpus > 0:
-            gpu_provider = "amd"
+            gpu_provider: str = "amd"
         elif nvidia_gpus > 0:
             gpu_provider = "nvidia"
         else:
@@ -279,7 +316,7 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
         parallel_args = self._configure_parallel_args(
             input_.server_extra_args, gpu_count
         )
-        image_config = self._configure_image(input_)
+        image_config = self._configure_image(input_, gpu_provider)
         server_extra_args = [
             *input_.server_extra_args,
             *parallel_args,
@@ -302,12 +339,15 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
             ]
         )
 
+
 class ModelSettings(NamedTuple):
     model_hf_name: str
     vram_min_required_gb: float
 
 
-T = t.TypeVar("T", LLama4Inputs, DeepSeekInputs, MistralInputs, GptOssInputs, Kimi2Inputs)
+T = t.TypeVar(
+    "T", LLama4Inputs, DeepSeekInputs, MistralInputs, GptOssInputs, Kimi2Inputs
+)
 
 
 logger = logging.getLogger(__name__)
@@ -405,8 +445,7 @@ class BaseLLMBundleMixin(BaseChartValueProcessor[T]):
             id=model_settings.model_hf_name,
             visibility="public",
             hf_token=HuggingFaceToken(
-                token_name="llm_bundle_token",
-                token=input_.hf_token
+                token_name="llm_bundle_token", token=input_.hf_token
             ),
             files_path=ApoloFilesPath(path=self._get_storage_path()),
             cached=False,
