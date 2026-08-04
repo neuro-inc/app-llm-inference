@@ -1,3 +1,7 @@
+import base64
+import json
+from unittest.mock import AsyncMock
+
 from apolo_app_types_fixtures.constants import (
     APP_ID,
     APP_SECRETS_NAME,
@@ -19,6 +23,7 @@ from apolo_app_types.helm.apps.llm import KEDA_HTTP_PROXY_SERVICE
 from apolo_app_types.protocols.common import (
     ApoloAuth,
     ApoloFilesPath,
+    ContainerImage,
     IngressHttp,
     Preset,
 )
@@ -26,12 +31,14 @@ from apolo_app_types.protocols.common.autoscaling import (
     AutoscalingKedaHTTP,
     RequestRateConfig,
 )
+from apolo_app_types.protocols.common.containers import DockerConfigModel
 from apolo_app_types.protocols.common.hugging_face import (
     HuggingFaceCache,
     HuggingFaceModel,
     HuggingFaceModelDetailDynamic,
 )
 from apolo_app_types.protocols.common.secrets_ import ApoloSecret
+from apolo_app_types.protocols.github import GithubImageRegistryAuth
 
 
 async def test_values_llm_generation_cpu(setup_clients, mock_get_preset_cpu):
@@ -110,6 +117,76 @@ async def test_values_llm_generation_cpu(setup_clients, mock_get_preset_cpu):
     assert helm_params["env"]["HUGGING_FACE_HUB_TOKEN"] == {
         "valueFrom": {"secretKeyRef": {"name": "apps-secrets", "key": "test3"}}
     }
+
+
+async def test_values_llm_generation_with_image_pull_secret(
+    setup_clients, mock_get_preset_cpu
+):
+    input_processor = VLLMInferenceInputsProcessor(client=setup_clients)
+    dockerconfigjson = "base64-encoded-docker-config"
+
+    helm_params = await input_processor.gen_extra_values(
+        input_=VLLMInferenceInputs(
+            preset=Preset(name="cpu-large"),
+            hugging_face_model=HuggingFaceModelDetailDynamic(
+                id="test",
+                name="test",
+                visibility="public",
+            ),
+            docker_image_config=ContainerImage(
+                repository="registry.example.com/private/vllm",
+                tag="latest",
+                imagepullsecret=DockerConfigModel(filecontents=dockerconfigjson),
+            ),
+        ),
+        app_name="llm",
+        namespace=DEFAULT_NAMESPACE,
+        app_secrets_name=APP_SECRETS_NAME,
+        app_id=APP_ID,
+    )
+
+    assert helm_params["dockerconfigjson"] == dockerconfigjson
+    assert helm_params["image"] == {
+        "pullPolicy": "IfNotPresent",
+        "repository": "registry.example.com/private/vllm",
+        "tag": "latest",
+    }
+
+
+async def test_values_llm_generation_with_github_image_pull_secret(
+    setup_clients, mock_get_preset_cpu
+):
+    input_processor = VLLMInferenceInputsProcessor(client=setup_clients)
+    setup_clients.secrets.get = AsyncMock(return_value=b"github-token\n")
+
+    helm_params = await input_processor.gen_extra_values(
+        input_=VLLMInferenceInputs(
+            preset=Preset(name="cpu-large"),
+            hugging_face_model=HuggingFaceModelDetailDynamic(
+                id="test",
+                name="test",
+                visibility="public",
+            ),
+            docker_image_config=ContainerImage(
+                repository="ghcr.io/example/private-vllm",
+                imagepullsecret=GithubImageRegistryAuth(
+                    username="octocat",
+                    token=ApoloSecret(key="github-registry-token"),
+                ),
+            ),
+        ),
+        app_name="llm",
+        namespace=DEFAULT_NAMESPACE,
+        app_secrets_name=APP_SECRETS_NAME,
+        app_id=APP_ID,
+    )
+
+    dockerconfig = json.loads(
+        base64.b64decode(helm_params["dockerconfigjson"]).decode()
+    )
+    expected_auth = base64.b64encode(b"octocat:github-token").decode()
+    assert dockerconfig == {"auths": {"ghcr.io": {"auth": expected_auth}}}
+    setup_clients.secrets.get.assert_awaited_once_with(key="github-registry-token")
 
 
 async def test_values_llm_generation_gpu(setup_clients, mock_get_preset_gpu):
@@ -217,7 +294,7 @@ async def test_values_llm_generation_gpu(setup_clients, mock_get_preset_gpu):
         "nvidiaImage": {
             "pullPolicy": "IfNotPresent",
             "repository": "vllm/vllm-openai",
-            "tag": "v0.21.0",
+            "tag": "v0.26.0",
         },
         "podLabels": {
             "platform.apolo.us/component": "app",
@@ -470,109 +547,102 @@ async def test_values_llm_generation__storage_integrated(
         app_id=APP_ID,
     )
 
-    assert (
-        helm_params
-        == {
-            "serverExtraArgs": [],
-            "model": {"modelHFName": "test", "tokenizerHFName": ""},
-            "llm": {"modelHFName": "test", "tokenizerHFName": ""},
-            "env": {
-                "HUGGING_FACE_HUB_TOKEN": {
-                    "valueFrom": {
-                        "secretKeyRef": {"name": "apps-secrets", "key": hf_token}
-                    }
+    assert helm_params == {
+        "serverExtraArgs": [],
+        "model": {"modelHFName": "test", "tokenizerHFName": ""},
+        "llm": {"modelHFName": "test", "tokenizerHFName": ""},
+        "env": {
+            "HUGGING_FACE_HUB_TOKEN": {
+                "valueFrom": {"secretKeyRef": {"name": "apps-secrets", "key": hf_token}}
+            }
+        },
+        "preset_name": "gpu-small",
+        "resources": {
+            "requests": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+            "limits": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+        },
+        "tolerations": [
+            {
+                "effect": "NoSchedule",
+                "key": "platform.neuromation.io/job",
+                "operator": "Exists",
+            },
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/not-ready",
+                "operator": "Exists",
+                "tolerationSeconds": 300,
+            },
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/unreachable",
+                "operator": "Exists",
+                "tolerationSeconds": 300,
+            },
+            {"effect": "NoSchedule", "key": "nvidia.com/gpu", "operator": "Exists"},
+        ],
+        "affinity": {
+            "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                    "nodeSelectorTerms": [
+                        {
+                            "matchExpressions": [
+                                {
+                                    "key": "platform.neuromation.io/nodepool",
+                                    "operator": "In",
+                                    "values": ["gpu_pool"],
+                                }
+                            ]
+                        }
+                    ]
                 }
+            }
+        },
+        "ingress": {
+            "enabled": True,
+            "grpc": {"enabled": False},
+            "annotations": {
+                "traefik.ingress.kubernetes.io/router.middlewares": (
+                    "platform-platform-control-plane-ingress-auth@kubernetescrd"
+                )
             },
-            "preset_name": "gpu-small",
-            "resources": {
-                "requests": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
-                "limits": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
-            },
-            "tolerations": [
+            "className": "traefik",
+            "hosts": [
                 {
-                    "effect": "NoSchedule",
-                    "key": "platform.neuromation.io/job",
-                    "operator": "Exists",
-                },
-                {
-                    "effect": "NoExecute",
-                    "key": "node.kubernetes.io/not-ready",
-                    "operator": "Exists",
-                    "tolerationSeconds": 300,
-                },
-                {
-                    "effect": "NoExecute",
-                    "key": "node.kubernetes.io/unreachable",
-                    "operator": "Exists",
-                    "tolerationSeconds": 300,
-                },
-                {"effect": "NoSchedule", "key": "nvidia.com/gpu", "operator": "Exists"},
+                    "host": f"{AppType.LLMInference.value}--"
+                    f"{APP_ID}.apps.some.org.neu.ro",
+                    "paths": [{"path": "/", "pathType": "Prefix", "portName": "http"}],
+                }
             ],
-            "affinity": {
-                "nodeAffinity": {
-                    "requiredDuringSchedulingIgnoredDuringExecution": {
-                        "nodeSelectorTerms": [
-                            {
-                                "matchExpressions": [
-                                    {
-                                        "key": "platform.neuromation.io/nodepool",
-                                        "operator": "In",
-                                        "values": ["gpu_pool"],
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            },
-            "ingress": {
-                "enabled": True,
-                "grpc": {"enabled": False},
-                "annotations": {
-                    "traefik.ingress.kubernetes.io/router.middlewares": (
-                        "platform-platform-control-plane-ingress-auth@kubernetescrd"
-                    )
-                },
-                "className": "traefik",
-                "hosts": [
-                    {
-                        "host": f"{AppType.LLMInference.value}--"
-                        f"{APP_ID}.apps.some.org.neu.ro",
-                        "paths": [
-                            {"path": "/", "pathType": "Prefix", "portName": "http"}
-                        ],
-                    }
-                ],
-            },
-            "podAnnotations": {
-                APOLO_STORAGE_LABEL: '[{"storage_uri": "storage://some-cluster/some-org/some-proj/some-folder", "mount_path": "/root/.cache/huggingface", "mount_mode": "rw"}]'  # noqa: E501
-            },
-            "podExtraLabels": {
-                APOLO_STORAGE_LABEL: "true",
-                APOLO_ORG_LABEL: "test-org",
-                APOLO_PROJECT_LABEL: "test-project",
-            },
-            "modelDownload": {"hookEnabled": True, "initEnabled": False},
-            "cache": {"enabled": False},
-            "nvidiaImage": {
-                "pullPolicy": "IfNotPresent",
-                "repository": "vllm/vllm-openai",
-                "tag": "v0.21.0",
-            },
-            "gpuProvider": "nvidia",
-            "podLabels": {
-                "platform.apolo.us/component": "app",
-                "platform.apolo.us/preset": "gpu-small",
-            },
-            "apolo_app_id": APP_ID,
-            "envNvidia": {
-                "PATH": "/usr/local/cuda/bin:/usr/local/sbin:"
-                "/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$(PATH)",
-                "LD_LIBRARY_PATH": "/usr/local/cuda/lib64:"
-                "/usr/local/nvidia/lib64:$(LD_LIBRARY_PATH)",
-            },
-        }
-    )
+        },
+        "podAnnotations": {
+            APOLO_STORAGE_LABEL: '[{"storage_uri": "storage://some-cluster/some-org/some-proj/some-folder", "mount_path": "/root/.cache/huggingface", "mount_mode": "rw"}]'  # noqa: E501
+        },
+        "podExtraLabels": {
+            APOLO_STORAGE_LABEL: "true",
+            APOLO_ORG_LABEL: "test-org",
+            APOLO_PROJECT_LABEL: "test-project",
+        },
+        "modelDownload": {"hookEnabled": True, "initEnabled": False},
+        "cache": {"enabled": False},
+        "nvidiaImage": {
+            "pullPolicy": "IfNotPresent",
+            "repository": "vllm/vllm-openai",
+            "tag": "v0.26.0",
+        },
+        "gpuProvider": "nvidia",
+        "podLabels": {
+            "platform.apolo.us/component": "app",
+            "platform.apolo.us/preset": "gpu-small",
+        },
+        "apolo_app_id": APP_ID,
+        "envNvidia": {
+            "PATH": "/usr/local/cuda/bin:/usr/local/sbin:"
+            "/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$(PATH)",
+            "LD_LIBRARY_PATH": "/usr/local/cuda/lib64:"
+            "/usr/local/nvidia/lib64:$(LD_LIBRARY_PATH)",
+        },
+    }
 
 
 async def test_values_llm_generation__autoscaling(setup_clients, mock_get_preset_gpu):
@@ -955,7 +1025,7 @@ async def test_values_llm_generation_with_hf_model_cache_token(
         "gpuProvider": "nvidia",
         "nvidiaImage": {
             "repository": "vllm/vllm-openai",
-            "tag": "v0.21.0",
+            "tag": "v0.26.0",
             "pullPolicy": "IfNotPresent",
         },
     }

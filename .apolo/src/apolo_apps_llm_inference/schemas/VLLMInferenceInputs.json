@@ -41,7 +41,7 @@
       "x-is-configurable": true,
       "x-meta-type": "inline",
       "x-title": "Apolo Files Path",
-      "x-type": "ApoloFilesFile"
+      "x-type": "ApoloFilesPath"
     },
     "ApoloSecret": {
       "properties": {
@@ -169,21 +169,25 @@
           "x-meta-type": "inline",
           "x-title": "Container Image Tag"
         },
-        "dockerconfigjson": {
+        "imagepullsecret": {
           "anyOf": [
             {
               "$ref": "#/$defs/DockerConfigModel"
+            },
+            {
+              "$ref": "#/$defs/GithubImageRegistryAuth"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "x-description": "ImagePullSecrets for DockerHub",
+          "title": "Imagepullsecret",
+          "x-description": "Credentials used to pull the container image from a private registry: either a Docker config (e.g. from the DockerHub app) or a GitHub Container Registry auth (from the GitHub app).",
           "x-is-advanced-field": false,
           "x-is-configurable": true,
           "x-meta-type": "integration",
-          "x-title": "ImagePullSecrets for DockerHub"
+          "x-title": "Image Pull Secret"
         },
         "pull_policy": {
           "$ref": "#/$defs/ContainerImagePullPolicy",
@@ -312,6 +316,46 @@
       "x-meta-type": "inline",
       "x-title": "Env",
       "x-type": "Env"
+    },
+    "GithubImageRegistryAuth": {
+      "properties": {
+        "username": {
+          "title": "Username",
+          "type": "string",
+          "x-description": "GitHub account username the personal access token belongs to.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Username"
+        },
+        "token": {
+          "$ref": "#/$defs/ApoloSecret",
+          "x-description": "GitHub personal access token (classic). For pulling container images it needs the read:packages scope, see https://docs.github.com/en/packages/learn-github-packages/about-permissions-for-github-packages#about-scopes-and-permissions-for-package-registries",
+          "x-title": "GitHub Personal Access Token"
+        },
+        "registry_url": {
+          "default": "ghcr.io",
+          "title": "Registry Url",
+          "type": "string",
+          "x-description": "Container registry host. Use ghcr.io for github.com or containers.HOSTNAME for GitHub Enterprise Server.",
+          "x-is-advanced-field": false,
+          "x-is-configurable": true,
+          "x-meta-type": "inline",
+          "x-title": "Registry Host"
+        }
+      },
+      "required": [
+        "username",
+        "token"
+      ],
+      "title": "GithubImageRegistryAuth",
+      "type": "object",
+      "x-description": "Credentials for pulling container images from the GitHub Container Registry (ghcr.io or a GitHub Enterprise Server host).",
+      "x-is-advanced-field": false,
+      "x-is-configurable": true,
+      "x-meta-type": "integration",
+      "x-title": "GitHub Container Registry Auth",
+      "x-type": "GithubImageRegistryAuth"
     },
     "HuggingFaceCache": {
       "properties": {
@@ -737,8 +781,9 @@
       "$ref": "#/$defs/ContainerImage",
       "default": {
         "repository": "vllm/vllm-openai",
-        "tag": "v0.21.0",
+        "tag": "v0.26.0",
         "dockerconfigjson": null,
+        "imagepullsecret": null,
         "pull_policy": "IfNotPresent",
         "__type__": "ContainerImage"
       },
