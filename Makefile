@@ -1,9 +1,12 @@
-.PHONY: all clean test lint format
-all clean test lint format:
-
 SHELL := /bin/sh -e
 IMAGE_NAME ?= app-llm-inference
 IMAGE_TAG ?= latest
+
+.PHONY: all
+all: lint test
+
+.PHONY: test
+test: test-unit
 
 .PHONY: install setup
 install setup:
@@ -20,7 +23,7 @@ else
 	poetry run pre-commit run --all-files || poetry run pre-commit run --all-files
 endif
 
-.PHONY:
+.PHONY: lint
 lint: format
 	poetry run mypy .apolo
 
@@ -45,10 +48,6 @@ push-hook-image:
 
 .PHONY: gen-types-schemas
 gen-types-schemas:
-	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference VLLMInferenceInputs .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceInputs.json
-	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference VLLMInferenceOutputs .apolo/src/apolo_apps_llm_inference/schemas/VLLMInferenceOutputs.json
-	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference LLama4Inputs .apolo/src/apolo_apps_llm_inference/schemas/LLama4Inputs.json
-	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference DeepSeekInputs .apolo/src/apolo_apps_llm_inference/schemas/DeepSeekInputs.json
-	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference MistralInputs .apolo/src/apolo_apps_llm_inference/schemas/MistralInputs.json
-	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference GptOssInputs .apolo/src/apolo_apps_llm_inference/schemas/GptOssInputs.json
-	app-types dump-types-schema .apolo/src/apolo_apps_llm_inference Kimi2Inputs .apolo/src/apolo_apps_llm_inference/schemas/Kimi2Inputs.json
+	for schema in VLLMInferenceInputs VLLMInferenceOutputs LLama4Inputs DeepSeekInputs MistralInputs GptOssInputs Kimi2Inputs; do \
+		app-types dump-types-schema .apolo/src/apolo_apps_llm_inference "$$schema" ".apolo/src/apolo_apps_llm_inference/schemas/$$schema.json"; \
+	done

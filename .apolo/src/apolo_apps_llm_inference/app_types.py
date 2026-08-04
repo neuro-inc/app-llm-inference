@@ -1,5 +1,5 @@
 import typing
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import Field, model_validator
@@ -81,7 +81,7 @@ class VLLMInferenceInputs(AppInputs):
     docker_image_config: ContainerImage = Field(
         default=ContainerImage(
             repository="vllm/vllm-openai",
-            tag="v0.21.0",
+            tag="v0.26.0",
             pullPolicy=ContainerImagePullPolicy.IF_NOT_PRESENT,
         ),
         json_schema_extra=SchemaExtraMetadata(
@@ -164,12 +164,12 @@ class VLLMInferenceOutputs(AppOutputs):
 TSize = typing.TypeVar("TSize")
 
 
-class Llama4Size(str, Enum):
+class Llama4Size(StrEnum):
     scout = "Llama-4-Scout-17B-16E"
     scout_instruct = "Llama-4-Scout-17B-16E-Instruct"
 
 
-class DeepSeekSize(str, Enum):
+class DeepSeekSize(StrEnum):
     # R1 models
     r1 = "R1"
     r1_zero = "R1-Zero"
@@ -181,19 +181,19 @@ class DeepSeekSize(str, Enum):
     v3_2 = "V3.2"
 
 
-class MistralSize(str, Enum):
+class MistralSize(StrEnum):
     mistral_7b_v02 = "Mistral-7B-Instruct-v0.2"
     mistral_7b_v03 = "Mistral-7B-Instruct-v0.3"
     mistral_31_24b_instruct = "Mistral-Small-3.1-24B-Instruct-2503"
     mistral_32_24b_instruct = "Mistral-Small-3.2-24B-Instruct-2506"
 
 
-class GptOssSize(str, Enum):
+class GptOssSize(StrEnum):
     gpt_oss_120b = "gpt-oss-120b"
     gpt_oss_20b = "gpt-oss-20b"
 
 
-class Kimi2Size(str, Enum):
+class Kimi2Size(StrEnum):
     # Full-weight models
     k2_base = "K2-Base"
     k2_instruct = "K2-Instruct"

@@ -64,3 +64,10 @@ Autoscaling externalName service
 {{- define "app.proxyFullname" -}}
 {{- printf "%s-proxy" ((include "app.fullname" .) | trunc 55 | trimSuffix "-") }}
 {{- end }}
+
+{{/*
+Name of the generated image pull secret.
+*/}}
+{{- define "app.dockerconfigSecretName" -}}
+{{- printf "%s-dockerconfig" (include "app.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}

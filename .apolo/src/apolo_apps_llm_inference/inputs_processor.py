@@ -16,6 +16,7 @@ from apolo_app_types.helm.apps.common import (
     get_preset,
 )
 from apolo_app_types.helm.utils.deep_merging import merge_list_of_dicts
+from apolo_app_types.helm.utils.images import resolve_image_dockerconfig
 from apolo_app_types.protocols.common import (
     ApoloFilesMount,
     ApoloFilesPath,
@@ -317,6 +318,13 @@ class VLLMInferenceInputsProcessor(BaseChartValueProcessor[VLLMInferenceInputs])
             input_.server_extra_args, gpu_count
         )
         image_config = self._configure_image(input_, gpu_provider)
+        dockerconfig = await resolve_image_dockerconfig(
+            client=self.client,
+            image=input_.docker_image_config,
+            sa_name=f"llm-inference-{app_name}",
+        )
+        if dockerconfig:
+            image_config["dockerconfigjson"] = dockerconfig.filecontents
         server_extra_args = [
             *input_.server_extra_args,
             *parallel_args,

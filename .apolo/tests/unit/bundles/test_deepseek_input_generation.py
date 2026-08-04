@@ -36,117 +36,112 @@ async def test_values_llm_generation_gpu_default_preset(
         app_id=APP_ID,
     )
 
-    assert (
-        helm_params
-        == {
-            "serverExtraArgs": [],
-            "model": {
-                "modelHFName": DeepSeekValueProcessor.model_map[
-                    model_to_test
-                ].model_hf_name,
-                "tokenizerHFName": DeepSeekValueProcessor.model_map[
-                    model_to_test
-                ].model_hf_name,
-            },
-            "llm": {
-                "modelHFName": DeepSeekValueProcessor.model_map[
-                    model_to_test
-                ].model_hf_name,
-                "tokenizerHFName": DeepSeekValueProcessor.model_map[
-                    model_to_test
-                ].model_hf_name,
-            },
-            "env": {
-                "HUGGING_FACE_HUB_TOKEN": {
-                    "valueFrom": {
-                        "secretKeyRef": {"name": "apps-secrets", "key": "FakeSecret"}
-                    }
+    assert helm_params == {
+        "serverExtraArgs": [],
+        "model": {
+            "modelHFName": DeepSeekValueProcessor.model_map[
+                model_to_test
+            ].model_hf_name,
+            "tokenizerHFName": DeepSeekValueProcessor.model_map[
+                model_to_test
+            ].model_hf_name,
+        },
+        "llm": {
+            "modelHFName": DeepSeekValueProcessor.model_map[
+                model_to_test
+            ].model_hf_name,
+            "tokenizerHFName": DeepSeekValueProcessor.model_map[
+                model_to_test
+            ].model_hf_name,
+        },
+        "env": {
+            "HUGGING_FACE_HUB_TOKEN": {
+                "valueFrom": {
+                    "secretKeyRef": {"name": "apps-secrets", "key": "FakeSecret"}
                 }
+            }
+        },
+        "preset_name": preset_name,
+        "resources": {
+            "requests": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+            "limits": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+        },
+        "tolerations": [
+            {
+                "effect": "NoSchedule",
+                "key": "platform.neuromation.io/job",
+                "operator": "Exists",
             },
-            "preset_name": preset_name,
-            "resources": {
-                "requests": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
-                "limits": {"cpu": "2000.0m", "memory": "0M", "nvidia.com/gpu": "1"},
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/not-ready",
+                "operator": "Exists",
+                "tolerationSeconds": 300,
             },
-            "tolerations": [
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/unreachable",
+                "operator": "Exists",
+                "tolerationSeconds": 300,
+            },
+            {"effect": "NoSchedule", "key": "nvidia.com/gpu", "operator": "Exists"},
+        ],
+        "affinity": {
+            "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                    "nodeSelectorTerms": [
+                        {
+                            "matchExpressions": [
+                                {
+                                    "key": "platform.neuromation.io/nodepool",
+                                    "operator": "In",
+                                    "values": ["gpu_pool"],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "ingress": {
+            "grpc": {"enabled": False},
+            "enabled": True,
+            "className": "traefik",
+            "hosts": [
                 {
-                    "effect": "NoSchedule",
-                    "key": "platform.neuromation.io/job",
-                    "operator": "Exists",
-                },
-                {
-                    "effect": "NoExecute",
-                    "key": "node.kubernetes.io/not-ready",
-                    "operator": "Exists",
-                    "tolerationSeconds": 300,
-                },
-                {
-                    "effect": "NoExecute",
-                    "key": "node.kubernetes.io/unreachable",
-                    "operator": "Exists",
-                    "tolerationSeconds": 300,
-                },
-                {"effect": "NoSchedule", "key": "nvidia.com/gpu", "operator": "Exists"},
+                    "host": f"{AppType.DeepSeek.value}--{APP_ID}.apps.some.org.neu.ro",  # noqa: E501
+                    "paths": [{"path": "/", "pathType": "Prefix", "portName": "http"}],
+                }
             ],
-            "affinity": {
-                "nodeAffinity": {
-                    "requiredDuringSchedulingIgnoredDuringExecution": {
-                        "nodeSelectorTerms": [
-                            {
-                                "matchExpressions": [
-                                    {
-                                        "key": "platform.neuromation.io/nodepool",
-                                        "operator": "In",
-                                        "values": ["gpu_pool"],
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            },
-            "ingress": {
-                "grpc": {"enabled": False},
-                "enabled": True,
-                "className": "traefik",
-                "hosts": [
-                    {
-                        "host": f"{AppType.DeepSeek.value}--{APP_ID}.apps.some.org.neu.ro",  # noqa: E501
-                        "paths": [
-                            {"path": "/", "pathType": "Prefix", "portName": "http"}
-                        ],
-                    }
-                ],
-            },
-            "podAnnotations": {
-                APOLO_STORAGE_LABEL: '[{"storage_uri": "storage://cluster/test-org/test-project/llm_bundles", "mount_path": "/root/.cache/huggingface", "mount_mode": "rw"}]'  # noqa: E501
-            },
-            "podExtraLabels": {
-                APOLO_STORAGE_LABEL: "true",
-                APOLO_ORG_LABEL: "test-org",
-                APOLO_PROJECT_LABEL: "test-project",
-            },
-            "modelDownload": {"hookEnabled": True, "initEnabled": False},
-            "cache": {"enabled": False},
-            "gpuProvider": "nvidia",
-            "nvidiaImage": {
-                "pullPolicy": "IfNotPresent",
-                "repository": "vllm/vllm-openai",
-                "tag": "v0.21.0",
-            },
-            "podLabels": {
-                "platform.apolo.us/component": "app",
-                "platform.apolo.us/preset": preset_name,
-            },
-            "apolo_app_id": APP_ID,
-            "envNvidia": {
-                "PATH": "/usr/local/cuda/bin:/usr/local/sbin:"
-                "/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$(PATH)",
-                "LD_LIBRARY_PATH": "/usr/local/cuda/lib64:"
-                "/usr/local/nvidia/lib64:$(LD_LIBRARY_PATH)",
-            },
-        }
-    )
+        },
+        "podAnnotations": {
+            APOLO_STORAGE_LABEL: '[{"storage_uri": "storage://cluster/test-org/test-project/llm_bundles", "mount_path": "/root/.cache/huggingface", "mount_mode": "rw"}]'  # noqa: E501
+        },
+        "podExtraLabels": {
+            APOLO_STORAGE_LABEL: "true",
+            APOLO_ORG_LABEL: "test-org",
+            APOLO_PROJECT_LABEL: "test-project",
+        },
+        "modelDownload": {"hookEnabled": True, "initEnabled": False},
+        "cache": {"enabled": False},
+        "gpuProvider": "nvidia",
+        "nvidiaImage": {
+            "pullPolicy": "IfNotPresent",
+            "repository": "vllm/vllm-openai",
+            "tag": "v0.26.0",
+        },
+        "podLabels": {
+            "platform.apolo.us/component": "app",
+            "platform.apolo.us/preset": preset_name,
+        },
+        "apolo_app_id": APP_ID,
+        "envNvidia": {
+            "PATH": "/usr/local/cuda/bin:/usr/local/sbin:"
+            "/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$(PATH)",
+            "LD_LIBRARY_PATH": "/usr/local/cuda/lib64:"
+            "/usr/local/nvidia/lib64:$(LD_LIBRARY_PATH)",
+        },
+    }
 
 
 @pytest.mark.usefixtures("_mock_get_preset_gpu_h100")

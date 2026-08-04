@@ -25,9 +25,14 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.image.imagePullSecrets }}
+      {{- if or .Values.image.imagePullSecrets .Values.dockerconfigjson }}
       imagePullSecrets:
+        {{- with .Values.image.imagePullSecrets }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.dockerconfigjson }}
+        - name: {{ include "app.dockerconfigSecretName" . }}
+        {{- end }}
       {{- end }}
       restartPolicy: Never
       containers:

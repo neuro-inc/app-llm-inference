@@ -7,7 +7,6 @@ from neuro_config_client import NvidiaGPUPreset
 
 pytest_plugins = [
     "apolo_app_types_fixtures.apolo_clients",
-    "apolo_app_types_fixtures.constants",
 ]
 
 
@@ -70,7 +69,7 @@ def _mock_get_preset_gpu_h100(setup_clients):
 
     setup_clients.config.presets = TEST_PRESETS_WITH_H100_CLUSTER
     setup_clients.jobs.get_capacity = AsyncMock(
-        return_value={name: 10 for name in TEST_PRESETS_WITH_H100_CLUSTER}
+        return_value=dict.fromkeys(TEST_PRESETS_WITH_H100_CLUSTER, 10)
     )
 
 
@@ -81,7 +80,7 @@ def _mock_get_preset_gpu_gguf(setup_clients):
 
     setup_clients.config.presets = TEST_PRESETS_WITH_GGUF_SUPPORT
     setup_clients.jobs.get_capacity = AsyncMock(
-        return_value={name: 10 for name in TEST_PRESETS_WITH_GGUF_SUPPORT}
+        return_value=dict.fromkeys(TEST_PRESETS_WITH_GGUF_SUPPORT, 10)
     )
 
 
