@@ -9,7 +9,7 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@v7
       - name: Install python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: 3.12
       - name: Cache pre-commit hooks
@@ -39,7 +39,7 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@v7
       - name: Install python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version-file: .python-version
           cache: pip
