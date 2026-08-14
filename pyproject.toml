@@ -31,7 +31,7 @@ pycares = "^5.0.1"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^4.6.1"
+pre-commit = "^4.6.2"
 types-PyYAML = "^6.0.12.20260724"
 pytest = "^9.1.1"
 pytest-asyncio = "^1.4.0"
