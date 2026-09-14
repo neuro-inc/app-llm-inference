@@ -21,7 +21,7 @@ apolo-sdk = "^26.8.1"
 pydantic = "^2.13.5"
 pyyaml = "^6.0.3"
 yarl = "^1.24.5"
-apolo-app-types = {version = "26.8.1", extras = ["fixtures"]}
+apolo-app-types = {version = "26.9.0", extras = ["fixtures"]}
 dirty-equals = "^0.11"
 httpx = "^0.28.1"
 aiodns = "^4.0.4"
