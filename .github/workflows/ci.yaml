@@ -41,9 +41,13 @@ jobs:
   release-hook-image:
     name: Release hook image
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+      packages: write
     needs: test
     if: (
-      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master'))
       )
     steps:
@@ -65,8 +69,9 @@ jobs:
           make build-hook-image
       - name: Release branch image
         if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
         run: |
-          BRANCH_NAME=${{ github.head_ref }}
           # Convert to lowercase, replace anything not a-z0-9_.- with '-'
           export IMAGE_TAG=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_.-]/-/g')
           make push-hook-image
