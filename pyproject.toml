@@ -32,7 +32,7 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.7.0"
-types-PyYAML = "^6.0.12.20261030"
+types-PyYAML = "^6.0.12.20261103"
 pytest = "^9.2.0"
 pytest-asyncio = "^1.4.1"
 pytest-cov = "^7.1.0"
