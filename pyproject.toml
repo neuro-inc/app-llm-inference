@@ -34,7 +34,7 @@ optional = true
 pre-commit = "^4.7.0"
 types-PyYAML = "^6.0.12.20261111"
 pytest = "^9.2.0"
-pytest-asyncio = "^1.4.1"
+pytest-asyncio = "^1.5.0"
 pytest-cov = "^7.1.0"
 mypy = "^2.4.1"
 
