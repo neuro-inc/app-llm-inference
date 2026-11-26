@@ -299,18 +299,19 @@ trio = ["trio (>=0.32.0)"]
 
 [[package]]
 name = "apolo-app-types"
-version = "26.9.0"
+version = "26.11.1"
 description = "Apolo Platform App Types."
 optional = false
-python-versions = "<4.0,>=3.10.0"
+python-versions = "<4.0,>=3.11.0"
 groups = ["main"]
 files = [
-    {file = "apolo_app_types-26.9.0-py3-none-any.whl", hash = "sha256:6a5b0ccf95df2948c504fecbc2f3f2d86b1013b83721f22137ab5b067ac52dd2"},
-    {file = "apolo_app_types-26.9.0.tar.gz", hash = "sha256:495575536a78eddd3c0ba923f1bd7343e567fd04b9b67f6e2bcf1dc34d75cafb"},
+    {file = "apolo_app_types-26.11.1-py3-none-any.whl", hash = "sha256:d2c110844d682f7ef7e2fc20015315d9d5b24a3d3a6424a196d9c2b1a663fbc2"},
+    {file = "apolo_app_types-26.11.1.tar.gz", hash = "sha256:9cca882873fad82a809871ac2bddb4f8295b466ae0e40558906e77a89e39ff04"},
 ]
 
 [package.dependencies]
 apolo-sdk = ">=26.3.0,<27.0.0"
+certifi = ">=2026.10.18"
 click = ">=8.3.2,<9.0.0"
 httpx = ">=0.28.0,<0.29.0"
 jsonref = ">=1.1.0,<2.0.0"
@@ -730,14 +731,14 @@ cffi = [
 
 [[package]]
 name = "certifi"
-version = "2026.7.22"
+version = "2026.11.20"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "certifi-2026.7.22-py3-none-any.whl", hash = "sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"},
-    {file = "certifi-2026.7.22.tar.gz", hash = "sha256:741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55"},
+    {file = "certifi-2026.11.20-py3-none-any.whl", hash = "sha256:7422df25243767b9877031a2248cb14d09ddac9beee846f4cef3d5c9191d488f"},
+    {file = "certifi-2026.11.20.tar.gz", hash = "sha256:af1cb240a8133f105aa52684a3a3258339d7f2fd0bd4e2812698ff5cf5588c4e"},
 ]
 
 [[package]]
@@ -3242,4 +3243,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11.0,<4.0"
-content-hash = "64de0fa4a6c8996a788c52a48a5dd86e9ac2974309f6f6f8f89a21ef421ab23b"
+content-hash = "61cc8b7abbbaade3a467f3fa02e2c302516fcf96e398f75acd6680f1f764bcec"
